@@ -269,3 +269,18 @@
     display: inline-flex;
   }
 }
+
+/* Impresión: solo el contenido de la pantalla, en flujo normal para que pase de página. */
+@media print {
+  .marco {
+    display: block;
+    height: auto;
+    background: #fff;
+  }
+  .riel {
+    display: none;
+  }
+  .contenido {
+    display: block;
+  }
+}

@@ -39,10 +39,22 @@ Desde la Fase 2 (`20260928100000_fase2_contrataciones_mensajes.sql` y `202609281
 - `mensaje` está en la publicación de Realtime: la app escucha solo los `UPDATE` de la conversación abierta (marcar relevante, observación).
 - Un mismo vínculo (origen, destino, tipo) no se carga dos veces (índice `vinculo_unico`). Mensaje → contratación se guarda como `prueba_de`; mensaje → pieza, como `relacionado`.
 
+Desde la Fase 3 (`20260929100000_fase3_juicio.sql`, probada por `supabase/tests/fase3.sql`):
+
+- `ofrecimiento_item` es el punteo de prueba para el debate. Cada ítem es una pieza del índice (clase documental), una persona del directorio (testimonial o pericial) o una prueba descripta a mano (informativa, instrumental, otra); el control `ofrecimiento_algo_ofrecido` exige una de las tres. Una misma pieza no se ofrece dos veces, ni una persona dos veces en la misma clase (índices únicos parciales). `se_exhibe` se reemplazó por `incorporacion` (exhibición, lectura o no se incorpora); se suman `objeto`, `admision` y `numero_auto` (lo que resolvió el auto de apertura), `impugnada` y `motivo_impugnacion`, `imputados` (lista de personas), `tambien_ofrecida_por` y `origen`.
+- `agregar_al_ofrecimiento(causa, clase, piezas[], personas[])` suma varias de una vez, numerando desde el último número de la clase, con un candado por causa y clase para que dos personas sumando a la vez no repitan números. Copia la ubicación física del efecto de la pieza y devuelve cuántas entraron y cuántas ya estaban. `renumerar_ofrecimiento(causa, clase)` corre los números 1..n.
+- Vista `ofrecimiento_estado`: por ítem, la situación procesal que hereda de su pieza (`pieza_estado_procesal`), si se exhibe sin quién la introduce, si falta la entrega a la defensa (solo para lo que no es una persona), si fue impugnada o rechazada. De ahí salen los avisos de la pantalla Juicio.
+- `cronologia(causa)`: una sola línea de tiempo con piezas fechadas, mensajes relevantes, pasos de trámite, allanamientos, actos procesales (`acto_procesal`, que suma `link`) y planteos y resoluciones de las incidencias, cada hito con las fichas vinculadas (`relacionados`).
+- `vinculo` suma `fuente`: de dónde surge una relación entre personas (tipo `relacionado`, la relación va en `nota`). Se edita con `guardar_campo()` y queda en el historial.
+
 Lectores y generador del lado de la app (con pruebas en `src/lib/*.test.ts`):
 
 - `lib/contrataciones.ts`: lee una hoja con el formato de la planilla (encabezado PROCEDIMIENTO · Fs. · FECHA · FIRMANTE · OBSERVACIONES), une las filas combinadas al paso de arriba (el link suele venir en la fila siguiente), arma el cuadro de ofertas con los pasos que empiezan con «Oferta» y propone como sugerencia los montos escritos (uno solo por oferta). Repone la «/» que Excel no admite en el nombre de la hoja.
 - `lib/conversaciones.ts`: saca el texto de un .docx (párrafos y notas al pie, sin librerías) y lee las dos formas de transcripción del equipo y el .txt de WhatsApp. Lo que no entiende queda en la lista de líneas omitidas, a la vista.
+- `lib/ofrecimiento.ts`: avisos de cada ítem, orden por clase, cita y el listado para la remisión en .docx (mismo formato que el informe: «Ref.: Legajo N.º …», OFRECIMIENTO DE PRUEBA, «A.- TESTIMONIAL:», ítems numerados, `[completar: …]` para lo que falta).
+- `lib/cronologia.ts`: agrupa por año y mes respetando la precisión de la fecha (nunca inventa el día) y busca a una persona por nombre, apellido o cómo figura agendada. Esa coincidencia es por nombre y la pantalla lo avisa.
+- `lib/relaciones.ts` y `lib/disposicion.ts`: arman el grafo (una línea por par con todos sus motivos; firmes las relaciones cargadas y las ofertas, punteadas las coincidencias por nombre en conversaciones) y lo ubican con `d3-force`, calculado de una vez y sin animación. En grafos chicos se prueban varios arranques con semilla fija y se queda el que menos líneas cruza, así el mismo grafo se dibuja siempre igual. `d3-force` se descarga recién cuando alguien abre Relaciones.
+- La cronología se exporta a PDF con el diálogo de impresión del navegador (`window.print()` y reglas `@media print`: A4, sin menú ni filtros, con encabezado de la causa, filtros aplicados y fecha de emisión).
 - `lib/informe.ts`: arma el .docx con la librería `docx` siguiendo la plantilla PLANTILLA PARA REALIZAR INFORMES CELULARES (Palatino Linotype 11, justificado, interlineado 1,5, A4 con márgenes de 2,54 cm). Lo que falta sale como `[completar: …]` en cursiva. La librería se descarga recién cuando alguien pide un informe.
 
 ### Estructura del repositorio
@@ -52,19 +64,20 @@ src/
   styles/        tokens.css (único lugar de colores, tipografía, espaciado) y base.css
   componentes/   piezas del sistema de diseño: marcas, botones, tabla, panel, ficha, estados,
                  tarjeta de efecto, búsqueda global (Ctrl+K), menú de exportar
-  pantallas/     acceso, causas, inicio, índice, efectos, contrataciones, personas, mensajes,
-                 importadores (efectos, contrataciones, conversaciones), informe, equipo, fichas,
-                 sistema de diseño (/diseno)
-  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts, hechos.ts), guardado con
+  pantallas/     acceso, causas, inicio, índice, efectos, contrataciones, personas (directorio y
+                 grafo de relaciones), mensajes, cronología, juicio, importadores (efectos,
+                 contrataciones, conversaciones), informe, equipo, fichas, sistema de diseño (/diseno)
+  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts, hechos.ts, juicio.ts), guardado con
                  cola sin conexión, presencia
   lib/           orden jerárquico, cita, fechas, etiquetas, links de Drive, importación de
                  planillas, exportación, copia completa, comparación de nombres, lectura de
-                 contrataciones y de transcripciones, informe .docx, resaltado (con pruebas)
+                 contrataciones y de transcripciones, informe .docx, resaltado, ofrecimiento y
+                 listado para la remisión, cronología, grafo y su disposición (con pruebas)
 supabase/
   migrations/    esquema
   seed.sql       datos reales del legajo 299113 (solo lo que figura en las fuentes)
   tests/         pruebas SQL de las reglas
-e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K, Fase 2);
+e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K, Fase 2, Fase 3);
                  fixtures/generar-planillas.mjs arma planillas y una transcripción .docx sintéticas
                  con la forma de las reales
 scripts/         preparar-local, capturas, test-sql, configurar-produccion
@@ -78,7 +91,8 @@ Requisitos: Node 22 y Docker.
 npm install
 npm run db:start                        # Supabase local (Postgres, Auth, Realtime)
 node scripts/preparar-local.mjs         # cuentas de prueba rober@ / ines@ejemplo.test
-node scripts/preparar-local.mjs --ejemplos   # además, piezas de ejemplo
+node scripts/preparar-local.mjs --ejemplos   # además, piezas, personas, una contratación y una
+                                             # conversación inventadas, marcadas «(ejemplo local)»
 cp .env.example .env.local              # y completar con `npx supabase status -o env`
 npm run dev                             # http://localhost:5173
 ```
@@ -90,10 +104,11 @@ En `.env.local` local conviene `VITE_ACCESO_CON_CLAVE=true` para entrar con corr
 ```bash
 npm run typecheck      # tipos
 npm test               # lógica: orden, citas, fechas, links, importación, nombres, contrataciones,
-                       # transcripciones, informe .docx, resaltado (55)
-npm run db:test        # reglas de la base, Fase 1 y Fase 2 (75 comprobaciones)
+                       # transcripciones, informe .docx, resaltado, ofrecimiento, cronología, grafo (67)
+npm run db:test        # reglas de la base, Fase 1, Fase 2 y Fase 3 (92 comprobaciones)
 npm run test:e2e       # dos personas a la vez, importaciones, tablero en vivo, Ctrl+K, mensajes
-                       # relevantes en vivo, vínculos e informe descargado y verificado
+                       # relevantes en vivo, vínculos e informe descargado y verificado, ofrecimiento
+                       # con aviso procesal, listado .docx verificado, cronología y relaciones (7)
 node e2e/fixtures/generar-planillas.mjs   # planillas y transcripción sintéticas en e2e/fixtures/generadas/
 npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas (importa las planillas sintéticas)
 ```
@@ -102,18 +117,18 @@ Antes de publicar, probar también el build de producción: `npm run build && np
 
 ## Puesta en marcha de producción
 
-### Estado actual (26/09/2026, Fase 2)
+### Estado actual (26/09/2026, Fase 3)
 
 | Pieza | Valor |
 |---|---|
 | Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
 | URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
-| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente`, `20260927100000_fase1_efectos_importacion`, `20260928100000_fase2_contrataciones_mensajes` y `20260928110000_fase2_completar_contratacion` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente`, `20260927100000_fase1_efectos_importacion`, `20260928100000_fase2_contrataciones_mensajes`, `20260928110000_fase2_completar_contratacion` y `20260929100000_fase3_juicio` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
 | Auth | Site URL y redirecciones configuradas; «Entrar con Google» activo (proyecto de Google Cloud «Tablero de Prueba», cliente web `283725982972-….apps.googleusercontent.com`) |
 | Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
 | Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |
 
-Las pruebas de `supabase/tests/reglas.sql` y de `supabase/tests/fase2.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro). Para correr un archivo de pruebas por la API de administración hay que sacarle las líneas que empiezan con `\` (son comandos de psql).
+Las pruebas de `supabase/tests/reglas.sql`, `supabase/tests/fase2.sql` y `supabase/tests/fase3.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro). Para correr un archivo de pruebas por la API de administración hay que sacarle las líneas que empiezan con `\` (son comandos de psql).
 
 ### Con el script (recomendado)
 

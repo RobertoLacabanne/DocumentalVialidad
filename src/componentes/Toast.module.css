@@ -63,3 +63,9 @@
     justify-items: stretch;
   }
 }
+
+@media print {
+  .zona {
+    display: none;
+  }
+}

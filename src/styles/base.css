@@ -112,3 +112,17 @@ svg.lucide {
   stroke-width: 1.6;
   flex: none;
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+}

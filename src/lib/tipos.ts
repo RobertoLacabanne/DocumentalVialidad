@@ -313,4 +313,5 @@ export type Vinculo = Comunes & {
   destino_id: string;
   tipo: TipoVinculo;
   nota: string | null;
+  fuente: string | null;
 };

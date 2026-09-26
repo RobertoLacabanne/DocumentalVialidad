@@ -1,8 +1,8 @@
-import { Building2, Landmark, Plus, Search, Sparkles, UserRound, X } from 'lucide-react';
-import { useMemo, useState, type KeyboardEvent } from 'react';
+import { Building2, Landmark, List, Network, Plus, Search, Sparkles, UserRound, X } from 'lucide-react';
+import { Suspense, lazy, useMemo, useState, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Boton } from '../componentes/Boton';
-import { AvisoError, EstadoVacio, FilasEsqueleto } from '../componentes/estados';
+import { AvisoError, Esqueleto, EstadoVacio, FilasEsqueleto } from '../componentes/estados';
 import { Chip, EtiquetaEfecto } from '../componentes/marcas';
 import { MenuExportar } from '../componentes/MenuExportar';
 import { useEfectos, usePersonas, type PersonaVista } from '../datos/causa';
@@ -16,6 +16,9 @@ import { useCausaActual } from './Marco';
 import s from './Personas.module.css';
 import se from './Efectos.module.css';
 import si from './Indice.module.css';
+
+// El grafo usa d3-force: se baja recién cuando alguien abre «Relaciones».
+const Relaciones = lazy(() => import('./Relaciones'));
 
 type Filtros = { texto: string; tipo: string; rol: string };
 const SIN_FILTROS: Filtros = { texto: '', tipo: '', rol: '' };
@@ -38,6 +41,7 @@ export function Personas() {
   const { filas: efectos } = useEfectos(causa.id);
   const [params, setParams] = useSearchParams();
   const abierta = params.get('persona');
+  const vista = params.get('vista') === 'relaciones' ? 'relaciones' : 'directorio';
   const [filtros, setFiltros] = useState<Filtros>(SIN_FILTROS);
   const [creando, setCreando] = useState(false);
   const [propuesta, setPropuesta] = useState<Propuesta | null>(null);
@@ -60,6 +64,12 @@ export function Personas() {
     const nuevos = new URLSearchParams(params);
     if (id) nuevos.set('persona', id);
     else nuevos.delete('persona');
+    setParams(nuevos, { replace: true });
+  };
+  const verComo = (v: 'directorio' | 'relaciones') => {
+    const nuevos = new URLSearchParams(params);
+    if (v === 'relaciones') nuevos.set('vista', 'relaciones');
+    else nuevos.delete('vista');
     setParams(nuevos, { replace: true });
   };
 
@@ -145,6 +155,16 @@ export function Personas() {
             <p className={si.bajada}>Quién es quién en la causa, con sus teléfonos, CUIT y cómo figura agendado en los celulares.</p>
           </div>
           <div className={si.acciones}>
+            <div className={`${si.segmento} ${se.vistas}`} role="group" aria-label="Cómo ver el directorio">
+              <button type="button" aria-pressed={vista === 'directorio'} onClick={() => verComo('directorio')}>
+                <List aria-hidden />
+                Directorio
+              </button>
+              <button type="button" aria-pressed={vista === 'relaciones'} onClick={() => verComo('relaciones')}>
+                <Network aria-hidden />
+                Relaciones
+              </button>
+            </div>
             <MenuExportar cantidad={visibles.length} onExcel={() => descargarXlsx(visibles, columnas, archivo, 'Personas')} onCsv={() => descargarCsv(visibles, columnas, archivo)} />
             <Boton
               variante="primario"
@@ -159,190 +179,200 @@ export function Personas() {
           </div>
         </div>
 
-        <div className={si.filtros}>
-          <label className={si.buscar}>
-            <Search aria-hidden />
-            <span className="visualmente-oculto">Buscar en el directorio</span>
-            <input type="search" placeholder="Nombre, cargo, teléfono, CUIT…" value={filtros.texto} onChange={(e) => cambiar('texto', e.target.value)} />
-          </label>
-          <select aria-label="Filtrar por tipo" className={`${si.filtro} ${filtros.tipo ? si.filtroActivo : ''}`} value={filtros.tipo} onChange={(e) => cambiar('tipo', e.target.value)}>
-            <option value="">Personas y empresas</option>
-            <option value="fisica">Solo personas humanas</option>
-            <option value="juridica">Solo personas jurídicas</option>
-          </select>
-          <select aria-label="Filtrar por rol" className={`${si.filtro} ${filtros.rol ? si.filtroActivo : ''}`} value={filtros.rol} onChange={(e) => cambiar('rol', e.target.value)}>
-            <option value="">Rol: todos</option>
-            {ROLES.map((r) => (
-              <option key={r.valor} value={r.valor}>
-                {r.etiqueta}
-              </option>
-            ))}
-          </select>
-          {hayFiltros && (
-            <button type="button" className={si.limpiar} onClick={() => setFiltros(SIN_FILTROS)}>
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-
-        <div className={se.contenido}>
-          {sugerencias.length > 0 && !hayFiltros && (
-            <section className={s.sugerencias} aria-label="Sugerencias para el directorio">
-              <div className={s.sugerenciasCabecera}>
-                <Sparkles aria-hidden />
-                <div>
-                  <h3 className={s.sugerenciasTitulo}>
-                    {sugerencias.length === 1 ? 'Un nombre aparece' : `${sugerencias.length} nombres aparecen`} en los efectos y todavía no {sugerencias.length === 1 ? 'está' : 'están'} en el directorio
-                  </h3>
-                  <p className={s.sugerenciasBajada}>
-                    Salen de las columnas Propietario y Tenedor. Revisá cada uno antes de agregarlo (el tipo es una sugerencia) y ocultá con la cruz lo que no sea una
-                    persona ni una empresa.
-                  </p>
-                </div>
-              </div>
-              <ul className={s.sugerenciasLista}>
-                {mostradas.map((g) => (
-                  <li key={g.clave} className={s.sugerencia}>
-                    <span className={`${s.icono} ${g.tipo === 'juridica' ? s.iconoJuridica : ''}`} aria-hidden>
-                      {g.tipo === 'juridica' ? <Building2 /> : <UserRound />}
-                    </span>
-                    <span className={s.sugerenciaTexto}>
-                      <strong>{g.nombre}</strong>
-                      <span className={s.sugerenciaDonde}>
-                        {g.efectos.slice(0, 4).map((e) => (
-                          <EtiquetaEfecto key={e.id} numero={e.numero} />
-                        ))}
-                        {g.efectos.length > 4 && <span>y {g.efectos.length - 4} más</span>}
-                      </span>
-                    </span>
-                    <Boton
-                      tamano="chico"
-                      icono={<Plus aria-hidden />}
-                      onClick={() => {
-                        const como = g.efectos.every((e) => e.como === 'tenedor') ? 'tenedor' : 'propietario';
-                        setPropuesta({
-                          nombre: g.nombre,
-                          tipo: g.tipo,
-                          origen: `${g.efectos.length === 1 ? `el efecto Nº ${g.efectos[0].numero}` : `${g.efectos.length} efectos`} como ${como}`,
-                        });
-                        setCreando(true);
-                      }}
-                    >
-                      Agregar
-                    </Boton>
-                    <Boton
-                      tamano="chico"
-                      variante="fantasma"
-                      soloIcono
-                      aria-label={`Ocultar la sugerencia ${g.nombre}`}
-                      title="No es una persona ni una empresa: ocultar"
-                      onClick={() => ocultar(g.clave)}
-                    >
-                      <X aria-hidden />
-                    </Boton>
-                  </li>
+        {vista === 'relaciones' ? (
+          <div className={se.contenido}>
+            <Suspense fallback={<div style={{ padding: 'var(--esp-6)' }}><Esqueleto alto={420} /></div>}>
+              <Relaciones causaId={causa.id} personas={filas} abierta={abierta} conPanel={!!personaAbierta} onAbrir={(id) => abrir(id)} />
+            </Suspense>
+          </div>
+        ) : (
+          <>
+            <div className={si.filtros}>
+              <label className={si.buscar}>
+                <Search aria-hidden />
+                <span className="visualmente-oculto">Buscar en el directorio</span>
+                <input type="search" placeholder="Nombre, cargo, teléfono, CUIT…" value={filtros.texto} onChange={(e) => cambiar('texto', e.target.value)} />
+              </label>
+              <select aria-label="Filtrar por tipo" className={`${si.filtro} ${filtros.tipo ? si.filtroActivo : ''}`} value={filtros.tipo} onChange={(e) => cambiar('tipo', e.target.value)}>
+                <option value="">Personas y empresas</option>
+                <option value="fisica">Solo personas humanas</option>
+                <option value="juridica">Solo personas jurídicas</option>
+              </select>
+              <select aria-label="Filtrar por rol" className={`${si.filtro} ${filtros.rol ? si.filtroActivo : ''}`} value={filtros.rol} onChange={(e) => cambiar('rol', e.target.value)}>
+                <option value="">Rol: todos</option>
+                {ROLES.map((r) => (
+                  <option key={r.valor} value={r.valor}>
+                    {r.etiqueta}
+                  </option>
                 ))}
-              </ul>
-              {sugerencias.length > MAX_SUGERENCIAS && (
-                <button type="button" className={si.limpiar} onClick={() => setVerTodas((v) => !v)}>
-                  {verTodas ? 'Ver menos' : `Ver las ${sugerencias.length}`}
+              </select>
+              {hayFiltros && (
+                <button type="button" className={si.limpiar} onClick={() => setFiltros(SIN_FILTROS)}>
+                  Limpiar filtros
                 </button>
               )}
-            </section>
-          )}
+            </div>
 
-          {error ? (
-            <div style={{ padding: 'var(--esp-6)' }}>
-              <AvisoError titulo="No pudimos traer el directorio">{error.message}</AvisoError>
-            </div>
-          ) : cargando ? (
-            <FilasEsqueleto filas={6} />
-          ) : filas.length === 0 ? (
-            <div className={si.vacio}>
-              <EstadoVacio
-                icono={<Landmark />}
-                titulo="El directorio está vacío"
-                accion={
-                  <Boton variante="primario" icono={<Plus aria-hidden />} onClick={() => setCreando(true)}>
-                    Agregar la primera
-                  </Boton>
-                }
-              >
-                Cargá imputados, testigos, funcionarios y empresas con sus teléfonos y CUIT. Así, cuando alguien busque un número, la app le dice de quién es.
-              </EstadoVacio>
-            </div>
-          ) : visibles.length === 0 ? (
-            <div className={si.vacio}>
-              <EstadoVacio icono={<Search />} titulo="Nadie coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
-                Probá con otra parte del nombre o con los últimos dígitos del teléfono.
-              </EstadoVacio>
-            </div>
-          ) : (
-            <div className={se.marcoTabla}>
-              <table className={`${se.tabla} ${s.tabla}`}>
-                <thead>
-                  <tr>
-                    <th>Nombre o razón social</th>
-                    <th style={{ width: 200 }}>Rol en la causa</th>
-                    <th style={{ width: 280 }}>Teléfonos, CUIT, agendado como</th>
-                    <th style={{ width: 120 }}>En efectos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibles.map((p) => {
-                    const juridica = p.tipo_persona === 'juridica';
-                    const n = conteoEfectos.get(p.id) ?? 0;
-                    return (
-                      <tr key={p.id} className={`${se.fila} ${p.id === abierta ? se.filaAbierta : ''}`} tabIndex={0} onClick={() => abrir(p.id)} onKeyDown={tecla(p.id)}>
-                        <td data-movil="ancho">
-                          <span className={s.nombre}>
-                            <span className={`${s.icono} ${juridica ? s.iconoJuridica : ''}`} aria-hidden>
-                              {juridica ? <Building2 /> : <UserRound />}
-                            </span>
-                            <span>
-                              <strong>{p.nombre}</strong>
-                              {p.cargo && <span className={s.cargo}>{p.cargo}</span>}
-                            </span>
+            <div className={se.contenido}>
+              {sugerencias.length > 0 && !hayFiltros && (
+                <section className={s.sugerencias} aria-label="Sugerencias para el directorio">
+                  <div className={s.sugerenciasCabecera}>
+                    <Sparkles aria-hidden />
+                    <div>
+                      <h3 className={s.sugerenciasTitulo}>
+                        {sugerencias.length === 1 ? 'Un nombre aparece' : `${sugerencias.length} nombres aparecen`} en los efectos y todavía no {sugerencias.length === 1 ? 'está' : 'están'} en el directorio
+                      </h3>
+                      <p className={s.sugerenciasBajada}>
+                        Salen de las columnas Propietario y Tenedor. Revisá cada uno antes de agregarlo (el tipo es una sugerencia) y ocultá con la cruz lo que no sea una
+                        persona ni una empresa.
+                      </p>
+                    </div>
+                  </div>
+                  <ul className={s.sugerenciasLista}>
+                    {mostradas.map((g) => (
+                      <li key={g.clave} className={s.sugerencia}>
+                        <span className={`${s.icono} ${g.tipo === 'juridica' ? s.iconoJuridica : ''}`} aria-hidden>
+                          {g.tipo === 'juridica' ? <Building2 /> : <UserRound />}
+                        </span>
+                        <span className={s.sugerenciaTexto}>
+                          <strong>{g.nombre}</strong>
+                          <span className={s.sugerenciaDonde}>
+                            {g.efectos.slice(0, 4).map((e) => (
+                              <EtiquetaEfecto key={e.id} numero={e.numero} />
+                            ))}
+                            {g.efectos.length > 4 && <span>y {g.efectos.length - 4} más</span>}
                           </span>
-                        </td>
-                        <td data-movil="ancho">
-                          <span className={s.roles}>
-                            {p.roles.length ? (
-                              p.roles.map((r) => (
-                                <Chip key={r.id} familia={r.rol === 'imputado' ? 'contratacion' : 'otros'}>
-                                  {etiquetaRol(r.rol)}
-                                </Chip>
-                              ))
-                            ) : (
-                              <span className={se.tenue}>Sin rol</span>
-                            )}
-                          </span>
-                        </td>
-                        <td data-movil="ancho">
-                          {p.identificadores.length ? (
-                            <span className={s.identificadores}>
-                              {p.identificadores.slice(0, 3).map((i) => (
-                                <span key={i.id} title={etiquetaIdentificador(i.tipo)}>
-                                  <span className={s.identificadorTipo}>{etiquetaIdentificador(i.tipo)}</span> <span className={s.valor}>{i.valor}</span>
-                                </span>
-                              ))}
-                              {p.identificadores.length > 3 && <span className={se.tenue}>y {p.identificadores.length - 3} más</span>}
-                            </span>
-                          ) : (
-                            <span className={se.tenue}>—</span>
-                          )}
-                        </td>
-                        <td data-movil="oculto" className="cifras">
-                          {n ? `${n} ${n === 1 ? 'efecto' : 'efectos'}` : <span className={se.tenue}>—</span>}
-                        </td>
+                        </span>
+                        <Boton
+                          tamano="chico"
+                          icono={<Plus aria-hidden />}
+                          onClick={() => {
+                            const como = g.efectos.every((e) => e.como === 'tenedor') ? 'tenedor' : 'propietario';
+                            setPropuesta({
+                              nombre: g.nombre,
+                              tipo: g.tipo,
+                              origen: `${g.efectos.length === 1 ? `el efecto Nº ${g.efectos[0].numero}` : `${g.efectos.length} efectos`} como ${como}`,
+                            });
+                            setCreando(true);
+                          }}
+                        >
+                          Agregar
+                        </Boton>
+                        <Boton
+                          tamano="chico"
+                          variante="fantasma"
+                          soloIcono
+                          aria-label={`Ocultar la sugerencia ${g.nombre}`}
+                          title="No es una persona ni una empresa: ocultar"
+                          onClick={() => ocultar(g.clave)}
+                        >
+                          <X aria-hidden />
+                        </Boton>
+                      </li>
+                    ))}
+                  </ul>
+                  {sugerencias.length > MAX_SUGERENCIAS && (
+                    <button type="button" className={si.limpiar} onClick={() => setVerTodas((v) => !v)}>
+                      {verTodas ? 'Ver menos' : `Ver las ${sugerencias.length}`}
+                    </button>
+                  )}
+                </section>
+              )}
+
+              {error ? (
+                <div style={{ padding: 'var(--esp-6)' }}>
+                  <AvisoError titulo="No pudimos traer el directorio">{error.message}</AvisoError>
+                </div>
+              ) : cargando ? (
+                <FilasEsqueleto filas={6} />
+              ) : filas.length === 0 ? (
+                <div className={si.vacio}>
+                  <EstadoVacio
+                    icono={<Landmark />}
+                    titulo="El directorio está vacío"
+                    accion={
+                      <Boton variante="primario" icono={<Plus aria-hidden />} onClick={() => setCreando(true)}>
+                        Agregar la primera
+                      </Boton>
+                    }
+                  >
+                    Cargá imputados, testigos, funcionarios y empresas con sus teléfonos y CUIT. Así, cuando alguien busque un número, la app le dice de quién es.
+                  </EstadoVacio>
+                </div>
+              ) : visibles.length === 0 ? (
+                <div className={si.vacio}>
+                  <EstadoVacio icono={<Search />} titulo="Nadie coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
+                    Probá con otra parte del nombre o con los últimos dígitos del teléfono.
+                  </EstadoVacio>
+                </div>
+              ) : (
+                <div className={se.marcoTabla}>
+                  <table className={`${se.tabla} ${s.tabla}`}>
+                    <thead>
+                      <tr>
+                        <th>Nombre o razón social</th>
+                        <th style={{ width: 200 }}>Rol en la causa</th>
+                        <th style={{ width: 280 }}>Teléfonos, CUIT, agendado como</th>
+                        <th style={{ width: 120 }}>En efectos</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {visibles.map((p) => {
+                        const juridica = p.tipo_persona === 'juridica';
+                        const n = conteoEfectos.get(p.id) ?? 0;
+                        return (
+                          <tr key={p.id} className={`${se.fila} ${p.id === abierta ? se.filaAbierta : ''}`} tabIndex={0} onClick={() => abrir(p.id)} onKeyDown={tecla(p.id)}>
+                            <td data-movil="ancho">
+                              <span className={s.nombre}>
+                                <span className={`${s.icono} ${juridica ? s.iconoJuridica : ''}`} aria-hidden>
+                                  {juridica ? <Building2 /> : <UserRound />}
+                                </span>
+                                <span>
+                                  <strong>{p.nombre}</strong>
+                                  {p.cargo && <span className={s.cargo}>{p.cargo}</span>}
+                                </span>
+                              </span>
+                            </td>
+                            <td data-movil="ancho">
+                              <span className={s.roles}>
+                                {p.roles.length ? (
+                                  p.roles.map((r) => (
+                                    <Chip key={r.id} familia={r.rol === 'imputado' ? 'contratacion' : 'otros'}>
+                                      {etiquetaRol(r.rol)}
+                                    </Chip>
+                                  ))
+                                ) : (
+                                  <span className={se.tenue}>Sin rol</span>
+                                )}
+                              </span>
+                            </td>
+                            <td data-movil="ancho">
+                              {p.identificadores.length ? (
+                                <span className={s.identificadores}>
+                                  {p.identificadores.slice(0, 3).map((i) => (
+                                    <span key={i.id} title={etiquetaIdentificador(i.tipo)}>
+                                      <span className={s.identificadorTipo}>{etiquetaIdentificador(i.tipo)}</span> <span className={s.valor}>{i.valor}</span>
+                                    </span>
+                                  ))}
+                                  {p.identificadores.length > 3 && <span className={se.tenue}>y {p.identificadores.length - 3} más</span>}
+                                </span>
+                              ) : (
+                                <span className={se.tenue}>—</span>
+                              )}
+                            </td>
+                            <td data-movil="oculto" className="cifras">
+                              {n ? `${n} ${n === 1 ? 'efecto' : 'efectos'}` : <span className={se.tenue}>—</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         <footer className={si.pie}>
           <span>

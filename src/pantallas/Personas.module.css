@@ -150,3 +150,41 @@
     min-width: 0;
   }
 }
+
+/* Relaciones en la ficha */
+.relacion {
+  align-items: flex-start;
+}
+.relacionTexto {
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-sm);
+}
+.relacionEdicion {
+  display: grid;
+  gap: var(--esp-2);
+  flex: 1;
+  min-width: 0;
+}
+.enlace {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+.enlace:hover {
+  color: var(--color-acento);
+  text-decoration: underline;
+}
+.enlace:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

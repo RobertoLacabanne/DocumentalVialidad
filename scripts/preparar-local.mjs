@@ -75,5 +75,53 @@ if (process.argv.includes('--ejemplos')) {
     .select('id')
     .single();
   await admin.from('incidencia_alcance').insert({ causa_id: causa.id, incidencia_id: inc.id, entidad_id: extraccion.id });
-  console.log('Piezas de ejemplo cargadas en el Supabase local.');
+  // Personas inventadas para probar el juicio y el grafo de relaciones.
+  const { data: personas, error: ep } = await admin
+    .from('persona')
+    .insert(
+      [
+        { causa_id: causa.id, nombre: 'Imputado Ejemplo Local', tipo_persona: 'fisica', cargo: 'Funcionario de prueba' },
+        { causa_id: causa.id, nombre: 'Testigo Ejemplo Local', tipo_persona: 'fisica', cargo: 'Empleado de prueba' },
+        { causa_id: causa.id, nombre: 'Proveedora Ejemplo SRL', tipo_persona: 'juridica', cargo: null },
+        { causa_id: causa.id, nombre: 'Constructora Ejemplo SA', tipo_persona: 'juridica', cargo: null },
+      ],
+      { defaultToNull: false },
+    )
+    .select('id,nombre');
+  if (ep) throw ep;
+  const pe = Object.fromEntries((personas ?? []).map((p) => [p.nombre, p.id]));
+  const { error: er } = await admin.from('rol_en_causa').insert([
+    { causa_id: causa.id, persona_id: pe['Imputado Ejemplo Local'], rol: 'imputado' },
+    { causa_id: causa.id, persona_id: pe['Testigo Ejemplo Local'], rol: 'testigo' },
+    { causa_id: causa.id, persona_id: pe['Proveedora Ejemplo SRL'], rol: 'proveedor' },
+    { causa_id: causa.id, persona_id: pe['Constructora Ejemplo SA'], rol: 'proveedor' },
+  ]);
+  if (er) throw er;
+  const { error: ev } = await admin.from('vinculo').insert({
+    causa_id: causa.id,
+    origen_id: pe['Imputado Ejemplo Local'],
+    destino_id: pe['Proveedora Ejemplo SRL'],
+    tipo: 'relacionado',
+    nota: 'Socio (ejemplo local)',
+    fuente: 'Contrato social (ejemplo local)',
+  });
+  if (ev) throw ev;
+  // Una contratación, dos ofertas y una conversación inventadas, para que el grafo tenga de dónde dibujar.
+  const { data: lp, error: ec } = await admin
+    .from('contratacion')
+    .insert({ causa_id: causa.id, identificador: 'LP 99/2026', objeto: 'Obra de ejemplo local', adjudicatario_id: pe['Proveedora Ejemplo SRL'] }, { defaultToNull: false })
+    .select('id')
+    .single();
+  if (ec) throw ec;
+  const { error: eo } = await admin.from('oferta').insert([
+    { causa_id: causa.id, contratacion_id: lp.id, oferente_id: pe['Proveedora Ejemplo SRL'], orden: 1 },
+    { causa_id: causa.id, contratacion_id: lp.id, oferente_id: pe['Constructora Ejemplo SA'], orden: 2 },
+  ]);
+  if (eo) throw eo;
+  const { error: ecv } = await admin.from('conversacion').insert(
+    { causa_id: causa.id, titulo: 'Imputado Ejemplo – Testigo Ejemplo (ejemplo local)', participantes: 'Imputado Ejemplo Local, Testigo Ejemplo Local' },
+    { defaultToNull: false },
+  );
+  if (ecv) throw ecv;
+  console.log('Piezas y personas de ejemplo cargadas en el Supabase local.');
 }

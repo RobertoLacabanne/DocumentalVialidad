@@ -35,8 +35,8 @@ export const SECCIONES: Seccion[] = [
   { ruta: 'contrataciones', etiqueta: 'Contrataciones', icono: <ScrollText aria-hidden /> },
   { ruta: 'personas', etiqueta: 'Personas y empresas', icono: <Landmark aria-hidden /> },
   { ruta: 'mensajes', etiqueta: 'Mensajes', icono: <MessagesSquare aria-hidden /> },
-  { ruta: 'cronologia', etiqueta: 'Cronología', icono: <Clock aria-hidden />, fase: 3 },
-  { ruta: 'juicio', etiqueta: 'Juicio', icono: <Gavel aria-hidden />, fase: 3 },
+  { ruta: 'cronologia', etiqueta: 'Cronología', icono: <Clock aria-hidden /> },
+  { ruta: 'juicio', etiqueta: 'Juicio', icono: <Gavel aria-hidden /> },
   { ruta: 'equipo', etiqueta: 'Equipo', icono: <UsersRound aria-hidden /> },
 ];
 

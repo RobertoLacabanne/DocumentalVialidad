@@ -8,6 +8,7 @@ import { hayConexion } from './lib/supabase';
 import { Acceso, Cargando, ErrorDeSesion, SinConfigurar, SinInvitacion } from './pantallas/Acceso';
 import { Causas } from './pantallas/Causas';
 import { Contrataciones } from './pantallas/Contrataciones';
+import { Cronologia } from './pantallas/Cronologia';
 import { Efectos } from './pantallas/Efectos';
 import { Equipo } from './pantallas/Equipo';
 import { Importar } from './pantallas/Importar';
@@ -15,6 +16,7 @@ import { ImportarContrataciones } from './pantallas/ImportarContrataciones';
 import { ImportarConversacion } from './pantallas/ImportarConversacion';
 import { Indice } from './pantallas/Indice';
 import { Inicio } from './pantallas/Inicio';
+import { Juicio } from './pantallas/Juicio';
 import { Marco } from './pantallas/Marco';
 import { Mensajes } from './pantallas/Mensajes';
 import { Personas } from './pantallas/Personas';
@@ -70,6 +72,8 @@ function Protegida() {
           <Route path="contrataciones" element={<Contrataciones />} />
           <Route path="personas" element={<Personas />} />
           <Route path="mensajes" element={<Mensajes />} />
+          <Route path="cronologia" element={<Cronologia />} />
+          <Route path="juicio" element={<Juicio />} />
           <Route path="importar" element={<Importar />} />
           <Route path="importar-contrataciones" element={<ImportarContrataciones />} />
           <Route path="importar-conversacion" element={<ImportarConversacion />} />

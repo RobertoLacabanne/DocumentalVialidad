@@ -1,6 +1,6 @@
 # Tablero de Prueba
 
-El índice vivo de la prueba de una causa, para la Unidad Fiscal de Investigación y Litigación de Paraná. Es el cuadro de siempre (una fila por pieza, con su número de orden, su cita y el link al Drive) pero compartido en tiempo real, con historial y con la situación procesal de cada documento a la vista. Suma el tablero de los efectos secuestrados, las contrataciones investigadas con su trámite a fojas, un lector de las conversaciones extraídas de los teléfonos que arma el informe de relevamiento, el directorio de personas y empresas, y un buscador que encuentra cualquier cosa de la causa.
+El índice vivo de la prueba de una causa, para la Unidad Fiscal de Investigación y Litigación de Paraná. Es el cuadro de siempre (una fila por pieza, con su número de orden, su cita y el link al Drive) pero compartido en tiempo real, con historial y con la situación procesal de cada documento a la vista. Suma el tablero de los efectos secuestrados, las contrataciones investigadas con su trámite a fojas, un lector de las conversaciones extraídas de los teléfonos que arma el informe de relevamiento, el directorio de personas y empresas con su grafo de relaciones, la cronología de la causa, la preparación del juicio con los avisos procesales y un buscador que encuentra cualquier cosa de la causa.
 
 **Dirección:** https://tablero-prueba-ufil.netlify.app
 
@@ -18,8 +18,10 @@ Los archivos siguen en el Drive de la UFIL. El tablero no los toca: guarda los l
 - **Índice de prueba:** una fila por pieza, como el cuadro Urribarri.
 - **Efectos:** cada cosa secuestrada. En **Tablero** se arrastran las tarjetas entre columnas (Sin iniciar, En proceso, Escaneado, Finalizado, Observado); en **Por allanamiento** se ven agrupadas por procedimiento, y se pueden marcar varias para cargarles una situación procesal de una vez.
 - **Contrataciones:** una ficha por licitación con el trámite paso a paso (fojas, fecha tal cual figura, firmante), el cuadro comparativo de ofertas con la menor marcada y la diferencia contra el presupuesto oficial, y los mensajes y piezas que la prueban.
-- **Personas y empresas:** el directorio de la causa, con teléfonos, CUIT y cómo figura cada uno agendado en los celulares.
+- **Personas y empresas:** el directorio de la causa, con teléfonos, CUIT y cómo figura cada uno agendado en los celulares. Con **Relaciones** se ve el grafo: quién es socio, familiar o empleado de quién, qué empresas ofertaron en cada contratación y quiénes aparecen juntos en una conversación.
 - **Mensajes:** las conversaciones de los teléfonos, como un chat, en orden y con la fecha de cada mensaje. Se marcan los relevantes, se les escribe la observación y se vinculan a su contratación. Desde acá sale el **Informe de relevamiento de mensajes** en Word.
+- **Cronología:** todo lo que tiene fecha en una sola línea de tiempo (piezas, mensajes relevantes, pasos de las contrataciones, allanamientos, actos procesales, planteos y resoluciones), filtrable por tipo, persona, contratación y fechas. **Exportar PDF** la imprime para mostrársela al fiscal.
+- **Juicio:** el punteo de la prueba para el debate, heredero de «Prueba a mostrar en debate con testigos». Avisa lo que falta resolver y sale el listado para la remisión a juicio en Word.
 - **Equipo:** quién está habilitado y con qué alias figura en las planillas.
 
 ## Cómo importar las planillas de efectos
@@ -63,6 +65,24 @@ Los montos que falten se completan tocando la oferta en la ficha, escritos como 
 4. Tocá **Informe .docx**. Sale con la plantilla del equipo (Palatino 11, justificado, interlineado 1,5): referencia del legajo, los dos párrafos de introducción, la transcripción por conversación y en orden, y cada mensaje con Fecha, Emisor, Remitente, Mensaje y OBSERVACIONES (con la contratación vinculada). Si el teléfono tiene otras conversaciones, se pueden sumar al mismo informe.
 5. Lo que falte (dispositivo, informe del gabinete, titular…) sale como `[completar: …]`. Se carga desde **Datos de la conversación**. Revisá el documento en Word antes de firmarlo.
 
+## Cómo armar el ofrecimiento de prueba
+
+1. En **Juicio**, tocá **Sumar piezas** y elegí las del índice en el orden en que las querés numerar. Si alguna tiene un problema procesal (admisibilidad cuestionada, pendiente de resolución, excluida), el tablero lo dice **antes** de confirmar y el botón pasa a decir «Sumar igual».
+2. Con **Testigos o peritos** sumás personas del directorio (primero aparecen las que ya tienen ese rol). **Otra prueba** sirve para informativa o instrumental que no está en el índice.
+3. Tocá cada fila para completar su ficha: cómo se nombra en el escrito, qué se prueba o sobre qué declara, si se exhibe y con quién se introduce, si se entregó a la defensa, el acuerdo probatorio, los imputados vinculados y, después de la audiencia, qué dijo el auto de apertura.
+4. Arriba están los avisos: **con problema procesal** (rojo lacre), **rechazadas en el auto**, **sin quién la introduce**, **sin entregar a la defensa** e **impugnadas**. Tocá uno para ver solo esas filas.
+5. **Exportar → Listado para la remisión (.docx)** arma el ofrecimiento por clase (A.- TESTIMONIAL, B.- DOCUMENTAL…), numerado y con el formato de la fiscalía. Lo que falte sale como `[completar: …]`. **Planilla del punteo** baja la tabla completa a Excel, con las columnas del cuadro Urribarri.
+
+Si se quita una prueba, **Renumerar** corre los números para que no queden salteados.
+
+## Cómo cargar una relación entre personas
+
+1. En **Personas y empresas**, tocá **Relaciones** y después **Nueva relación** (o, desde la ficha de una persona, **Agregar relación**).
+2. Elegí las dos fichas, escribí qué relación tienen (socio, familiar, empleado…) y **de dónde surge** (contrato social, efecto, fojas): así cualquiera puede ir a verificarla.
+3. En el grafo, las líneas llenas son lo firme (lo cargado por el equipo y las ofertas de las contrataciones). Las **punteadas** salen de nombres que aparecen juntos en una conversación: son una coincidencia a confirmar, no una identificación.
+
+Tocá un nodo para abrir la ficha de esa persona: ahí se ven sus relaciones y dónde aparece (contrataciones, juicio, efectos, piezas, conversaciones y mensajes).
+
 ## Cómo cargar una pieza
 
 1. En **Índice de prueba**, tocá **Nueva pieza**.
@@ -99,7 +119,7 @@ Desde la misma pantalla se puede cambiar el alias de alguien (con el lápiz que 
 | 0 | Base: acceso con Google, índice de prueba, ficha, historial, tiempo real, sistema de diseño | Lista |
 | 1 | Inicio, efectos (tablero y por allanamiento), personas y empresas, búsqueda global, importación de planillas, exportar a Excel, copia completa | Lista |
 | 2 | Contrataciones con trámite y ofertas, lector de mensajes, relevantes y vínculos, informe de relevamiento en .docx | Lista |
-| 3 | Preparación del juicio, cronología, grafo de relaciones | Próxima |
+| 3 | Preparación del juicio con avisos procesales y listado para la remisión, cronología exportable a PDF, grafo de relaciones | Lista |
 | 4 | OCR y sugerencias automáticas (siempre pendientes de validar) | Opcional |
 
 ## Si algo no anda

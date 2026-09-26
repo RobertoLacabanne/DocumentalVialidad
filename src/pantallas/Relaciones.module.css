@@ -1,0 +1,451 @@
+/* Grafo de relaciones: papel cuadriculado apenas marcado, fichas con el
+   color de su familia y la lista «quién con quién» al costado. */
+.relaciones {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2) var(--esp-3);
+  padding: var(--esp-3) var(--esp-6);
+  border-bottom: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+}
+.capas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.capasRotulo {
+  margin-right: 4px;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: var(--espaciado-rotulo);
+  text-transform: uppercase;
+  color: var(--color-texto-tenue);
+}
+.capa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--alto-control-sm);
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pill);
+  background: var(--color-superficie);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+  transition: border-color var(--duracion-rapida) var(--curva-salida), background-color var(--duracion-rapida) var(--curva-salida);
+}
+.capa::before {
+  content: '';
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--trazo);
+}
+.capa:hover {
+  border-color: var(--color-borde-fuerte);
+}
+.capa:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 1px;
+}
+.capa[aria-pressed='true'] {
+  background: var(--color-seleccion);
+  border-color: var(--color-seleccion-borde);
+  color: var(--color-texto);
+}
+.capaContratacion {
+  --trazo: var(--cat-contratacion-texto);
+}
+.capaNombre::before {
+  border-top-style: dashed;
+  border-top-color: var(--color-sugerencia-borde);
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: var(--color-fondo);
+}
+.marco {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+.vacio {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--esp-6);
+}
+.lienzo {
+  position: relative;
+  flex: 1;
+  min-height: 420px;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  background-color: var(--color-fondo);
+  background-image: radial-gradient(circle, rgba(30, 51, 80, 0.09) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.lienzo:active {
+  cursor: grabbing;
+}
+.lienzo svg {
+  display: block;
+}
+.oculto {
+  visibility: hidden;
+}
+
+/* Líneas */
+.arista line {
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: opacity var(--duracion-rapida) var(--curva-salida);
+}
+.arista text {
+  font-size: calc(11px * var(--escala, 1));
+  font-weight: var(--peso-medio);
+  fill: var(--color-texto-suave);
+  paint-order: stroke;
+  stroke: var(--color-fondo);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.aristaRelacion line {
+  stroke: var(--color-texto-suave);
+  stroke-width: 2;
+}
+.aristaRelacion text {
+  fill: var(--color-texto);
+  font-weight: var(--peso-fuerte);
+}
+.aristaOferta line {
+  stroke: var(--cat-contratacion-texto);
+  stroke-opacity: 0.55;
+}
+.aristaAdjudicacion line {
+  stroke: var(--cat-contratacion-texto);
+  stroke-width: 2.6;
+}
+.aristaAdjudicacion text,
+.aristaOferta text {
+  fill: var(--cat-contratacion-texto);
+}
+.aristaNombre line {
+  stroke: var(--color-sugerencia-borde);
+  stroke-dasharray: 5 5;
+}
+.aristaNombre text {
+  fill: var(--color-texto-tenue);
+  font-style: italic;
+}
+
+/* Fichas */
+.nodo {
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duracion-rapida) var(--curva-salida);
+}
+.forma {
+  stroke-width: 1.5;
+  filter: drop-shadow(0 1px 1.5px rgba(30, 51, 80, 0.12));
+  transition: stroke-width var(--duracion-rapida) var(--curva-salida);
+}
+.nodoPersona .forma {
+  fill: var(--cat-persona-fondo);
+  stroke: var(--cat-persona-texto);
+}
+.nodoPersona .sigla {
+  fill: var(--cat-persona-texto);
+}
+.nodoEmpresa .forma {
+  fill: var(--cat-contratacion-fondo);
+  stroke: var(--cat-contratacion-texto);
+}
+.nodoEmpresa .sigla {
+  fill: var(--cat-contratacion-texto);
+}
+.nodoContratacion .forma {
+  fill: var(--color-sello-fondo);
+  stroke: var(--color-sello-borde);
+  stroke-width: 1;
+}
+.nodoContratacion .sigla {
+  fill: var(--color-texto);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.sigla {
+  font-size: 13px;
+  font-weight: var(--peso-fuerte);
+  pointer-events: none;
+}
+.nombre {
+  font-size: calc(12px * var(--escala, 1));
+  font-weight: var(--peso-medio);
+  fill: var(--color-texto);
+  paint-order: stroke;
+  stroke: var(--color-fondo);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.anillo {
+  fill: none;
+  stroke: var(--color-texto);
+  stroke-width: 2;
+}
+.nodo:hover .forma,
+.nodo:focus-visible .forma {
+  stroke-width: 3;
+}
+.nodo:focus-visible .nombre {
+  text-decoration: underline;
+}
+.elegida .forma {
+  stroke: var(--color-acento);
+  stroke-width: 3;
+}
+.tenue {
+  opacity: 0.2;
+}
+
+/* Controles sobre el dibujo */
+.zoom {
+  position: absolute;
+  top: var(--esp-3);
+  right: var(--esp-3);
+  display: grid;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-2);
+  overflow: hidden;
+}
+.zoom button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  background: none;
+  color: var(--color-texto-suave);
+  cursor: pointer;
+}
+.zoom button + button {
+  border-top: 1px solid var(--color-borde);
+}
+.zoom button:hover {
+  background: var(--color-cabecera);
+  color: var(--color-texto);
+}
+.zoom button:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: -2px;
+}
+.zoom :global(svg.lucide) {
+  width: 15px;
+  height: 15px;
+}
+.leyenda {
+  position: absolute;
+  left: var(--esp-3);
+  bottom: var(--esp-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--esp-3);
+  max-width: calc(100% - 2 * var(--esp-3));
+  margin: 0;
+  padding: 6px 10px;
+  list-style: none;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-superficie) 92%, transparent);
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-suave);
+  pointer-events: none;
+}
+.leyenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.refPersona,
+.refEmpresa,
+.refImputado,
+.refContratacion {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid;
+}
+.refPersona {
+  border-radius: 50%;
+  background: var(--cat-persona-fondo);
+  border-color: var(--cat-persona-texto);
+}
+.refEmpresa {
+  border-radius: 3px;
+  background: var(--cat-contratacion-fondo);
+  border-color: var(--cat-contratacion-texto);
+}
+.refImputado {
+  border-radius: 50%;
+  border: 2px solid var(--color-texto);
+  box-shadow: inset 0 0 0 2px var(--color-superficie), inset 0 0 0 8px var(--cat-persona-fondo);
+}
+.refContratacion {
+  width: 18px;
+  height: 10px;
+  border-width: 1px;
+  border-radius: 2px;
+  background: var(--color-sello-fondo);
+  border-color: var(--color-sello-borde);
+}
+.refPunteada {
+  width: 18px;
+  border-top: 2px dashed var(--color-sugerencia-borde);
+}
+
+/* Lista «quién con quién» */
+.lista {
+  flex: none;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+}
+.conPanel .lista {
+  display: none;
+}
+.listaCabecera {
+  display: flex;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-4) var(--esp-3);
+  border-bottom: 1px solid var(--color-borde);
+}
+.listaCabecera > :global(svg.lucide) {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  color: var(--color-texto-tenue);
+}
+.listaCabecera h3 {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.25;
+}
+.listaCabecera p {
+  margin: 2px 0 0;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--esp-2) 0 var(--esp-4);
+  list-style: none;
+}
+.items > li {
+  display: grid;
+  gap: 4px;
+  padding: var(--esp-3) var(--esp-4);
+  border-left: 3px solid var(--color-texto-suave);
+}
+.items > li + li {
+  border-top: 1px solid var(--color-borde);
+}
+.items > li.itemNombre {
+  border-left: 3px dashed var(--color-sugerencia-borde);
+}
+.par {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+}
+.par button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+.par button:hover {
+  color: var(--color-acento);
+  text-decoration: underline;
+}
+.par button:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.motivos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--texto-xs);
+  line-height: 1.5;
+  color: var(--color-texto-suave);
+}
+.fuente {
+  color: var(--color-texto-tenue);
+}
+
+@media (max-width: 860px) {
+  .relaciones {
+    flex: none;
+  }
+  .barra {
+    padding: var(--esp-3) var(--esp-4);
+  }
+  .cuerpo {
+    flex-direction: column;
+  }
+  .marco {
+    flex: none;
+    height: 440px;
+  }
+  .lienzo {
+    min-height: 0;
+  }
+  .lista {
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--color-borde);
+  }
+  .conPanel .lista {
+    display: flex;
+  }
+  .items {
+    overflow: visible;
+  }
+}

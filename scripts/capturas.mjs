@@ -1,7 +1,7 @@
 // Capturas de las pantallas en 1440×900 y 390×844, como pide la skill de diseño.
 // Requiere: npm run db:start, node scripts/preparar-local.mjs --ejemplos,
 // node e2e/fixtures/generar-planillas.mjs y npm run dev.
-// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,contrataciones,mensajes,diseno,acceso]
+// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,contrataciones,mensajes,juicio,cronologia,relaciones,diseno,acceso]
 // La importación se hace en la primera pasada (1440); en la segunda solo se revisa.
 import { chromium } from '@playwright/test';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -76,7 +76,7 @@ for (const [n, t] of TAMANOS.entries()) {
     await foto(p, 'acceso', t);
   }
 
-  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo', 'contrataciones', 'mensajes'];
+  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo', 'contrataciones', 'mensajes', 'juicio', 'cronologia', 'relaciones'];
   if (resto.some(quiero)) {
     const causa = await entrar(p);
 
@@ -215,6 +215,92 @@ for (const [n, t] of TAMANOS.entries()) {
       await p.getByRole('dialog', { name: 'Informe de relevamiento de mensajes' }).waitFor();
       await foto(p, 'informe', t);
       await p.keyboard.press('Escape');
+    }
+    if (quiero('juicio')) {
+      await p.goto(`${causa}/juicio`);
+      await p.getByRole('heading', { name: 'Preparación del juicio' }).waitFor();
+      if (n === 0) {
+        const vacio = p.getByText('Todavía no hay prueba ofrecida');
+        if (await vacio.count()) await foto(p, 'juicio-vacio', t);
+        await p.getByRole('button', { name: 'Sumar piezas', exact: true }).click();
+        const dialogo = p.getByRole('dialog', { name: 'Sumar piezas del índice' });
+        for (const titulo of ['Acta de allanamiento – DPV', 'Agenda 2021', 'Extracción de teléfono celular']) {
+          const fila = dialogo.getByText(titulo, { exact: true });
+          if (await fila.count()) await fila.click();
+        }
+        await foto(p, 'juicio-sumar', t);
+        const sumar = dialogo.getByRole('button', { name: /^Sumar/ });
+        if (await sumar.isEnabled()) await sumar.click();
+        else await p.keyboard.press('Escape');
+        await p.getByRole('button', { name: 'Testigos o peritos', exact: true }).click();
+        const personas = p.getByRole('dialog', { name: 'Sumar testigos o peritos' });
+        const testigo = personas.getByText('Testigo Ejemplo Local');
+        if (await testigo.count()) {
+          await testigo.click();
+          await personas.getByRole('button', { name: /^Sumar/ }).click();
+        } else await p.keyboard.press('Escape');
+      }
+      await p.getByRole('region', { name: 'Documental' }).waitFor();
+      await foto(p, 'juicio', t);
+      await medir('juicio');
+      await p.getByRole('row', { name: /Extracción de teléfono celular/ }).click();
+      await p.getByRole('complementary', { name: 'Ficha del ofrecimiento' }).waitFor();
+      await foto(p, 'juicio-ficha', t);
+      await p.keyboard.press('Escape');
+      await p.getByRole('button', { name: /^Exportar/ }).click();
+      await p.getByRole('menuitem', { name: /Listado para la remisión/ }).click();
+      await p.getByRole('dialog', { name: 'Listado de prueba' }).waitFor();
+      await foto(p, 'juicio-listado', t);
+      await p.keyboard.press('Escape');
+    }
+    if (quiero('cronologia')) {
+      await p.goto(`${causa}/cronologia`);
+      await p.getByRole('heading', { name: 'Cronología', exact: true }).waitFor();
+      if (n === 0) {
+        await p.getByRole('button', { name: 'Acto procesal' }).click();
+        const d = p.getByRole('dialog', { name: 'Nuevo acto procesal' });
+        await d.getByLabel('Qué pasó').fill('Audiencia de control de la acusación (ejemplo local)');
+        await d.getByLabel('Fecha', { exact: true }).fill('2026-03-15');
+        await foto(p, 'cronologia-acto', t);
+        await d.getByRole('button', { name: 'Cargar' }).click();
+        await p.getByText('Audiencia de control de la acusación (ejemplo local)').waitFor();
+      }
+      await foto(p, 'cronologia', t);
+      await medir('cronologia');
+      if (n === 0) {
+        await p.emulateMedia({ media: 'print' });
+        await foto(p, 'cronologia-impresion', t, true);
+        await p.pdf({ path: `${SALIDA}/cronologia.pdf`, format: 'A4', printBackground: true });
+        await p.emulateMedia({ media: 'screen' });
+      }
+    }
+    if (quiero('relaciones')) {
+      await p.goto(`${causa}/personas?vista=relaciones`);
+      await p.getByRole('complementary', { name: 'Relaciones en lista' }).or(p.getByText('Todavía no hay relaciones para dibujar')).first().waitFor();
+      if (n === 0) {
+        await p.getByRole('button', { name: 'Nueva relación' }).click();
+        const d = p.getByRole('dialog', { name: 'Nueva relación' });
+        await d.getByLabel('Entre').selectOption({ label: 'Testigo Ejemplo Local' });
+        await d.getByLabel('Y', { exact: true }).selectOption({ label: 'Proveedora Ejemplo SRL' });
+        await d.getByLabel('Qué relación tienen').fill('Empleado (ejemplo local)');
+        await d.getByLabel('De dónde surge').fill('Recibos de sueldo, efecto Nº 48436 (ejemplo local)');
+        await foto(p, 'relaciones-nueva', t);
+        await d.getByRole('button', { name: 'Cargar relación' }).click();
+        const repetida = d.getByText(/Ya hay una relación cargada/);
+        await Promise.race([d.waitFor({ state: 'hidden' }), repetida.waitFor()]);
+        if (await repetida.count()) await p.keyboard.press('Escape');
+      }
+      await p.waitForTimeout(400);
+      await foto(p, 'relaciones', t);
+      await medir('relaciones');
+      const nodo = p.getByRole('button', { name: /Persona: Imputado Ejemplo Local/ });
+      if (await nodo.count()) {
+        await nodo.click();
+        await p.getByRole('complementary', { name: /Ficha de Imputado Ejemplo Local/ }).waitFor();
+        await p.waitForTimeout(400);
+        await foto(p, 'relaciones-ficha', t);
+        await p.keyboard.press('Escape');
+      }
     }
     if (quiero('equipo')) {
       await p.goto(`${causa}/equipo`);
