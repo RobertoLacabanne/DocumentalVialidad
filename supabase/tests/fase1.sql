@@ -79,14 +79,6 @@ select pg_temp.comprobar(
 select pg_temp.comprobar(
   (select e.estado = 'sin_iniciar' and not e.requiere_escribiente from public.efecto e where e.numero = '99003'),
   'sin estado en la planilla queda «sin iniciar»; «no requiere escribiente» se respeta');
-do $$
-begin
-  insert into public.miembro (email, alias, invitado_por) values ('otro.f1@prueba.test', 'pruebaf1', 'prueba');
-  raise exception 'FALLÓ: aceptó dos miembros con el mismo alias';
-exception when unique_violation then
-  raise notice 'ok · dos personas del equipo no pueden tener el mismo alias (sin importar mayúsculas)';
-end $$;
-
 select pg_temp.comprobar(
   (select filas_origen = 4 and filas_importadas = 3 and filas_omitidas = 1
      from public.importacion where archivo = 'LISTADO DE PRUEBA.xlsx'),
@@ -113,6 +105,20 @@ select pg_temp.comprobar(
   exists (select 1 from public.auditoria a join public.efecto e on e.id = a.registro_id
            where e.numero = '99002' and a.cambios ? 'responsable'),
   'esa asignación queda en el historial del efecto');
+
+-- Un alias compartido por dos cuentas no asigna a ninguna: queda el alias, sin adivinar.
+insert into public.miembro (email, alias, invitado_por) values
+  ('doble.a@prueba.test', 'DOBLEF1', 'prueba'), ('doble.b@prueba.test', 'doblef1', 'prueba');
+select public.importar_efectos(current_setting('prueba.causa')::uuid, 'DOBLE.xlsx', null,
+  jsonb_build_array(jsonb_build_object('fila', 3, 'numero', '99010', 'soporte', 'papel', 'responsable_alias', 'DOBLEF1')), 1);
+select pg_temp.comprobar(
+  (select e.responsable is null and e.responsable_alias = 'DOBLEF1' from public.efecto e where e.numero = '99010'),
+  'si dos cuentas comparten alias, el efecto no se asigna solo a ninguna');
+update public.miembro set activo = false where email = 'doble.b@prueba.test';
+update public.miembro set alias = 'DOBLEF1' where email = 'doble.a@prueba.test';
+select pg_temp.comprobar(
+  (select e.responsable = 'doble.a@prueba.test' from public.efecto e where e.numero = '99010'),
+  'cuando el alias queda en una sola cuenta habilitada, se asigna');
 
 -- ---------------------------------------------------------------------
 -- 3. Situación procesal en bloque

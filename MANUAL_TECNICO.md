@@ -24,20 +24,32 @@ Están en `supabase/migrations/20260926120000_esquema_inicial.sql` y las prueba 
 - `registrar_ingreso()`: si la lista de invitados está vacía, la primera persona que entra queda habilitada. Después, solo entran los invitados.
 - Lo que sugiera una máquina va a `sugerencia`, nunca al dato.
 
+Desde la Fase 1 (`20260927100000_fase1_efectos_importacion.sql`, probada por `supabase/tests/fase1.sql`):
+
+- `importar_efectos()` carga todas las filas de una planilla en una sola transacción: o entran todas las revisadas o ninguna. Un número de efecto ya cargado no se pisa (vuelve como duplicado). Agrupa los procedimientos por fecha y domicilio, da de alta los informes del gabinete mencionados y guarda en cada efecto el archivo, la hoja y la fila de origen. Cada importación queda en la tabla `importacion` con el conteo de filas.
+- Alias de responsables: un efecto importado con responsable «AGUS» guarda ese alias en `responsable_alias`. Se asigna a la persona (`responsable`) cuando exactamente una cuenta habilitada tiene ese alias, sea al importar o al invitarla después. Si dos cuentas comparten alias, no se asigna a ninguna.
+- `aplicar_incidencia()` marca una situación procesal sobre varias fichas de una vez, sin duplicar. La vista `efecto_estado_procesal` resume la más grave de cada efecto (propia o de su procedimiento) y las piezas la heredan por `pieza_estado_procesal`.
+- `buscar()` busca en piezas, efectos, personas, mensajes y contrataciones, y también por teléfonos (solo dígitos, desde 6) y por cómo figura agendada una persona.
+
 ### Estructura del repositorio
 
 ```
 src/
   styles/        tokens.css (único lugar de colores, tipografía, espaciado) y base.css
-  componentes/   piezas del sistema de diseño: marcas, botones, tabla, panel, ficha, estados
-  pantallas/     acceso, causas, índice, ficha de pieza, equipo, sistema de diseño (/diseno)
-  datos/         sesión, consultas en tiempo real, guardado con cola sin conexión, presencia
-  lib/           orden jerárquico, cita, fechas, etiquetas, links de Drive (con pruebas)
+  componentes/   piezas del sistema de diseño: marcas, botones, tabla, panel, ficha, estados,
+                 tarjeta de efecto, búsqueda global (Ctrl+K), menú de exportar
+  pantallas/     acceso, causas, inicio, índice, efectos, personas, importar, equipo, fichas,
+                 sistema de diseño (/diseno)
+  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts), guardado con cola
+                 sin conexión, presencia
+  lib/           orden jerárquico, cita, fechas, etiquetas, links de Drive, importación de
+                 planillas, exportación, copia completa, comparación de nombres (con pruebas)
 supabase/
   migrations/    esquema
   seed.sql       datos reales del legajo 299113 (solo lo que figura en las fuentes)
   tests/         pruebas SQL de las reglas
-e2e/             pruebas con dos navegadores a la vez
+e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K);
+                 fixtures/generar-planillas.mjs arma planillas sintéticas con la forma de las reales
 scripts/         preparar-local, capturas, test-sql, configurar-produccion
 ```
 
@@ -60,23 +72,24 @@ En `.env.local` local conviene `VITE_ACCESO_CON_CLAVE=true` para entrar con corr
 
 ```bash
 npm run typecheck      # tipos
-npm test               # lógica: orden jerárquico, citas, fechas, links de Drive
-npm run db:test        # reglas de la base (34 comprobaciones)
-npm run test:e2e       # dos personas a la vez: tiempo real, presencia, conflicto, historial
-npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas
+npm test               # lógica: orden jerárquico, citas, fechas, links, importación, nombres (28)
+npm run db:test        # reglas de la base y de la Fase 1 (57 comprobaciones)
+npm run test:e2e       # dos personas a la vez, importación con planilla sintética, tablero en vivo, Ctrl+K
+node e2e/fixtures/generar-planillas.mjs   # planillas sintéticas en e2e/fixtures/generadas/
+npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas (importa las planillas sintéticas)
 ```
 
 Antes de publicar, probar también el build de producción: `npm run build && npx vite preview` y abrir http://localhost:4173.
 
 ## Puesta en marcha de producción
 
-### Estado actual (26/09/2026)
+### Estado actual (26/09/2026, Fase 1)
 
 | Pieza | Valor |
 |---|---|
 | Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
 | URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
-| Esquema | Migraciones `20260926120000_esquema_inicial` y `20260926170000_ingreso_concurrente` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente` y `20260927100000_fase1_efectos_importacion` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
 | Auth | Site URL y redirecciones configuradas; «Entrar con Google» activo (proyecto de Google Cloud «Tablero de Prueba», cliente web `283725982972-….apps.googleusercontent.com`) |
 | Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
 | Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |
@@ -116,6 +129,7 @@ Aplica las migraciones nuevas (cada una una sola vez), vuelve a pasar la semilla
 
 - Sitio: `tablero-prueba-ufil`, equipo `rlacabanne14`.
 - **Site configuration → Environment variables**: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. No definir `VITE_ACCESO_CON_CLAVE`.
+- Publicar desde esta computadora de trabajo: mover `.env.local` fuera de la carpeta antes de publicar (Vite lo leería y el sitio quedaría apuntando al Supabase local con acceso por contraseña) y volver a ponerlo después. Después de publicar, revisar que el JS del sitio contenga `fpihhaaqgsukscnfrbry` y no `127.0.0.1`.
 - Para publicar en cada cambio: **Site configuration → Build & deploy → Link repository** con `RobertoLacabanne/DocumentalVialidad`, rama de producción `main`. `netlify.toml` ya trae el comando de build y la redirección de rutas.
 - Cuidado con los créditos del plan gratuito: cada publicación a producción consume 15 de 300 por mes (y el equipo los comparte con los demás sitios). Conviene juntar cambios y publicar desde `main`; las vistas previas de las ramas figuran como ilimitadas.
 
@@ -132,7 +146,7 @@ La primera persona que entra con Google queda habilitada automáticamente (la li
   npx supabase db dump --linked --data-only -f copia-datos-$(date +%F).sql
   npx supabase db dump --linked -f copia-esquema-$(date +%F).sql
   ```
-  El botón «Descargar copia completa de la causa» (JSON y CSV) y la exportación semanal automática llegan en la Fase 1.
+- **Copia completa de la causa** (botón en **Inicio**): un .zip con `causa.json` (todas las tablas de la causa, incluido lo archivado y la `auditoria` completa) y una planilla CSV por tabla. Es la copia que puede guardar cualquiera del equipo en el Drive de la UFIL, sin credenciales. Sirve como resguardo legible y para auditar; para reconstruir la base entera se usa el volcado de arriba. La exportación semanal automática queda pendiente.
 - **Restaurar en un proyecto nuevo:** crear el proyecto, aplicar `supabase/migrations/` (o `copia-esquema`), después `psql "<cadena de conexión>" -f copia-datos-AAAA-MM-DD.sql`. Revisar que la tabla `auditoria` quede con la misma cantidad de filas que en la copia.
 - **Recuperar algo pisado por error:** está en `auditoria` (columna `cambios` o `antes`). La ficha muestra el historial; restaurar un valor es volver a cargarlo, y queda registrado.
 

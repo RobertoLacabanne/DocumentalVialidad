@@ -40,7 +40,7 @@ export async function copiaCompleta(causaId: string, alAvanzar?: (tabla: string,
     'LEEME.txt': strToU8(
       `Copia completa de la causa ${(causa as { legajo_fiscalia: string }).legajo_fiscalia}\n` +
         `Generada el ${new Date().toLocaleString('es-AR')} desde el Tablero de Prueba.\n\n` +
-        `causa.json tiene todas las tablas juntas: sirve para restaurar (ver MANUAL_TECNICO.md).\n` +
+        `causa.json tiene todas las tablas juntas, en un formato que cualquier sistema puede leer (ver MANUAL_TECNICO.md).\n` +
         `La carpeta csv tiene una planilla por tabla para abrir en Excel.\n` +
         `Incluye lo archivado y el historial completo de cambios.\n`,
     ),

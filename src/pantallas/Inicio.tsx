@@ -68,6 +68,7 @@ export function Inicio() {
 
   const sinAsignar = trabajables.filter((e) => !e.responsable && !e.responsable_alias);
   const observados = efectos.filter((e) => e.estado === 'observado');
+  const aliasEnEquipo = new Set(directorio.miembros.filter((m) => m.alias && m.activo).map((m) => m.alias!.trim().toUpperCase()));
   const sinInvitar = porResponsable.filter((r) => !r.invitado);
   const piezasSinEvaluar = piezas.filter((p) => !p.relevancia).length;
 
@@ -174,7 +175,7 @@ export function Inicio() {
                     <Avatar texto={r.alias} email={r.email ?? r.alias} tamano="chico" />
                     <span className={s.personaNombre}>
                       {r.alias}
-                      {!r.invitado && <span className={s.tenue}> · sin invitar</span>}
+                      {!r.invitado && <span className={s.tenue}>{aliasEnEquipo.has(r.alias.toUpperCase()) ? ' · alias repetido' : ' · sin invitar'}</span>}
                     </span>
                     <span className={s.miniBarra} aria-hidden>
                       <span style={{ width: `${(r.hechos / r.total) * 100}%` }} />
@@ -228,7 +229,11 @@ export function Inicio() {
                   key={r.clave}
                   icono={<UserPlus aria-hidden />}
                   cantidad={r.total}
-                  texto={`${r.total === 1 ? 'efecto espera' : 'efectos esperan'} a ${r.alias}, que no está invitado`}
+                  texto={
+                    aliasEnEquipo.has(r.alias.toUpperCase())
+                      ? `${r.total === 1 ? 'efecto' : 'efectos'} de ${r.alias} sin asignar: ese alias está en más de una cuenta`
+                      : `${r.total === 1 ? 'efecto espera' : 'efectos esperan'} a ${r.alias}, que no está invitado`
+                  }
                   a="../equipo"
                 />
               ))}

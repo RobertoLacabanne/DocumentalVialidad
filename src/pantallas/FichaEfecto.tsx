@@ -248,7 +248,11 @@ export function FichaEfecto({
                 tipo="opciones"
                 valor={efecto.responsable}
                 opciones={directorio.miembros.filter((m) => m.activo).map((m) => ({ valor: m.email, etiqueta: aliasDe(m) }))}
-                ayuda={!efecto.responsable && efecto.responsable_alias ? `En la planilla figura ${efecto.responsable_alias}: se asigna solo cuando lo invites con ese alias.` : undefined}
+                ayuda={
+                  !efecto.responsable && efecto.responsable_alias
+                    ? `En la planilla figura ${efecto.responsable_alias}: se asigna solo cuando una sola cuenta del equipo tenga ese alias, o elegila acá.`
+                    : undefined
+                }
                 onGuardar={guardar('responsable')}
               />
             </div>
@@ -298,7 +302,7 @@ export function FichaEfecto({
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                     <Avatar texto={responsableAlias} email={efecto.responsable ?? responsableAlias} tamano="chico" />
                     {responsableAlias}
-                    {!efecto.responsable && <span className={s.tenue}>(todavía no invitado)</span>}
+                    {!efecto.responsable && <span className={s.tenue}>(sin cuenta asignada)</span>}
                   </span>
                 ) : efecto.requiere_escribiente ? (
                   <span className={s.alerta}>Sin asignar</span>

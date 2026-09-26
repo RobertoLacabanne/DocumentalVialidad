@@ -38,6 +38,17 @@ export function Equipo() {
     return [...conteo.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es'));
   }, [efectos]);
 
+  /** Alias que comparten dos o más cuentas habilitadas: sus efectos no se asignan solos. */
+  const aliasCompartidos = useMemo(() => {
+    const porAlias = new Map<string, Miembro[]>();
+    for (const m of miembros ?? []) {
+      if (!m.alias || !m.activo) continue;
+      const a = m.alias.trim().toUpperCase();
+      porAlias.set(a, [...(porAlias.get(a) ?? []), m]);
+    }
+    return [...porAlias.entries()].filter(([, ms]) => ms.length > 1);
+  }, [miembros]);
+
   async function guardarAlias(m: Miembro, nuevo: string) {
     const alias = nuevo.trim().toUpperCase() || null;
     setEditandoAlias(null);
@@ -71,7 +82,7 @@ export function Equipo() {
     });
     setEnviando(false);
     if (err) {
-      setErrorAlta(/miembro_alias_unico/i.test(err.message) ? traducirError(err.message) : /duplicate/i.test(err.message) ? 'Esa persona ya está en la lista.' : traducirError(err.message));
+      setErrorAlta(/duplicate/i.test(err.message) ? 'Esa persona ya está en la lista.' : traducirError(err.message));
       return;
     }
     setErrorAlta(null);
@@ -163,6 +174,12 @@ export function Equipo() {
           <div className={s.tarjetaCabecera}>
             <h2 className={s.tarjetaTitulo}>Personas habilitadas</h2>
           </div>
+          {aliasCompartidos.map(([alias, ms]) => (
+            <p key={alias} className={s.pendientes}>
+              <b>{alias}</b> figura en {ms.length} cuentas ({ms.map((m) => m.email).join(' y ')}). Mientras sea así, los efectos de las planillas con ese
+              alias no se asignan solos: dejale el alias a una sola cuenta (con el lápiz) o asignalos a mano desde cada efecto.
+            </p>
+          ))}
           {error ? (
             <div style={{ padding: 'var(--esp-5)' }}>
               <AvisoError titulo="No pudimos traer el equipo">{(error as Error).message}</AvisoError>

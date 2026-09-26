@@ -4,7 +4,9 @@
 >
 > - 26/09/2026. Paso 1 (sección 11) respondido en `docs/PROPUESTA_INICIAL.md`, con el boceto `docs/diseno/boceto-indice-prueba.html`. El usuario dio el OK y pidió arrancar.
 > - 26/09/2026. Fase 0 construida y probada (34 pruebas SQL, 12 unitarias, 2 de punta a punta con dos sesiones; CI en GitHub Actions). Publicada en https://tablero-prueba-ufil.netlify.app (Netlify `tablero-prueba-ufil`, id 349bfd0f-2d95-45c5-92dd-841af40290bd). Producción en Supabase `DocumentalVialidad` (ref `fpihhaaqgsukscnfrbry`, us-west-2): esquema y semilla aplicados, variables en Netlify cargadas, «Entrar con Google» activo (cliente OAuth 283725982972-…, proyecto de Google Cloud «Tablero de Prueba»). La Fase 0 queda cerrada cuando el usuario entre por primera vez (queda habilitado solo) e invite al equipo. Las migraciones de cada fase se llevan a producción con `scripts/configurar-produccion.mjs`.
-> - Próximo: Fase 1 (efectos, personas, búsqueda global, importación de LISTADO EFECTOS y DISTRIBUCIÓN DE TAREAS, copia completa de la causa).
+> - 26/09/2026. El usuario entró por primera vez (Fase 0 cerrada) e invitó a UFIL y a GONZA (dos cuentas con el mismo alias GONZA: fiscalbadano@ y gonzalobadano@).
+> - 26/09/2026. Fase 1 construida, probada y publicada: Inicio, efectos (tablero arrastrable y tabla por allanamiento, ficha), personas y empresas, búsqueda global Ctrl+K, asistente de importación de planillas, exportar a Excel/CSV, copia completa en .zip, alias editable en Equipo. Migración `20260927100000_fase1_efectos_importacion` aplicada en producción. Pruebas: 57 SQL, 28 unitarias, 5 de punta a punta. Guion para el fiscal en `docs/GUION_FISCAL.md`. Falta que el usuario importe LISTADO EFECTOS y DISTRIBUCIÓN DE TAREAS con el asistente (la importación real la hace una persona, con revisión previa) e invite a AGUS, CARLI e INES con esos alias.
+> - Próximo: Fase 2 (contrataciones, lector de mensajes, informe de relevamiento en .docx).
 >
 > **Decisiones tomadas con el usuario** (valen por encima de lo que diga el resto de este archivo)
 >
@@ -13,6 +15,10 @@
 > - Riesgos de nube, datos personales y contraseñas de dispositivos: el usuario pidió no preocuparse. El patrón/contraseña va como campo común del efecto, igual que en la planilla.
 > - Diseño: seguir siempre la skill `.claude/skills/diseno-con-identidad/SKILL.md` y los tokens de `src/styles/tokens.css`. Sacar capturas con `npm run capturas` (1440×900 y 390×844) después de cada cambio visual.
 > - El usuario autorizó avanzar sin pedir confirmación («permito todo, no me preguntes»).
+> - Importación: la carga real de las planillas la hace una persona del equipo con el asistente (vista previa, columnas, revisión, confirmar). Los datos reales nunca se copian al repositorio; las pruebas usan planillas sintéticas (`e2e/fixtures/generar-planillas.mjs`).
+> - Alias: si dos cuentas habilitadas comparten alias, los efectos con ese alias no se asignan solos a ninguna (no se adivina); Equipo lo avisa. No se impuso alias único para no tocar las cuentas que ya cargó el usuario.
+> - La columna «Patrón/Contraseña» de LISTADO EFECTOS dice si el patrón se conoce (SI, NO, Se desconoce): se transcribe tal cual en `patron_contrasena`.
+> - Las menciones a casación o apelación en las observaciones se muestran como sugerencia al importar; la situación procesal la marca una persona.
 
 > Para pegar como primer mensaje en Claude Code, dentro de una carpeta de proyecto vacía. Guardalo también como `CLAUDE.md` en la raíz del repo: así cada sesión nueva arranca con el mismo contexto.
 

@@ -44,12 +44,14 @@ security definer
 set search_path = ''
 as $$
 begin
+  -- Se asigna solo si el alias identifica a UNA persona del equipo. Si dos cuentas
+  -- comparten alias, el efecto queda con el alias y sin asignar: nadie adivina.
   if new.responsable is null and new.responsable_alias is not null and btrim(new.responsable_alias) <> '' then
-    select m.email into new.responsable
+    select min(m.email) into new.responsable
       from public.miembro m
      where upper(btrim(m.alias)) = upper(btrim(new.responsable_alias))
        and m.activo and m.archivado_en is null
-     limit 1;
+    having count(*) = 1;
   end if;
   return new;
 end
@@ -65,7 +67,9 @@ security definer
 set search_path = ''
 as $$
 begin
-  if new.alias is not null and btrim(new.alias) <> '' and new.activo and new.archivado_en is null then
+  if new.alias is not null and btrim(new.alias) <> '' and new.activo and new.archivado_en is null
+     and (select count(*) from public.miembro m
+           where upper(btrim(m.alias)) = upper(btrim(new.alias)) and m.activo and m.archivado_en is null) = 1 then
     update public.efecto
        set responsable = new.email
      where responsable is null
@@ -118,12 +122,6 @@ create policy miembros_leen on public.importacion for select to authenticated
 create policy miembros_cargan on public.importacion for insert to authenticated
   with check ((select public.es_miembro()));
 revoke delete, truncate on public.importacion from anon, authenticated;
-
--- Dos personas del equipo no pueden compartir alias: la asignación automática
--- de los efectos importados depende de que el alias identifique a una sola.
-create unique index if not exists miembro_alias_unico
-  on public.miembro (upper(btrim(alias)))
-  where alias is not null and archivado_en is null;
 
 -- ---------------------------------------------------------------------
 -- importar_efectos(): carga todas las filas en una sola transacción.

@@ -1,4 +1,4 @@
-import { Building2, Landmark, Plus, Search, Sparkles, UserRound } from 'lucide-react';
+import { Building2, Landmark, Plus, Search, Sparkles, UserRound, X } from 'lucide-react';
 import { useMemo, useState, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Boton } from '../componentes/Boton';
@@ -21,6 +21,15 @@ type Filtros = { texto: string; tipo: string; rol: string };
 const SIN_FILTROS: Filtros = { texto: '', tipo: '', rol: '' };
 const MAX_SUGERENCIAS = 6;
 
+const claveOcultas = (causaId: string) => `tp-sugerencias-ocultas:${causaId}`;
+function leerOcultas(causaId: string): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(claveOcultas(causaId)) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
+
 type Sugerencia = { clave: string; nombre: string; tipo: 'fisica' | 'juridica'; efectos: { id: string; numero: string; como: 'propietario' | 'tenedor' }[] };
 
 export function Personas() {
@@ -33,6 +42,17 @@ export function Personas() {
   const [creando, setCreando] = useState(false);
   const [propuesta, setPropuesta] = useState<Propuesta | null>(null);
   const [verTodas, setVerTodas] = useState(false);
+  // Sugerencias que no son personas (un lugar, «escritorio del fondo»): se ocultan solo para quien las descarta.
+  const [ocultas, setOcultas] = useState<string[]>(() => leerOcultas(causa.id));
+  const ocultar = (clave: string) => {
+    const nuevas = [...ocultas, clave];
+    setOcultas(nuevas);
+    try {
+      localStorage.setItem(claveOcultas(causa.id), JSON.stringify(nuevas));
+    } catch {
+      /* queda oculta solo mientras la pantalla esté abierta */
+    }
+  };
 
   const cambiar = <K extends keyof Filtros>(clave: K, valor: Filtros[K]) => setFiltros((f) => ({ ...f, [clave]: valor }));
 
@@ -67,8 +87,10 @@ export function Personas() {
         mapa.set(clave, previa);
       }
     }
-    return [...mapa.values()].sort((a, b) => b.efectos.length - a.efectos.length || a.nombre.localeCompare(b.nombre, 'es'));
-  }, [filas, efectos]);
+    return [...mapa.values()]
+      .filter((g) => !ocultas.includes(g.clave))
+      .sort((a, b) => b.efectos.length - a.efectos.length || a.nombre.localeCompare(b.nombre, 'es'));
+  }, [filas, efectos, ocultas]);
 
   const visibles = useMemo(() => {
     const terminos = claveNombre(filtros.texto).split(' ').filter(Boolean);
@@ -172,7 +194,10 @@ export function Personas() {
                   <h3 className={s.sugerenciasTitulo}>
                     {sugerencias.length === 1 ? 'Un nombre aparece' : `${sugerencias.length} nombres aparecen`} en los efectos y todavía no {sugerencias.length === 1 ? 'está' : 'están'} en el directorio
                   </h3>
-                  <p className={s.sugerenciasBajada}>Salen de las columnas Propietario y Tenedor. Revisá cada uno antes de agregarlo: el tipo es una sugerencia.</p>
+                  <p className={s.sugerenciasBajada}>
+                    Salen de las columnas Propietario y Tenedor. Revisá cada uno antes de agregarlo (el tipo es una sugerencia) y ocultá con la cruz lo que no sea una
+                    persona ni una empresa.
+                  </p>
                 </div>
               </div>
               <ul className={s.sugerenciasLista}>
@@ -204,6 +229,16 @@ export function Personas() {
                       }}
                     >
                       Agregar
+                    </Boton>
+                    <Boton
+                      tamano="chico"
+                      variante="fantasma"
+                      soloIcono
+                      aria-label={`Ocultar la sugerencia ${g.nombre}`}
+                      title="No es una persona ni una empresa: ocultar"
+                      onClick={() => ocultar(g.clave)}
+                    >
+                      <X aria-hidden />
                     </Boton>
                   </li>
                 ))}
