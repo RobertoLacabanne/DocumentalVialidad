@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Contratacion, Conversacion, ConversacionResumen, Mensaje, Oferta, PasoTramite, Vinculo } from '../lib/tipos';
-import { canal, todas, useEnVivo } from './causa';
+import { canal, refrescarAlConectar, todas, useEnVivo } from './causa';
 
 export type ContratacionVista = Contratacion & { pasos: PasoTramite[]; ofertas: Oferta[] };
 
@@ -115,7 +115,8 @@ export function useMensajes(conversacionId: string | null) {
         );
         void qc.invalidateQueries({ queryKey: ['conversaciones-resumen', nuevo.causa_id] });
       })
-      .subscribe();
+      // Una conversación puede tener miles de mensajes: se vuelven a traer solo al reconectarse.
+      .subscribe(refrescarAlConectar(qc, [['mensajes', conversacionId]], { tambienLaPrimera: false }));
     return () => {
       void supabase.removeChannel(c);
     };

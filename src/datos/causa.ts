@@ -1,5 +1,5 @@
 // Consultas en tiempo real de efectos, procedimientos, personas, incidencias y actividad.
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import type {
@@ -14,6 +14,24 @@ import type {
 } from '../lib/tipos';
 
 export const canal = (base: string) => `${base}:${Math.random().toString(36).slice(2, 10)}`;
+
+/**
+ * Para pasar a `.subscribe()`: cada vez que el canal queda conectado (al abrir la pantalla o al
+ * reconectarse) o no puede conectarse, vuelve a traer los datos. Así no se pierde lo que cambió
+ * mientras el canal se conectaba, ni queda una pantalla vieja si un aviso en vivo no llegó.
+ */
+export function refrescarAlConectar(qc: QueryClient, claves: unknown[][], opciones: { tambienLaPrimera?: boolean } = {}) {
+  let conexiones = 0;
+  return (estado: string) => {
+    if (estado === 'SUBSCRIBED') {
+      conexiones += 1;
+      if (conexiones === 1 && opciones.tambienLaPrimera === false) return;
+    } else if (estado !== 'CHANNEL_ERROR' && estado !== 'TIMED_OUT') {
+      return;
+    }
+    for (const k of claves) void qc.invalidateQueries({ queryKey: k });
+  };
+}
 
 export async function todas<T>(tabla: string, causaId: string, columnas = '*', orden?: string): Promise<T[]> {
   const filas: T[] = [];
@@ -39,7 +57,7 @@ export function useEnVivo(causaId: string, tablas: string[], claves: unknown[][]
         for (const k of claves) void qc.invalidateQueries({ queryKey: k });
       });
     }
-    c.subscribe();
+    c.subscribe(refrescarAlConectar(qc, claves));
     return () => {
       void supabase.removeChannel(c);
     };
@@ -195,7 +213,7 @@ export function useActividad(causaId: string, limite = 25) {
           [cambio.new as EventoHistorial, ...lista.filter((e) => e.id !== (cambio.new as EventoHistorial).id)].slice(0, limite),
         );
       })
-      .subscribe();
+      .subscribe(refrescarAlConectar(qc, [['actividad', causaId]]));
     return () => {
       void supabase.removeChannel(c);
     };

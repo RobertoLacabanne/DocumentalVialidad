@@ -4,6 +4,7 @@ import { aliasDe } from '../lib/etiquetas';
 import { supabase } from '../lib/supabase';
 import type { Causa, EstadoProcesalPieza, EventoHistorial, Miembro, Pieza } from '../lib/tipos';
 import type { FilaIndice } from '../componentes/TablaPiezas';
+import { refrescarAlConectar } from './causa';
 
 export const COLUMNAS_PIEZA =
   'id,causa_id,numero_orden,orden_clave,tipo,titulo,fecha_desde,fecha_hasta,fecha_precision,autor,destinatarios,' +
@@ -53,7 +54,7 @@ export function useMiembros() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'miembro' }, () => {
         void qc.invalidateQueries({ queryKey: ['miembros'] });
       })
-      .subscribe();
+      .subscribe(refrescarAlConectar(qc, [['miembros']]));
     return () => {
       void supabase.removeChannel(suscripcion);
     };
@@ -104,7 +105,7 @@ export function useCausas() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'causa' }, () => {
         void qc.invalidateQueries({ queryKey: ['causas'] });
       })
-      .subscribe();
+      .subscribe(refrescarAlConectar(qc, [['causas']]));
     return () => {
       void supabase.removeChannel(suscripcion);
     };
@@ -288,7 +289,7 @@ export function useHistorial(registroId: string | null) {
           lista.some((e) => e.id === (cambio.new as EventoHistorial).id) ? lista : [cambio.new as EventoHistorial, ...lista],
         );
       })
-      .subscribe();
+      .subscribe(refrescarAlConectar(qc, [['historial', registroId]]));
     return () => {
       void supabase.removeChannel(suscripcion);
     };
@@ -334,7 +335,7 @@ export function useEnlaces(entidadId: string | null) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'enlace', filter: `entidad_id=eq.${entidadId}` }, () => {
         void qc.invalidateQueries({ queryKey: ['enlaces', entidadId] });
       })
-      .subscribe();
+      .subscribe(refrescarAlConectar(qc, [['enlaces', entidadId]]));
     return () => {
       void supabase.removeChannel(suscripcion);
     };

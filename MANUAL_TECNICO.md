@@ -9,7 +9,7 @@ Para quien mantiene el Tablero de Prueba. El README es para el equipo; esto es p
 | **Frontend** | React 19 + TypeScript + Vite. Tabla virtualizada con TanStack Table y TanStack Virtual. Estilos propios con CSS Modules y tokens en `src/styles/tokens.css`. |
 | **Base de datos** | Supabase (Postgres 17). Esquema versionado en `supabase/migrations/`. |
 | **Acceso** | Supabase Auth con Google. Solo leen y escriben los correos de la tabla `miembro` (lista de invitados), vía políticas RLS. |
-| **Tiempo real** | Supabase Realtime: cambios de tablas (`postgres_changes`) y presencia (quién está viendo qué ficha). |
+| **Tiempo real** | Supabase Realtime: cambios de tablas (`postgres_changes`) y presencia (quién está viendo qué ficha). Cada canal, al conectarse (o reconectarse) y si no puede conectarse, vuelve a traer los datos de su pantalla (`refrescarAlConectar` en `datos/causa.ts`): un aviso perdido no deja una pantalla vieja. |
 | **Publicación** | Netlify, sitio `tablero-prueba-ufil` (https://tablero-prueba-ufil.netlify.app). |
 | **Archivos** | Siguen en el Google Drive de la UFIL. La app guarda links. |
 
@@ -133,7 +133,8 @@ npm run test:e2e       # dos personas a la vez, importaciones, tablero en vivo, 
                        # relevantes en vivo, vínculos e informe descargado y verificado, ofrecimiento
                        # con aviso procesal, listado .docx verificado, cronología y relaciones,
                        # carpeta de escaneos leída con capa de texto y OCR, sugerencias validadas,
-                       # texto encontrado con Ctrl+K, paquete de AppUFIL y chats de un reporte UFED (8)
+                       # texto encontrado con Ctrl+K, paquete de AppUFIL y chats de un reporte UFED,
+                       # y una sesión con el canal en vivo cortado que igual ve lo nuevo (9)
 node e2e/fixtures/generar-planillas.mjs   # planillas y transcripción sintéticas en e2e/fixtures/generadas/
 npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas (importa las planillas sintéticas)
 ```

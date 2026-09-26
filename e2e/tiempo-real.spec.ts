@@ -95,3 +95,31 @@ test('la cita se arma con lo que hay y marca lo que falta', async ({ browser }) 
   const cita = rober.getByRole('region', { name: 'Cita para escritos' });
   await expect(cita).toContainText(`Efecto Nº 48435 – ${titulo} (Sobre Nº [completar]), fs. [completar], informe [completar], pieza Nº 901`);
 });
+
+test('si el canal en vivo se corta, lo nuevo igual aparece al abrir la pantalla', async ({ browser }) => {
+  // INES trabaja con el canal en vivo cortado (como una red que bloquea WebSockets).
+  const contexto = await browser.newContext();
+  await contexto.routeWebSocket(/\/realtime\//, (ws) => ws.close());
+  const ines = await contexto.newPage();
+  await ines.goto('/');
+  await ines.getByLabel('Correo').fill('ines@ejemplo.test');
+  await ines.getByLabel('Contraseña').fill(CLAVE);
+  await ines.getByRole('button', { name: 'Entrar con correo' }).click();
+  // El Inicio ya trajo la lista de conversaciones: queda en memoria.
+  await expect(ines.getByText('Avance de los efectos')).toBeVisible();
+
+  // ROBER importa una conversación mientras tanto.
+  const rober = await entrar(browser, 'rober@ejemplo.test');
+  const titulo = `Conversación sin canal ${Date.now()}`;
+  await rober.getByRole('navigation', { name: 'Secciones de la causa' }).getByRole('link', { name: 'Mensajes' }).click();
+  await rober.getByRole('link', { name: /Importar conversación/ }).first().click();
+  await rober.getByLabel('Pegá el texto de la conversación').fill('16/04/21\nRemitente: Ficticio\nMensaje: mensaje de prueba sin canal');
+  await rober.getByRole('button', { name: 'Leer el texto pegado' }).click();
+  await rober.getByLabel('Título').fill(titulo);
+  await rober.getByRole('button', { name: 'Importar 1 mensaje' }).click();
+  await expect(rober.getByRole('heading', { name: '1 mensajes importados' })).toBeVisible();
+
+  // Sin aviso en vivo, INES abre Mensajes: la pantalla vuelve a traer los datos y la ve.
+  await ines.getByRole('navigation', { name: 'Secciones de la causa' }).getByRole('link', { name: 'Mensajes' }).click();
+  await expect(ines.getByRole('button', { name: new RegExp(titulo) })).toBeVisible({ timeout: 20_000 });
+});
