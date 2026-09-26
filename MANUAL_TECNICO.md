@@ -70,18 +70,30 @@ Antes de publicar, probar también el build de producción: `npm run build && np
 
 ## Puesta en marcha de producción
 
-Son tres cuentas: Supabase (base), Google Cloud (acceso con Google) y Netlify (ya está creado el sitio).
+### Estado actual (26/09/2026)
 
-### Camino corto: con el script
+| Pieza | Valor |
+|---|---|
+| Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
+| URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
+| Esquema | `20260926120000_esquema_inicial` aplicado y registrado en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Auth | Site URL y redirecciones configuradas; **Google pendiente** |
+| Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
+| Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |
 
-1. Crear una cuenta en https://supabase.com y generar un token en **Account → Access Tokens**.
-2. Correr, desde el repo:
-   ```bash
-   SUPABASE_ACCESS_TOKEN=sbp_... node scripts/configurar-produccion.mjs
-   ```
-   Crea el proyecto en São Paulo, aplica el esquema, carga el legajo 299113 y muestra la dirección de redirección para Google y las dos variables para Netlify. La contraseña de la base queda en `.env.produccion` (no se sube al repo; guardarla aparte).
-3. Crear el cliente de Google (ver abajo) y volver a correr el script con `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`, más `SUPABASE_PROJECT_REF` y `SUPABASE_DB_PASSWORD` de `.env.produccion`.
-4. Cargar las dos variables en Netlify y volver a publicar.
+Las 34 pruebas de `supabase/tests/reglas.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro).
+
+### Con el script (recomendado)
+
+Usa solo la API de administración de Supabase: no hace falta la contraseña de la base.
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_... SUPABASE_PROJECT_REF=fpihhaaqgsukscnfrbry \
+GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... \
+node scripts/configurar-produccion.mjs
+```
+
+Aplica las migraciones nuevas (cada una una sola vez), vuelve a pasar la semilla (no duplica), configura las direcciones y Google, y muestra las variables para Netlify. Sin `SUPABASE_PROJECT_REF` crea un proyecto nuevo en São Paulo. **Para cada migración nueva de una fase, correr este script es la forma de llevarla a producción.**
 
 ### Google Cloud: cliente para «Entrar con Google»
 
@@ -89,7 +101,7 @@ Son tres cuentas: Supabase (base), Google Cloud (acceso con Google) y Netlify (y
 2. **APIs y servicios → Pantalla de consentimiento de OAuth**: tipo **Externo**; nombre «Tablero de Prueba UFIL»; correo de asistencia; permisos básicos (correo, perfil, openid). Publicar la app (**En producción**): con permisos básicos no requiere verificación y evita el tope de usuarios de prueba.
 3. **Credenciales → Crear credenciales → ID de cliente de OAuth → Aplicación web**:
    - Orígenes autorizados: `https://tablero-prueba-ufil.netlify.app`
-   - URI de redireccionamiento: `https://<ref-del-proyecto>.supabase.co/auth/v1/callback`
+   - URI de redireccionamiento: `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback`
 4. Copiar el ID de cliente y el secreto.
 
 ### Supabase, a mano (si no se usa el script)
@@ -114,8 +126,9 @@ La primera persona que entra con Google queda habilitada automáticamente (la li
 ## Copias de seguridad y restauración
 
 - **Supabase Pro** hace una copia diaria y la guarda 7 días (**Database → Backups**). El plan gratuito **no hace copias**: por eso conviene Pro desde que entra información real.
-- **Copia propia** (a demanda o semanal, desde cualquier computadora con el repo):
+- **Copia propia** (a demanda o semanal, desde cualquier computadora con el repo y la contraseña de la base, que se resetea en Supabase → Project Settings → Database):
   ```bash
+  npx supabase link --project-ref fpihhaaqgsukscnfrbry
   npx supabase db dump --linked --data-only -f copia-datos-$(date +%F).sql
   npx supabase db dump --linked -f copia-esquema-$(date +%F).sql
   ```

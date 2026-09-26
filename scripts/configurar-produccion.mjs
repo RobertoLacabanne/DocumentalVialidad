@@ -1,20 +1,21 @@
-// Configura el Supabase de PRODUCCIÓN de punta a punta:
-//   1. crea el proyecto (región São Paulo) si no se indica uno existente,
-//   2. aplica el esquema (supabase/migrations) y la semilla del legajo 299113,
-//   3. activa "Entrar con Google" y las direcciones permitidas,
+// Configura el Supabase de PRODUCCIÓN de punta a punta, usando solo la API
+// de administración de Supabase (no hace falta la contraseña de la base):
+//   1. usa el proyecto indicado, o crea uno nuevo si no se indica,
+//   2. aplica las migraciones pendientes de supabase/migrations y la semilla,
+//   3. configura las direcciones permitidas y, si se pasan, las claves de Google,
 //   4. imprime las dos variables que van en Netlify.
 //
 // Uso:
-//   SUPABASE_ACCESS_TOKEN=sbp_...            (Supabase → Account → Access Tokens)
-//   GOOGLE_CLIENT_ID=...  GOOGLE_CLIENT_SECRET=...
-//   [SUPABASE_PROJECT_REF=abcd...  SUPABASE_DB_PASSWORD=...]   (si el proyecto ya existe)
+//   SUPABASE_ACCESS_TOKEN=sbp_...          (Supabase → Account → Access Tokens)
+//   SUPABASE_PROJECT_REF=fpihhaaqgsukscnfrbry   (proyecto de producción actual)
+//   [GOOGLE_CLIENT_ID=...  GOOGLE_CLIENT_SECRET=...]
 //   [SITE_URL=https://tablero-prueba-ufil.netlify.app]
 //   node scripts/configurar-produccion.mjs
 //
-// Se puede correr más de una vez: el esquema no se reaplica y la semilla no duplica.
-import { execFileSync } from 'node:child_process';
+// Se puede correr más de una vez: cada migración se aplica una sola vez y la semilla no duplica.
 import { randomBytes } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const API = 'https://api.supabase.com/v1';
 const token = process.env.SUPABASE_ACCESS_TOKEN;
@@ -38,26 +39,21 @@ async function api(metodo, ruta, cuerpo) {
 const esperar = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 let ref = process.env.SUPABASE_PROJECT_REF;
-let clave = process.env.SUPABASE_DB_PASSWORD;
-
 if (!ref) {
   const orgs = await api('GET', '/organizations');
   if (!orgs.length) throw new Error('La cuenta de Supabase no tiene ninguna organización.');
-  clave = randomBytes(18).toString('base64url');
   console.log(`Creando el proyecto en la organización «${orgs[0].name}» (São Paulo)…`);
   const proyecto = await api('POST', '/projects', {
     name: 'tablero-prueba',
     organization_id: orgs[0].id,
-    db_pass: clave,
+    db_pass: randomBytes(24).toString('base64url'),
     region: 'sa-east-1',
   });
   ref = proyecto.id ?? proyecto.ref;
-  writeFileSync('.env.produccion', `SUPABASE_PROJECT_REF=${ref}\nSUPABASE_DB_PASSWORD=${clave}\n`);
-  console.log(`Proyecto ${ref} creado. La contraseña de la base quedó en .env.produccion (no se sube al repo).`);
+  console.log(`Proyecto ${ref} creado.`);
 }
-if (!clave) throw new Error('Falta SUPABASE_DB_PASSWORD para el proyecto existente.');
 
-process.stdout.write('Esperando a que el proyecto esté listo');
+process.stdout.write(`Esperando a que el proyecto ${ref} esté listo`);
 for (;;) {
   const p = await api('GET', `/projects/${ref}`);
   if (p.status === 'ACTIVE_HEALTHY') break;
@@ -66,32 +62,39 @@ for (;;) {
 }
 console.log(' listo.');
 
-const cli = (args) =>
-  execFileSync('npx', ['supabase', ...args], {
-    stdio: 'inherit',
-    env: { ...process.env, SUPABASE_ACCESS_TOKEN: token, SUPABASE_DB_PASSWORD: clave },
-  });
-cli(['link', '--project-ref', ref, '-p', clave]);
-cli(['db', 'push', '--include-seed', '-p', clave]);
+const sql = (query) => api('POST', `/projects/${ref}/database/query`, { query });
 
+await sql(`create schema if not exists supabase_migrations;
+  create table if not exists supabase_migrations.schema_migrations (version text primary key, statements text[], name text);`);
+const aplicadas = new Set((await sql('select version from supabase_migrations.schema_migrations')).map((f) => f.version));
+
+for (const archivo of readdirSync('supabase/migrations').filter((a) => a.endsWith('.sql')).sort()) {
+  const [version, ...resto] = archivo.replace('.sql', '').split('_');
+  if (aplicadas.has(version)) {
+    console.log(`· ${archivo}: ya aplicada`);
+    continue;
+  }
+  await sql(readFileSync(join('supabase/migrations', archivo), 'utf8'));
+  await sql(`insert into supabase_migrations.schema_migrations (version, name) values ('${version}', '${resto.join('_')}')`);
+  console.log(`✓ ${archivo}: aplicada`);
+}
+await sql(readFileSync('supabase/seed.sql', 'utf8'));
+console.log('✓ Semilla del legajo 299113 (no duplica).');
+
+const auth = { site_url: sitio, uri_allow_list: `${sitio}/**,http://localhost:5173/**`, disable_signup: false };
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  await api('PATCH', `/projects/${ref}/config/auth`, {
-    site_url: sitio,
-    uri_allow_list: `${sitio}/**,http://localhost:5173/**`,
+  Object.assign(auth, {
     external_google_enabled: true,
     external_google_client_id: process.env.GOOGLE_CLIENT_ID,
     external_google_secret: process.env.GOOGLE_CLIENT_SECRET,
-    disable_signup: false,
   });
-  console.log('«Entrar con Google» activado.');
-} else {
-  await api('PATCH', `/projects/${ref}/config/auth`, { site_url: sitio, uri_allow_list: `${sitio}/**,http://localhost:5173/**` });
-  console.log('Direcciones configuradas. Falta Google: volvé a correr con GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET.');
 }
+await api('PATCH', `/projects/${ref}/config/auth`, auth);
+console.log(auth.external_google_enabled ? '✓ «Entrar con Google» activado.' : '✓ Direcciones configuradas (falta Google).');
 
 const claves = await api('GET', `/projects/${ref}/api-keys`);
 const anon = claves.find((k) => k.name === 'anon')?.api_key;
-console.log('\nCargá esto en Netlify (Site configuration → Environment variables):');
+console.log('\nVariables para Netlify (Site configuration → Environment variables):');
 console.log(`VITE_SUPABASE_URL=https://${ref}.supabase.co`);
 console.log(`VITE_SUPABASE_ANON_KEY=${anon ?? '(buscala en Supabase → Project Settings → API)'}`);
 console.log(`\nRedirección para Google Cloud: https://${ref}.supabase.co/auth/v1/callback`);

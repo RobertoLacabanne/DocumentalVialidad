@@ -3,7 +3,7 @@
 > **Estado del proyecto** (se actualiza al cerrar cada paso o fase)
 >
 > - 26/09/2026. Paso 1 (sección 11) respondido en `docs/PROPUESTA_INICIAL.md`, con el boceto `docs/diseno/boceto-indice-prueba.html`. El usuario dio el OK y pidió arrancar.
-> - 26/09/2026. Fase 0 construida y probada contra Supabase local (34 pruebas SQL, 12 unitarias, 2 de punta a punta con dos sesiones). Publicada en https://tablero-prueba-ufil.netlify.app (sitio Netlify `tablero-prueba-ufil`, id 349bfd0f-2d95-45c5-92dd-841af40290bd). **Pendiente para cerrar la Fase 0:** proyecto Supabase de producción y cliente OAuth de Google (el usuario pasa un token de Supabase y el ID/secreto de Google; se corre `scripts/configurar-produccion.mjs` y se cargan las variables en Netlify). Capturas en `docs/capturas/fase-0/`.
+> - 26/09/2026. Fase 0 construida y probada (34 pruebas SQL, 12 unitarias, 2 de punta a punta con dos sesiones; CI en GitHub Actions). Publicada en https://tablero-prueba-ufil.netlify.app (Netlify `tablero-prueba-ufil`, id 349bfd0f-2d95-45c5-92dd-841af40290bd). Producción en Supabase `DocumentalVialidad` (ref `fpihhaaqgsukscnfrbry`, us-west-2): esquema y semilla aplicados, variables en Netlify cargadas. **Pendiente para cerrar la Fase 0:** activar Google (el usuario crea el cliente OAuth con la redirección `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` y pasa ID y secreto; se corre `scripts/configurar-produccion.mjs`). Las migraciones de cada fase se llevan a producción con ese mismo script.
 > - Próximo: Fase 1 (efectos, personas, búsqueda global, importación de LISTADO EFECTOS y DISTRIBUCIÓN DE TAREAS, copia completa de la causa).
 >
 > **Decisiones tomadas con el usuario** (valen por encima de lo que diga el resto de este archivo)
