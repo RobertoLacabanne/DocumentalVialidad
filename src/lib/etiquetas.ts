@@ -87,6 +87,31 @@ export const CAMPOS: Record<string, string> = {
   alias: 'Alias',
   nombre: 'Nombre',
   activo: 'Habilitado',
+  estado: 'Estado',
+  numero: 'Nº de efecto',
+  numero_interno: 'Nº interno',
+  soporte: 'Soporte',
+  tipo_material: 'Tipo de material',
+  descripcion_acta: 'Descripción según el acta',
+  propietario: 'Propietario',
+  tenedor: 'Tenedor',
+  resolucion_autorizante: 'Autorización',
+  apto_analisis: '¿Apto para analizar?',
+  tiene_informe_gabinete: 'Informe del gabinete',
+  observaciones_gabinete: 'Observaciones del gabinete',
+  ubicacion_fisica: 'Ubicación',
+  responsable_alias: 'Responsable (alias)',
+  requiere_escribiente: 'Requiere escribiente',
+  prioridad: 'Prioridad',
+  fojas_aprox: 'Fojas aprox.',
+  fecha_inicio: 'Fecha de inicio',
+  fecha_fin: 'Fecha de fin',
+  link_escaneo: 'Link del escaneo',
+  patron_contrasena: 'Patrón / contraseña',
+  observaciones: 'Observaciones',
+  procedimiento_id: 'Procedimiento',
+  tipo_persona: 'Tipo',
+  cargo: 'Cargo',
 };
 
 export function valorLegible(campo: string, valor: unknown): string {
@@ -95,6 +120,10 @@ export function valorLegible(campo: string, valor: unknown): string {
   if (campo === 'relevancia') return RELEVANCIAS.find((r) => r.valor === valor)?.etiqueta ?? String(valor);
   if (campo === 'estado_trabajo') return ESTADOS_TRABAJO.find((e) => e.valor === valor)?.etiqueta ?? String(valor);
   if (campo === 'fecha_precision') return PRECISIONES.find((p) => p.valor === valor)?.etiqueta ?? String(valor);
+  if (campo === 'estado' && typeof valor === 'string' && ESTADOS_EFECTO[valor]) return ESTADOS_EFECTO[valor];
+  if (campo === 'apto_analisis' && typeof valor === 'string') return APTO_ETIQUETA[valor] ?? valor;
+  if (campo === 'tipo_material' && typeof valor === 'string') return MATERIALES_ETIQUETA[valor] ?? valor;
+  if (campo === 'prioridad' && typeof valor === 'string') return PRIORIDAD_ETIQUETA[valor] ?? valor;
   if (typeof valor === 'boolean') return valor ? 'sí' : 'no';
   if (Array.isArray(valor)) return valor.length ? valor.join(', ') : 'vacío';
   const texto = String(valor);
@@ -127,4 +156,70 @@ export function tonoDe(email: string | null | undefined): number {
   let h = 0;
   for (const c of email) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return (h % 6) + 1;
+}
+
+// ---------------------------------------------------------------------
+// Efectos
+// ---------------------------------------------------------------------
+export const COLUMNAS_TABLERO: { valor: 'sin_iniciar' | 'en_proceso' | 'escaneado' | 'finalizado' | 'observado'; etiqueta: string }[] = [
+  { valor: 'sin_iniciar', etiqueta: 'Sin iniciar' },
+  { valor: 'en_proceso', etiqueta: 'En proceso' },
+  { valor: 'escaneado', etiqueta: 'Escaneado' },
+  { valor: 'finalizado', etiqueta: 'Finalizado' },
+  { valor: 'observado', etiqueta: 'Observado' },
+];
+
+export const MATERIALES_ETIQUETA: Record<string, string> = {
+  manuscritos: 'Manuscritos',
+  bancario: 'Bancario',
+  facturacion_remitos: 'Facturación / remitos',
+  licitaciones_expedientes: 'Licitaciones / expedientes',
+  dispositivo: 'Dispositivo',
+  documentacion_varia: 'Documentación varia',
+  otro: 'Otro',
+};
+
+export const APTO_ETIQUETA: Record<string, string> = {
+  si: 'Apto para analizar',
+  no: 'No apto por ahora',
+  no_requiere_analisis: 'No requiere análisis',
+};
+
+export const SOPORTE_ETIQUETA: Record<string, string> = { papel: 'Papel', digital: 'Dispositivo' };
+
+export const PRIORIDAD_ETIQUETA: Record<string, string> = { alta: 'Alta', media: 'Media', baja: 'Baja' };
+
+export const TIPOS_INCIDENCIA: { valor: 'planteo_exclusion' | 'nulidad' | 'apelacion' | 'casacion' | 'otro'; etiqueta: string }[] = [
+  { valor: 'planteo_exclusion', etiqueta: 'Planteo de exclusión' },
+  { valor: 'nulidad', etiqueta: 'Nulidad' },
+  { valor: 'apelacion', etiqueta: 'Apelación' },
+  { valor: 'casacion', etiqueta: 'Casación' },
+  { valor: 'otro', etiqueta: 'Otro' },
+];
+
+// ---------------------------------------------------------------------
+// Personas
+// ---------------------------------------------------------------------
+export const ROLES: { valor: 'imputado' | 'testigo' | 'denunciante' | 'funcionario_dpv' | 'proveedor' | 'perito' | 'otro'; etiqueta: string }[] = [
+  { valor: 'imputado', etiqueta: 'Imputado' },
+  { valor: 'testigo', etiqueta: 'Testigo' },
+  { valor: 'denunciante', etiqueta: 'Denunciante' },
+  { valor: 'funcionario_dpv', etiqueta: 'Funcionario DPV' },
+  { valor: 'proveedor', etiqueta: 'Proveedor' },
+  { valor: 'perito', etiqueta: 'Perito' },
+  { valor: 'otro', etiqueta: 'Otro' },
+];
+
+export const TIPOS_IDENTIFICADOR: { valor: 'telefono' | 'alias_agendado' | 'cuit' | 'dni' | 'email' | 'otro'; etiqueta: string }[] = [
+  { valor: 'telefono', etiqueta: 'Teléfono' },
+  { valor: 'alias_agendado', etiqueta: 'Agendado como' },
+  { valor: 'cuit', etiqueta: 'CUIT' },
+  { valor: 'dni', etiqueta: 'DNI' },
+  { valor: 'email', etiqueta: 'Correo' },
+  { valor: 'otro', etiqueta: 'Otro' },
+];
+
+/** Sugerencia (no dato): una razón social suele traer SRL, SA, Coop., Dirección… La persona confirma. */
+export function pareceEmpresa(nombre: string): boolean {
+  return /\b(s\.?r\.?l|s\.?a|s\.?a\.?s|coop|cooperativa|direcci[oó]n|ministerio|municipalidad|sociedad|ltda|premoldeados|repuestos)\b/i.test(nombre);
 }

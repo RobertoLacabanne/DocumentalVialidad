@@ -13,6 +13,8 @@ async function entrar(browser: Browser, email: string): Promise<Page> {
   await pagina.getByLabel('Correo').fill(email);
   await pagina.getByLabel('Contraseña').fill(CLAVE);
   await pagina.getByRole('button', { name: 'Entrar con correo' }).click();
+  await expect(pagina.getByText('Avance de los efectos')).toBeVisible();
+  await pagina.getByRole('navigation', { name: 'Secciones de la causa' }).getByRole('link', { name: 'Índice de prueba' }).click();
   await expect(pagina.getByRole('heading', { name: 'Índice de prueba' })).toBeVisible();
   await expect(pagina.getByText('En vivo: los cambios del equipo aparecen solos')).toBeVisible();
   return pagina;

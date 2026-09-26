@@ -8,12 +8,14 @@ import {
   LogOut,
   MessagesSquare,
   Package,
+  Search,
   UsersRound,
   Landmark,
 } from 'lucide-react';
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Boton } from '../componentes/Boton';
+import { BusquedaGlobal } from '../componentes/BusquedaGlobal';
 import { IndicadorGuardado } from '../componentes/estados';
 import { Avatar } from '../componentes/marcas';
 import { useCausa } from '../datos/consultas';
@@ -27,11 +29,11 @@ import s from './Marco.module.css';
 type Seccion = { ruta: string; etiqueta: string; icono: ReactNode; fase?: number };
 
 export const SECCIONES: Seccion[] = [
-  { ruta: 'inicio', etiqueta: 'Inicio', icono: <House aria-hidden />, fase: 1 },
+  { ruta: 'inicio', etiqueta: 'Inicio', icono: <House aria-hidden /> },
   { ruta: 'indice', etiqueta: 'Índice de prueba', icono: <ListTree aria-hidden /> },
-  { ruta: 'efectos', etiqueta: 'Efectos', icono: <Package aria-hidden />, fase: 1 },
+  { ruta: 'efectos', etiqueta: 'Efectos', icono: <Package aria-hidden /> },
   { ruta: 'contrataciones', etiqueta: 'Contrataciones', icono: <FileText aria-hidden />, fase: 2 },
-  { ruta: 'personas', etiqueta: 'Personas y empresas', icono: <Landmark aria-hidden />, fase: 1 },
+  { ruta: 'personas', etiqueta: 'Personas y empresas', icono: <Landmark aria-hidden /> },
   { ruta: 'mensajes', etiqueta: 'Mensajes', icono: <MessagesSquare aria-hidden />, fase: 2 },
   { ruta: 'cronologia', etiqueta: 'Cronología', icono: <Clock aria-hidden />, fase: 3 },
   { ruta: 'juicio', etiqueta: 'Juicio', icono: <Gavel aria-hidden />, fase: 3 },
@@ -47,7 +49,7 @@ export function useCausaActual() {
   return c;
 }
 
-const NOMBRE_VISTA: Record<string, string> = Object.fromEntries(SECCIONES.map((x) => [x.ruta, x.etiqueta]));
+const NOMBRE_VISTA: Record<string, string> = { ...Object.fromEntries(SECCIONES.map((x) => [x.ruta, x.etiqueta])), importar: 'Importar' };
 
 export function Marco() {
   const { causaId } = useParams();
@@ -57,7 +59,9 @@ export function Marco() {
   const { estado: guardado } = useGuardado();
   const ubicacion = useLocation();
   const [params] = useSearchParams();
-  const vista = ubicacion.pathname.split('/')[3] ?? 'indice';
+  const vista = ubicacion.pathname.split('/')[3] ?? 'inicio';
+  const [buscando, setBuscando] = useState(false);
+  const cambiarBusqueda = useCallback((v: boolean) => setBuscando(v), []);
   const alias = aliasDe(yo);
   const { presentes, viendoPorPieza } = usePresencia(causaId ?? '', { email: yo.email, alias }, vista, params.get('pieza'));
 
@@ -92,6 +96,12 @@ export function Marco() {
             </span>
             <ChevronsUpDown aria-hidden />
           </Link>
+
+          <button type="button" className={s.buscar} onClick={() => setBuscando(true)}>
+            <Search aria-hidden />
+            <span className={s.buscarTexto}>Buscar en la causa</span>
+            <kbd>Ctrl K</kbd>
+          </button>
 
           <nav className={s.nav} aria-label="Secciones de la causa">
             {SECCIONES.map((x) => (
@@ -140,6 +150,7 @@ export function Marco() {
           <Outlet />
         </div>
       </div>
+      <BusquedaGlobal causaId={causa.id} abierta={buscando} onCambiar={cambiarBusqueda} />
     </CausaContexto.Provider>
   );
 }

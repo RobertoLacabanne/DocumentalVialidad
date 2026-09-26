@@ -17,12 +17,15 @@ export function NuevaPieza({
   abierto,
   causaId,
   numeroSugerido,
+  efecto,
   onCerrar,
   onCreada,
 }: {
   abierto: boolean;
   causaId: string;
   numeroSugerido: string;
+  /** Si la pieza sale de un efecto, queda vinculada a él. */
+  efecto?: { id: string; numero: string };
   onCerrar: () => void;
   onCreada: (id: string) => void;
 }) {
@@ -52,6 +55,7 @@ export function NuevaPieza({
         numero_orden: numero || null,
         tipo: String(datos.get('tipo')),
         titulo,
+        efecto_id: efecto?.id ?? null,
       })
       .select(COLUMNAS_PIEZA)
       .single();
@@ -61,7 +65,7 @@ export function NuevaPieza({
       return;
     }
     const pieza = data as unknown as Pieza;
-    qc.setQueryData<Pieza[]>(['piezas', causaId], (lista = []) => (lista.some((p) => p.id === pieza.id) ? lista : [...lista, pieza]));
+    qc.setQueryData<Pieza[]>(['piezas', causaId], (lista) => (!lista || lista.some((p) => p.id === pieza.id) ? lista : [...lista, pieza]));
     if (link) {
       const { error: errorEnlace } = await supabase.from('enlace').insert({
         causa_id: causaId,
@@ -81,7 +85,7 @@ export function NuevaPieza({
     <Dialogo
       abierto={abierto}
       onCerrar={onCerrar}
-      titulo="Nueva pieza"
+      titulo={efecto ? `Nueva pieza del efecto Nº ${efecto.numero}` : 'Nueva pieza'}
       descripcion="Con el título alcanza para empezar. El resto lo completás en la ficha, y se guarda solo."
     >
       <form onSubmit={crear}>

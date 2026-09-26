@@ -74,6 +74,45 @@
   color: var(--color-texto-tenue);
 }
 
+.buscar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--alto-control);
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-tenue);
+  text-align: left;
+  transition: border-color var(--duracion-rapida) var(--curva-salida), color var(--duracion-rapida) var(--curva-salida);
+}
+.buscar:hover {
+  border-color: var(--color-borde-fuerte);
+  color: var(--color-texto);
+}
+.buscar:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 1px;
+}
+.buscar :global(svg.lucide) {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+.buscarTexto {
+  flex: 1;
+}
+.buscar kbd {
+  font: var(--peso-fuerte) 0.625rem/1 var(--fuente-interfaz);
+  color: var(--color-texto-suave);
+  border: 1px solid var(--color-borde);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 3px 4px;
+}
+
 .nav {
   display: grid;
   gap: 2px;
@@ -206,6 +245,15 @@
   }
   .causa {
     flex: 1;
+  }
+  .buscar {
+    width: var(--alto-control);
+    padding: 0;
+    justify-content: center;
+  }
+  .buscarTexto,
+  .buscar kbd {
+    display: none;
   }
   .nav {
     display: flex;

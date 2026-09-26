@@ -26,7 +26,7 @@ export function Causas() {
   useEffect(() => {
     if (causas?.length === 1 && !sessionStorage.getItem('tp-vio-causas')) {
       sessionStorage.setItem('tp-vio-causas', '1');
-      navegar(`/causa/${causas[0].id}/indice`, { replace: true });
+      navegar(`/causa/${causas[0].id}/inicio`, { replace: true });
     }
   }, [causas, navegar]);
 
@@ -81,7 +81,7 @@ export function Causas() {
         ) : (
           <div className={s.causas}>
             {causas.map((c) => (
-              <Link key={c.id} to={`/causa/${c.id}/indice`} className={s.causa}>
+              <Link key={c.id} to={`/causa/${c.id}/inicio`} className={s.causa}>
                 <span className={s.legajo}>
                   <span className={s.legajoRotulo}>Legajo</span>
                   <span className={s.legajoNumero}>{c.legajo_fiscalia}</span>

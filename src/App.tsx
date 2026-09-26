@@ -7,9 +7,13 @@ import { ProveedorSesion, useSesion } from './datos/sesion';
 import { hayConexion } from './lib/supabase';
 import { Acceso, Cargando, ErrorDeSesion, SinConfigurar, SinInvitacion } from './pantallas/Acceso';
 import { Causas } from './pantallas/Causas';
+import { Efectos } from './pantallas/Efectos';
 import { Equipo } from './pantallas/Equipo';
+import { Importar } from './pantallas/Importar';
 import { Indice } from './pantallas/Indice';
+import { Inicio } from './pantallas/Inicio';
 import { Marco } from './pantallas/Marco';
+import { Personas } from './pantallas/Personas';
 import { PaginaDiseno } from './pantallas/PaginaDiseno';
 import { Proximamente } from './pantallas/Proximamente';
 
@@ -55,8 +59,12 @@ function Protegida() {
       <Routes>
         <Route path="/" element={<Causas />} />
         <Route path="/causa/:causaId" element={<Marco />}>
-          <Route index element={<Navigate to="indice" replace />} />
+          <Route index element={<Navigate to="inicio" replace />} />
+          <Route path="inicio" element={<Inicio />} />
           <Route path="indice" element={<Indice />} />
+          <Route path="efectos" element={<Efectos />} />
+          <Route path="personas" element={<Personas />} />
+          <Route path="importar" element={<Importar />} />
           <Route path="equipo" element={<Equipo />} />
           <Route path=":seccion" element={<Proximamente />} />
         </Route>

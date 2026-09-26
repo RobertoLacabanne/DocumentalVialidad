@@ -2,11 +2,14 @@ import { FileSearch, Plus, Search, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Boton } from '../componentes/Boton';
+import { MenuExportar } from '../componentes/MenuExportar';
 import { AvisoError, EstadoVacio, FilasEsqueleto } from '../componentes/estados';
 import { TablaPiezas, type FilaIndice } from '../componentes/TablaPiezas';
 import { useDirectorio, useIndice } from '../datos/consultas';
 import { useYo } from '../datos/sesion';
-import { RELEVANCIAS, TIPOS_PIEZA } from '../lib/etiquetas';
+import { ESTADOS_TRABAJO, RELEVANCIAS, SITUACIONES, TIPOS_PIEZA, tipoPieza } from '../lib/etiquetas';
+import { descargarCsv, descargarXlsx, nombreArchivo, type Columna } from '../lib/exportar';
+import { fechaConPrecision } from '../lib/tiempo';
 import { CabeceraCausa } from './CabeceraCausa';
 import { FichaPieza } from './FichaPieza';
 import { useCausaActual } from './Marco';
@@ -71,7 +74,8 @@ export function Indice() {
 
   useEffect(() => {
     const atajo = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      const escribiendo = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement;
+      if (e.key === '/' && !escribiendo && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         buscador.current?.focus();
         buscador.current?.select();
@@ -104,6 +108,27 @@ export function Indice() {
 
   const cambiar = <K extends keyof Filtros>(clave: K, valor: Filtros[K]) => setFiltros((f) => ({ ...f, [clave]: valor }));
 
+  const columnasExportar: Columna<FilaIndice>[] = [
+    { titulo: 'Nº de orden', valor: (f) => f.numero_orden, ancho: 10 },
+    { titulo: 'Tipo', valor: (f) => tipoPieza(f.tipo).etiqueta, ancho: 20 },
+    { titulo: 'Título', valor: (f) => f.titulo, ancho: 44 },
+    { titulo: 'Fecha', valor: (f) => (f.fecha_desde ? fechaConPrecision(f.fecha_desde, f.fecha_precision) : ''), ancho: 14 },
+    { titulo: 'Autor o remitente', valor: (f) => f.autor, ancho: 24 },
+    { titulo: 'Destinatarios', valor: (f) => f.destinatarios, ancho: 24 },
+    { titulo: 'Resumen', valor: (f) => f.resumen, ancho: 60 },
+    { titulo: 'Efecto', valor: (f) => f.efecto_numero, ancho: 10 },
+    { titulo: 'Sobre', valor: (f) => f.sobre, ancho: 10 },
+    { titulo: 'Informe', valor: (f) => f.informe_numero, ancho: 12 },
+    { titulo: 'Fojas', valor: (f) => f.fojas, ancho: 12 },
+    { titulo: 'Relevancia', valor: (f) => RELEVANCIAS.find((r) => r.valor === f.relevancia)?.etiqueta ?? 'Sin evaluar', ancho: 12 },
+    { titulo: 'Estado de trabajo', valor: (f) => ESTADOS_TRABAJO.find((e) => e.valor === f.estado_trabajo)?.etiqueta ?? '', ancho: 14 },
+    { titulo: 'Responsable', valor: (f) => f.responsable_alias, ancho: 14 },
+    { titulo: 'Situación procesal', valor: (f) => (f.situacion ? `${SITUACIONES[f.situacion.situacion]}: ${f.situacion.titulo}` : ''), ancho: 30 },
+    { titulo: 'Observaciones del analista', valor: (f) => f.observaciones_analista, ancho: 40 },
+    { titulo: 'Etiquetas', valor: (f) => f.etiquetas.join(', '), ancho: 20 },
+  ];
+  const archivo = nombreArchivo('Indice', causa.legajo_fiscalia);
+
   return (
     <div className={`${s.pantalla} ${piezaAbierta ? s.conPanel : ''}`}>
       <div className={s.principal}>
@@ -115,6 +140,11 @@ export function Indice() {
             <p className={s.bajada}>Una fila por pieza, como el cuadro Urribarri, con su origen, su estado y quién la trabaja.</p>
           </div>
           <div className={s.acciones}>
+            <MenuExportar
+              cantidad={visibles.length}
+              onExcel={() => descargarXlsx(visibles, columnasExportar, archivo, 'Índice de prueba')}
+              onCsv={() => descargarCsv(visibles, columnasExportar, archivo)}
+            />
             <Boton variante="primario" icono={<Plus aria-hidden />} onClick={() => setCreando(true)}>
               Nueva pieza
             </Boton>
@@ -133,7 +163,7 @@ export function Indice() {
               value={filtros.texto}
               onChange={(e) => cambiar('texto', e.target.value)}
             />
-            <kbd>Ctrl K</kbd>
+            <kbd title="Apretá / para buscar en el índice">/</kbd>
           </label>
           <select
             aria-label="Filtrar por tipo"

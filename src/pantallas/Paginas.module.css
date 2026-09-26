@@ -162,7 +162,68 @@
   border-bottom: 0;
 }
 .miembroNombre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: var(--peso-fuerte);
+}
+.editarAlias {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--color-texto-tenue);
+  opacity: 0;
+  transition: opacity var(--duracion-rapida) var(--curva-salida), background-color var(--duracion-rapida) var(--curva-salida);
+}
+.miembro:hover .editarAlias,
+.editarAlias:focus-visible {
+  opacity: 1;
+}
+.editarAlias:hover {
+  background: var(--color-hover);
+  color: var(--color-texto);
+}
+.editarAlias :global(svg.lucide) {
+  width: 13px;
+  height: 13px;
+}
+.aliasForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.aliasCampo {
+  width: 160px;
+  height: var(--alto-control-sm);
+  padding: 0 10px;
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-sm);
+  box-shadow: var(--anillo-foco);
+  font: inherit;
+  font-weight: var(--peso-fuerte);
+  text-transform: uppercase;
+  color: var(--color-texto);
+  outline: 0;
+}
+.pendientes {
+  margin: var(--esp-4) var(--esp-5) 0;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--radio-md);
+  background: var(--color-alerta-fondo);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+.pendientes b {
+  color: var(--color-texto);
+}
+@media (hover: none) {
+  .editarAlias {
+    opacity: 1;
+  }
 }
 .miembroCorreo {
   font-size: var(--texto-xs);

@@ -69,6 +69,18 @@ export function ProveedorGuardado({ children }: { children: ReactNode }) {
         void qc.invalidateQueries({ queryKey: ['causas'] });
       } else if (tabla === 'miembro') {
         void qc.invalidateQueries({ queryKey: ['miembros'] });
+        void qc.invalidateQueries({ queryKey: ['efectos'] });
+      } else {
+        const causa = fila.causa_id as string | undefined;
+        const claves: Record<string, string[]> = {
+          efecto: ['efectos', 'estado-procesal-efectos'],
+          procedimiento: ['procedimientos', 'efectos'],
+          persona: ['personas'],
+          identificador: ['identificadores'],
+          rol_en_causa: ['roles'],
+          incidencia_procesal: ['incidencias', 'estado-procesal-efectos', 'estado-procesal'],
+        };
+        for (const k of claves[tabla] ?? []) void qc.invalidateQueries({ queryKey: causa ? [k, causa] : [k] });
       }
     },
     [qc],
@@ -172,6 +184,7 @@ export function useGuardado() {
 export function traducirError(mensaje: string): string {
   if (/row-level security|permission denied/i.test(mensaje)) return 'Tu cuenta no tiene acceso. Pedile a alguien del equipo que te habilite.';
   if (/check constraint/i.test(mensaje)) return 'Ese valor no es válido para este campo.';
+  if (/miembro_alias_unico/i.test(mensaje)) return 'Ese alias ya lo usa otra persona del equipo.';
   if (/duplicate key/i.test(mensaje)) return 'Ya existe otro registro con ese dato.';
   if (/invalid input syntax for type date/i.test(mensaje)) return 'La fecha no es válida.';
   return mensaje;

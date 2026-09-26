@@ -12,8 +12,10 @@ export default defineConfig({
       output: {
         // Librerías en paquetes aparte: cambian poco y el navegador las guarda.
         // Supabase no depende de React, así que puede ir sola sin crear ciclos.
+        // Los lectores y escritores de planillas y el .zip se bajan solo al importar o exportar.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
+          if (/read-excel-file|write-excel-file|papaparse|fflate|unzipper|jszip|xmldom|fast-xml/.test(id)) return undefined;
           return id.includes('@supabase') ? 'supabase' : 'librerias';
         },
       },

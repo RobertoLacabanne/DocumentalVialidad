@@ -463,15 +463,15 @@ export function PaginaDiseno() {
             <div className={s.tablero}>
               <div className={s.columna}>
                 <div className={s.columnaTitulo}><span>Sin iniciar</span><span>1</span></div>
-                <TarjetaKanban numero="48436" material="Documentación varia" descripcion={null} fojas={null} responsable={null} situacion={null} />
+                <TarjetaKanban numero="48436" soporte="papel" material="Documentación varia" descripcion={null} fojas={null} responsable={null} situacion={null} />
               </div>
               <div className={s.columna}>
                 <div className={s.columnaTitulo}><span>En proceso</span><span>1</span></div>
-                <TarjetaKanban numero="48435" material="Manuscritos" descripcion="Agenda 2021" fojas={null} responsable={{ alias: 'INES', email: 'ines' }} situacion={null} prioridadAlta />
+                <TarjetaKanban numero="48435" soporte="papel" material="Manuscritos" descripcion="Agenda 2021" fojas={null} responsable={{ alias: 'INES', email: 'ines' }} situacion={null} prioridadAlta piezas={1} />
               </div>
               <div className={s.columna}>
                 <div className={s.columnaTitulo}><span>Observado</span><span>1</span></div>
-                <TarjetaKanban numero="48438" material="Dispositivo" descripcion={null} fojas={null} responsable={{ alias: 'ROBER', email: 'rober' }} situacion="pendiente_resolucion" />
+                <TarjetaKanban numero="48438" soporte="digital" material="Dispositivo" descripcion={null} fojas={null} responsable={{ alias: 'ROBER', email: 'rober' }} situacion="pendiente_resolucion" />
               </div>
             </div>
           </Bloque>

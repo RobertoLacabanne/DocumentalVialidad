@@ -1,17 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Copy, Mail, UserPlus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { Check, Copy, Mail, Pencil, UserPlus, X } from 'lucide-react';
+import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { Boton, clasesBoton } from '../componentes/Boton';
 import { Entrada } from '../componentes/campos';
 import { AvisoError, Esqueleto } from '../componentes/estados';
 import { Avatar } from '../componentes/marcas';
 import { useToast } from '../componentes/Toast';
+import { useEfectos } from '../datos/causa';
 import { useMiembros } from '../datos/consultas';
 import { traducirError, useGuardado } from '../datos/guardado';
 import { useYo } from '../datos/sesion';
 import { aliasDe } from '../lib/etiquetas';
 import { supabase } from '../lib/supabase';
 import { haceCuanto } from '../lib/tiempo';
+import type { Miembro } from '../lib/tipos';
+import { useCausaActual } from './Marco';
 import s from './Paginas.module.css';
 
 export function Equipo() {
@@ -23,6 +26,30 @@ export function Equipo() {
   const [enviando, setEnviando] = useState(false);
   const [errorAlta, setErrorAlta] = useState<string | null>(null);
   const [invitado, setInvitado] = useState<{ email: string; alias: string } | null>(null);
+  const [editandoAlias, setEditandoAlias] = useState<string | null>(null);
+  const campoAlias = useRef<HTMLInputElement>(null);
+  const { causa } = useCausaActual();
+  const { filas: efectos } = useEfectos(causa.id);
+
+  /** Alias que figuran en las planillas importadas y todavía no tienen a nadie del equipo. */
+  const aliasPendientes = useMemo(() => {
+    const conteo = new Map<string, number>();
+    for (const e of efectos) if (!e.responsable && e.responsable_alias) conteo.set(e.responsable_alias, (conteo.get(e.responsable_alias) ?? 0) + 1);
+    return [...conteo.entries()].sort((a, b) => a[0].localeCompare(b[0], 'es'));
+  }, [efectos]);
+
+  async function guardarAlias(m: Miembro, nuevo: string) {
+    const alias = nuevo.trim().toUpperCase() || null;
+    setEditandoAlias(null);
+    if (alias === m.alias) return;
+    const pendientes = alias ? aliasPendientes.find(([a]) => a === alias)?.[1] ?? 0 : 0;
+    const r = await guardarCampo('miembro', m.id, 'alias', m.alias, alias);
+    if (r.tipo === 'ok') {
+      void qc.invalidateQueries({ queryKey: ['miembros'] });
+      void qc.invalidateQueries({ queryKey: ['efectos', causa.id] });
+      avisar(pendientes ? `Listo: ${alias} y se le asignaron ${pendientes} efectos que la esperaban.` : `El alias ahora es ${alias ?? 'ninguno'}.`);
+    } else if (r.tipo === 'error') avisar(r.mensaje, { tono: 'error' });
+  }
 
   const direccion = window.location.origin;
   const mensaje = invitado
@@ -44,7 +71,7 @@ export function Equipo() {
     });
     setEnviando(false);
     if (err) {
-      setErrorAlta(/duplicate/i.test(err.message) ? 'Esa persona ya está en la lista.' : traducirError(err.message));
+      setErrorAlta(/miembro_alias_unico/i.test(err.message) ? traducirError(err.message) : /duplicate/i.test(err.message) ? 'Esa persona ya está en la lista.' : traducirError(err.message));
       return;
     }
     setErrorAlta(null);
@@ -81,9 +108,26 @@ export function Equipo() {
           <div className={s.tarjetaCabecera}>
             <h2 className={s.tarjetaTitulo}>Invitar a una persona</h2>
           </div>
+          {aliasPendientes.length > 0 && (
+            <p className={s.pendientes}>
+              En las planillas figuran{' '}
+              {aliasPendientes.map(([a, n], i) => (
+                <span key={a}>
+                  {i > 0 && (i === aliasPendientes.length - 1 ? ' y ' : ', ')}
+                  <b>{a}</b> ({n})
+                </span>
+              ))}{' '}
+              con efectos esperando. Invitalos con ese mismo alias y se les asignan solos.
+            </p>
+          )}
           <form className={s.formulario} onSubmit={invitar}>
             <Entrada name="email" type="email" etiqueta="Correo de Google" required placeholder="nombre@gmail.com" autoComplete="off" />
-            <Entrada name="alias" etiqueta="Cómo figura en las planillas" placeholder="p. ej. CARLI" autoComplete="off" />
+            <Entrada name="alias" etiqueta="Cómo figura en las planillas" placeholder="p. ej. CARLI" autoComplete="off" list="alias-pendientes" />
+            <datalist id="alias-pendientes">
+              {aliasPendientes.map(([a]) => (
+                <option key={a} value={a} />
+              ))}
+            </datalist>
             <Entrada name="nombre" etiqueta="Nombre y apellido" autoComplete="off" />
             <Boton type="submit" variante="primario" icono={<UserPlus aria-hidden />} cargando={enviando}>
               Invitar
@@ -134,11 +178,40 @@ export function Equipo() {
                 <li key={m.id} className={`${s.miembro} ${m.activo ? '' : s.inactivo}`}>
                   <Avatar texto={aliasDe(m)} email={m.email} />
                   <div>
-                    <div className={s.miembroNombre}>
-                      {aliasDe(m)}
-                      {m.nombre && m.alias ? ` · ${m.nombre}` : ''}
-                      {m.email === yo.email ? ' (vos)' : ''}
-                    </div>
+                    {editandoAlias === m.id ? (
+                      <form
+                        className={s.aliasForm}
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          void guardarAlias(m, campoAlias.current?.value ?? '');
+                        }}
+                      >
+                        <input
+                          ref={campoAlias}
+                          className={s.aliasCampo}
+                          defaultValue={m.alias ?? ''}
+                          aria-label={`Alias de ${m.email}`}
+                          autoFocus
+                          list="alias-pendientes"
+                          onKeyDown={(e) => e.key === 'Escape' && setEditandoAlias(null)}
+                        />
+                        <Boton type="submit" tamano="chico" variante="primario" soloIcono aria-label="Guardar alias">
+                          <Check aria-hidden />
+                        </Boton>
+                        <Boton tamano="chico" variante="fantasma" soloIcono aria-label="Cancelar" onClick={() => setEditandoAlias(null)}>
+                          <X aria-hidden />
+                        </Boton>
+                      </form>
+                    ) : (
+                      <div className={s.miembroNombre}>
+                        {aliasDe(m)}
+                        {m.nombre && m.alias ? ` · ${m.nombre}` : ''}
+                        {m.email === yo.email ? ' (vos)' : ''}
+                        <button type="button" className={s.editarAlias} onClick={() => setEditandoAlias(m.id)} aria-label={`Cambiar el alias de ${aliasDe(m)}`} title="Cambiar el alias">
+                          <Pencil aria-hidden />
+                        </button>
+                      </div>
+                    )}
                     <div className={s.miembroCorreo}>{m.email}</div>
                   </div>
                   <span className={s.miembroEstado}>
