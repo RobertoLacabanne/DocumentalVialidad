@@ -20,18 +20,20 @@ Abro un efecto que esté alcanzado por el planteo de casación. La ficha separa 
 
 Lo importante es que la marca se hereda. Si un efecto está cuestionado, todas las piezas que salgan de ese efecto lo muestran solas en el índice, y cuando llegue el momento de ofrecer prueba el sistema va a avisar antes de incluir algo que esté en esa situación. Se puede marcar un efecto por vez o seleccionar varios desde la vista por allanamiento y marcarlos juntos.
 
-## Minuto 3 a 4. Encontrar cualquier cosa
+## Minuto 3 a 4. Del mensaje a la contratación
 
-Aprieto **Ctrl + K** desde cualquier pantalla y escribo, por ejemplo, un número de efecto, un apellido o parte de un número de teléfono. El buscador revisa a la vez el índice de prueba, los efectos y el directorio de personas y empresas, sin importar tildes ni mayúsculas, y muestra el fragmento donde aparece lo buscado. Si una persona está cargada con su teléfono o con el nombre con el que la tenían agendada en un celular, la encuentra también por ese dato.
+Aprieto **Ctrl + K** desde cualquier pantalla y escribo lo que el fiscal recuerde del mensaje, por ejemplo «cotización» o un apellido. El buscador revisa a la vez el índice de prueba, los efectos, las personas, las contrataciones y el texto de todas las conversaciones cargadas, sin importar tildes ni mayúsculas, y muestra el fragmento donde aparece. Elijo el mensaje y se abre la conversación justo en ese punto, como un chat, con la fecha de cada mensaje y quién lo mandó.
 
-En **Personas y empresas** está el directorio de la causa. El sistema propone los nombres que figuran como propietarios o tenedores en los efectos y todavía no están cargados, pero no agrega a nadie solo: cada sugerencia la revisa y confirma una persona del equipo.
+El texto es la transcripción literal y no se puede editar: cada mensaje guarda una huella digital que lo prueba. Lo que sí se hace es marcarlo como relevante, escribir por qué y vincularlo a la contratación. Si toco el vínculo, paso a la ficha de esa licitación: el trámite completo a fojas, con la fecha tal como figura en el expediente y quién firmó cada paso, el cuadro de ofertas con la menor marcada y la diferencia contra el presupuesto oficial, y abajo todos los mensajes y piezas que la prueban. Es el hecho completo en una sola pantalla.
 
-## Minuto 4 a 5. El índice y lo que sigue
+## Minuto 4 a 5. El informe y el índice
 
-Termino en el **Índice de prueba**, que es el cuadro de siempre: una fila por pieza, con su número de orden jerárquico, su tipo, su relevancia y el link al original. Desde cada ficha se copia la cita lista para pegar en un escrito. Si falta un dato, la cita lo muestra entre corchetes para completar, nunca lo inventa. Todo se puede bajar a Excel con los filtros que estén aplicados, y desde el Inicio se descarga una copia completa de la causa con el historial de cambios, para guardar en el Drive.
+Vuelvo a la conversación y toco **Informe .docx**. Sale el informe de relevamiento de mensajes con la plantilla que ya usamos: la referencia del legajo, los párrafos de introducción con el dispositivo, el efecto y el informe del gabinete, y cada mensaje relevante en orden con su fecha, su remitente, el texto literal y la observación que lo vincula a la contratación. Lo que falta completar aparece marcado entre corchetes; el sistema nunca lo inventa.
 
-Lo que viene en las próximas etapas es el registro de las contrataciones investigadas, un lector para las conversaciones extraídas de los teléfonos y, más adelante, la preparación del juicio: el ofrecimiento de prueba armado desde el propio tablero, con los avisos procesales incluidos, y la cronología de los hechos.
+Termino en el **Índice de prueba**, que es el cuadro de siempre: una fila por pieza, con su número de orden jerárquico, su tipo, su relevancia y el link al original. Desde cada ficha se copia la cita lista para pegar en un escrito. Todo se puede bajar a Excel con los filtros que estén aplicados, y desde el Inicio se descarga una copia completa de la causa con el historial de cambios, para guardar en el Drive.
+
+Lo que viene en la próxima etapa es la preparación del juicio: el ofrecimiento de prueba armado desde el propio tablero, con avisos cuando una pieza tiene la admisibilidad cuestionada, cuando falta el testigo que la introduce o cuando no se entregó a la defensa, la cronología de los hechos exportable y el grafo de relaciones entre personas y empresas.
 
 ---
 
-Notas para quien presenta: el guion no menciona cantidades a propósito, porque dependen de lo que esté cargado ese día; conviene leerlas de la pantalla. Si al momento de la presentación todavía no se marcó ningún efecto con el planteo de casación, el minuto 2 se puede mostrar marcando uno en vivo desde su ficha, con el botón «Marcar situación procesal».
+Notas para quien presenta: el guion no menciona cantidades a propósito, porque dependen de lo que esté cargado ese día; conviene leerlas de la pantalla. Si al momento de la presentación todavía no se marcó ningún efecto con el planteo de casación, el minuto 2 se puede mostrar marcando uno en vivo desde su ficha, con el botón «Marcar situación procesal». Para los minutos 3 y 4 hace falta tener importada al menos una conversación (por ejemplo, Meynet–Gervasoni) y la hoja de la LP 05/2020 de EXPEDIENTES DE CONTRATACIÓN, con un par de mensajes ya marcados y vinculados; conviene elegir de antemano qué palabra buscar.

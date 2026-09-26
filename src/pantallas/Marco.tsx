@@ -1,13 +1,13 @@
 import {
   ChevronsUpDown,
   Clock,
-  FileText,
   Gavel,
   House,
   ListTree,
   LogOut,
   MessagesSquare,
   Package,
+  ScrollText,
   Search,
   UsersRound,
   Landmark,
@@ -32,9 +32,9 @@ export const SECCIONES: Seccion[] = [
   { ruta: 'inicio', etiqueta: 'Inicio', icono: <House aria-hidden /> },
   { ruta: 'indice', etiqueta: 'Índice de prueba', icono: <ListTree aria-hidden /> },
   { ruta: 'efectos', etiqueta: 'Efectos', icono: <Package aria-hidden /> },
-  { ruta: 'contrataciones', etiqueta: 'Contrataciones', icono: <FileText aria-hidden />, fase: 2 },
+  { ruta: 'contrataciones', etiqueta: 'Contrataciones', icono: <ScrollText aria-hidden /> },
   { ruta: 'personas', etiqueta: 'Personas y empresas', icono: <Landmark aria-hidden /> },
-  { ruta: 'mensajes', etiqueta: 'Mensajes', icono: <MessagesSquare aria-hidden />, fase: 2 },
+  { ruta: 'mensajes', etiqueta: 'Mensajes', icono: <MessagesSquare aria-hidden /> },
   { ruta: 'cronologia', etiqueta: 'Cronología', icono: <Clock aria-hidden />, fase: 3 },
   { ruta: 'juicio', etiqueta: 'Juicio', icono: <Gavel aria-hidden />, fase: 3 },
   { ruta: 'equipo', etiqueta: 'Equipo', icono: <UsersRound aria-hidden /> },
@@ -49,7 +49,12 @@ export function useCausaActual() {
   return c;
 }
 
-const NOMBRE_VISTA: Record<string, string> = { ...Object.fromEntries(SECCIONES.map((x) => [x.ruta, x.etiqueta])), importar: 'Importar' };
+const NOMBRE_VISTA: Record<string, string> = {
+  ...Object.fromEntries(SECCIONES.map((x) => [x.ruta, x.etiqueta])),
+  importar: 'Importar',
+  'importar-contrataciones': 'Importar',
+  'importar-conversacion': 'Importar',
+};
 
 export function Marco() {
   const { causaId } = useParams();

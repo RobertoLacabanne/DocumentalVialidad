@@ -1,0 +1,284 @@
+/* Piezas propias de los importadores de contrataciones y conversaciones. */
+.hojas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  overflow: hidden;
+}
+.hoja {
+  display: grid;
+  grid-template-columns: minmax(160px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--esp-2) var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+.hoja:last-child {
+  border-bottom: 0;
+}
+.hojaApagada {
+  background: var(--color-hover);
+  color: var(--color-texto-tenue);
+}
+.hojaElegir {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+.hojaNombre {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+}
+.hojaDetalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.hojaAviso {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-alerta);
+}
+.hojaCompleta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-exito);
+}
+
+.contratacion {
+  display: grid;
+  gap: var(--esp-3);
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--color-borde-suave);
+}
+.contratacionCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--esp-2) var(--esp-3);
+}
+.contratacionNombre {
+  width: 16ch;
+  max-width: 100%;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  background: none;
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto);
+  transition: border-color var(--duracion-rapida) var(--curva-salida), background-color var(--duracion-rapida) var(--curva-salida);
+}
+.contratacionNombre:hover {
+  border-color: var(--color-borde);
+  background: var(--color-superficie);
+}
+.contratacionNombre:focus {
+  border-color: var(--color-acento);
+  box-shadow: var(--anillo-foco);
+  outline: 0;
+  background: var(--color-superficie);
+}
+
+.tablaMarco {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+.tabla {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+.tabla th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 10px;
+  background: var(--color-cabecera);
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: var(--espaciado-rotulo);
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+  text-align: left;
+}
+.tabla td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-borde-suave);
+  vertical-align: top;
+  line-height: 1.4;
+}
+.tabla tr:last-child td {
+  border-bottom: 0;
+}
+.fila {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  font-variant-numeric: tabular-nums;
+}
+.precision {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px dashed var(--color-falta-borde);
+  border-radius: var(--radio-pill);
+  background: var(--color-falta-fondo);
+  font-size: 0.625rem;
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-falta-texto);
+}
+.pasoNombre {
+  display: block;
+  font-weight: var(--peso-medio);
+}
+.pasoObs {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  white-space: pre-line;
+}
+.pasoLink {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-acento);
+}
+
+.montos {
+  display: grid;
+  gap: var(--esp-2);
+  justify-items: start;
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px dashed var(--color-sugerencia-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-acento-fondo);
+}
+.monto {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
+}
+.monto input {
+  flex: none;
+  transform: translateY(2px);
+}
+
+.resultados {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  text-align: center;
+}
+
+/* ------- Conversaciones ------- */
+.pegar {
+  display: grid;
+  gap: var(--esp-2);
+}
+.pegar textarea {
+  min-height: 180px;
+  font-family: var(--fuente-interfaz);
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+}
+.o {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: var(--espaciado-rotulo);
+  text-transform: uppercase;
+  color: var(--color-texto-tenue);
+}
+.o::before,
+.o::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-borde);
+}
+.datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--esp-4);
+}
+.datosAncho {
+  grid-column: 1 / -1;
+}
+.origen {
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+}
+.mensajes td:first-child {
+  width: 36px;
+  text-align: center;
+}
+.excluido td {
+  background: var(--color-hover);
+  color: var(--color-texto-tenue);
+}
+.excluido .contenido {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-borde-fuerte);
+}
+.contenido {
+  display: block;
+  max-width: 68ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.avisoFila {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-alerta);
+}
+.notaFila {
+  display: block;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-left: 2px solid var(--color-nota-borde);
+  background: var(--color-nota-fondo);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.emisor {
+  height: var(--alto-control-sm);
+  max-width: 150px;
+  padding: 0 6px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  font-size: var(--texto-xs);
+  color: var(--color-texto);
+}
+
+@media (max-width: 760px) {
+  .hoja {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .datos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

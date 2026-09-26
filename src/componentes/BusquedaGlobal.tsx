@@ -13,8 +13,8 @@ const GRUPOS: { tipo: string; titulo: string; icono: ReactNode; ruta?: (id: stri
   { tipo: 'efecto', titulo: 'Efectos', icono: <Package aria-hidden />, ruta: (id) => `efectos?efecto=${id}` },
   { tipo: 'pieza', titulo: 'Piezas del índice', icono: <FileText aria-hidden />, ruta: (id) => `indice?pieza=${id}` },
   { tipo: 'persona', titulo: 'Personas y empresas', icono: <Landmark aria-hidden />, ruta: (id) => `personas?persona=${id}` },
-  { tipo: 'mensaje', titulo: 'Mensajes', icono: <MessagesSquare aria-hidden /> },
-  { tipo: 'contratacion', titulo: 'Contrataciones', icono: <ScrollText aria-hidden /> },
+  { tipo: 'mensaje', titulo: 'Mensajes', icono: <MessagesSquare aria-hidden />, ruta: (id) => `mensajes?mensaje=${id}` },
+  { tipo: 'contratacion', titulo: 'Contrataciones', icono: <ScrollText aria-hidden />, ruta: (id) => `contrataciones?c=${id}` },
 ];
 
 const CLAVE_RECIENTES = 'tp-busquedas';
@@ -212,7 +212,7 @@ export function BusquedaGlobal({ causaId, abierta, onCambiar }: { causaId: strin
                           onMouseMove={() => setActivo(i)}
                           onClick={() => ir(i)}
                           disabled={!g.ruta}
-                          title={g.ruta ? undefined : 'Esta sección llega en la Fase 2'}
+                          title={g.ruta ? undefined : 'Esta sección todavía no se abre desde la búsqueda'}
                         >
                           <span className={s.resultadoTitulo}>{r.titulo}</span>
                           {r.detalle && <span className={s.resultadoDetalle}>{detalleLegible(r)}</span>}

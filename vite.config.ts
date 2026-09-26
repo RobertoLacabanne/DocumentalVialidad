@@ -10,13 +10,16 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        // Librerías en paquetes aparte: cambian poco y el navegador las guarda.
+        // Librerías de la interfaz en paquetes aparte: cambian poco y el navegador las guarda.
         // Supabase no depende de React, así que puede ir sola sin crear ciclos.
-        // Los lectores y escritores de planillas y el .zip se bajan solo al importar o exportar.
+        // Todo lo demás (planillas, .zip, .docx) se baja solo cuando se importa o exporta.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (/read-excel-file|write-excel-file|papaparse|fflate|unzipper|jszip|xmldom|fast-xml/.test(id)) return undefined;
-          return id.includes('@supabase') ? 'supabase' : 'librerias';
+          if (id.includes('@supabase')) return 'supabase';
+          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|@tanstack|@radix-ui|@floating-ui|lucide-react|aria-hidden|react-remove-scroll[^\\/]*|use-callback-ref|use-sidecar|tslib|get-nonce|detect-node-es|cookie|set-cookie-parser)[\\/]/.test(id)) {
+            return 'librerias';
+          }
+          return undefined;
         },
       },
     },

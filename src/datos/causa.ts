@@ -13,9 +13,9 @@ import type {
   RolEnCausa,
 } from '../lib/tipos';
 
-const canal = (base: string) => `${base}:${Math.random().toString(36).slice(2, 10)}`;
+export const canal = (base: string) => `${base}:${Math.random().toString(36).slice(2, 10)}`;
 
-async function todas<T>(tabla: string, causaId: string, columnas = '*', orden?: string): Promise<T[]> {
+export async function todas<T>(tabla: string, causaId: string, columnas = '*', orden?: string): Promise<T[]> {
   const filas: T[] = [];
   for (let desde = 0; ; desde += 1000) {
     let q = supabase.from(tabla).select(columnas).eq('causa_id', causaId).is('archivado_en', null);
@@ -29,7 +29,7 @@ async function todas<T>(tabla: string, causaId: string, columnas = '*', orden?: 
 }
 
 /** Refresca las consultas indicadas cuando cambia alguna de las tablas, para esta causa. */
-function useEnVivo(causaId: string, tablas: string[], claves: unknown[][]) {
+export function useEnVivo(causaId: string, tablas: string[], claves: unknown[][]) {
   const qc = useQueryClient();
   const firma = tablas.join(',');
   useEffect(() => {

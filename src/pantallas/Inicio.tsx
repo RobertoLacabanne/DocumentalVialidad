@@ -1,4 +1,4 @@
-import { Archive, ArrowRight, Check, FileUp, Landmark, ListTree, Package, TriangleAlert, UserPlus } from 'lucide-react';
+import { Archive, ArrowRight, Check, FileUp, Landmark, ListTree, MessagesSquare, Package, ScrollText, TriangleAlert, UserPlus } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Boton } from '../componentes/Boton';
@@ -7,6 +7,7 @@ import { Avatar, EstadoProcesal } from '../componentes/marcas';
 import { useToast } from '../componentes/Toast';
 import { useActividad, useAlcances, useEfectos, useIncidencias, type EfectoVista } from '../datos/causa';
 import { useDirectorio, useIndice } from '../datos/consultas';
+import { useContrataciones, useConversaciones } from '../datos/hechos';
 import { useYo } from '../datos/sesion';
 import { CAMPOS, COLUMNAS_TABLERO, ESTADOS_EFECTO, valorLegible } from '../lib/etiquetas';
 import { descargar, nombreArchivo } from '../lib/exportar';
@@ -30,6 +31,8 @@ export function Inicio() {
   const { avisar } = useToast();
   const { filas: efectos, cargando } = useEfectos(causa.id);
   const { filas: piezas } = useIndice(causa.id, yo.user_id);
+  const { filas: contrataciones } = useContrataciones(causa.id);
+  const { filas: conversaciones } = useConversaciones(causa.id);
   const { data: incidencias = [] } = useIncidencias(causa.id);
   const { data: actividad = [], isLoading: cargandoActividad } = useActividad(causa.id, 80);
   const alcances = useAlcances(causa.id);
@@ -274,6 +277,15 @@ export function Inicio() {
                 <Link to="../efectos" relative="path">
                   <Package aria-hidden /> Efectos <b className="cifras">{efectos.length}</b>
                 </Link>
+                <Link to="../contrataciones" relative="path">
+                  <ScrollText aria-hidden /> Contrataciones <b className="cifras">{contrataciones.length}</b>
+                </Link>
+                <Link to="../mensajes" relative="path">
+                  <MessagesSquare aria-hidden /> Mensajes{' '}
+                  <b className="cifras" title="Mensajes marcados como relevantes">
+                    {conversaciones.reduce((n, c) => n + (c.resumen?.relevantes ?? 0), 0)} relevantes
+                  </b>
+                </Link>
                 <Link to="../personas" relative="path">
                   <Landmark aria-hidden /> Personas y empresas
                 </Link>
@@ -336,6 +348,12 @@ const NOMBRE_TABLA: Record<string, string> = {
   rol_en_causa: 'un rol en la causa',
   miembro: 'a',
   causa: 'la causa',
+  contratacion: 'la contratación',
+  paso_tramite: 'un paso del trámite',
+  oferta: 'una oferta',
+  conversacion: 'la conversación',
+  mensaje: 'un mensaje',
+  vinculo: 'un vínculo entre fichas',
 };
 const PLURAL_TABLA: Record<string, [string, string]> = {
   efecto: ['efecto', 'efectos'],
@@ -345,6 +363,9 @@ const PLURAL_TABLA: Record<string, [string, string]> = {
   persona: ['persona', 'personas'],
   identificador: ['identificador', 'identificadores'],
   incidencia_alcance: ['ficha con situación procesal', 'fichas con situación procesal'],
+  paso_tramite: ['paso del trámite', 'pasos del trámite'],
+  oferta: ['oferta', 'ofertas'],
+  vinculo: ['vínculo', 'vínculos'],
 };
 
 /** Junta altas seguidas de la misma persona en la misma tabla (una importación trae decenas). */
@@ -372,7 +393,7 @@ function Evento({ eventos, quien, efectos }: { eventos: EventoHistorial[]; quien
     sujeto = `el efecto Nº ${String(d.numero ?? efectos.find((x) => x.id === e.registro_id)?.numero ?? '')}`;
     enlace = `../efectos?efecto=${e.registro_id}`;
   } else if (e.tabla === 'pieza') {
-    sujeto = d.numero_orden ? `la pieza Nº ${String(d.numero_orden)}` : `la pieza «${String(d.titulo ?? '')}»`;
+    sujeto = d.numero_orden ? `la pieza Nº ${String(d.numero_orden)}` : d.titulo ? `la pieza «${String(d.titulo)}»` : 'una pieza';
     enlace = `../indice?pieza=${e.registro_id}`;
   } else if (e.tabla === 'persona') {
     sujeto = String(d.nombre ?? 'una persona');
@@ -385,6 +406,17 @@ function Evento({ eventos, quien, efectos }: { eventos: EventoHistorial[]; quien
     sujeto = `el informe ${String(d.numero ?? '')}`;
   } else if (e.tabla === 'procedimiento') {
     sujeto = `el procedimiento de ${String(d.domicilio ?? 'domicilio sin cargar')}`;
+  } else if (e.tabla === 'contratacion') {
+    sujeto = `la contratación ${String(d.identificador ?? '')}`;
+    enlace = `../contrataciones?c=${e.registro_id}`;
+  } else if (e.tabla === 'paso_tramite' || e.tabla === 'oferta') {
+    enlace = d.contratacion_id ? `../contrataciones?c=${String(d.contratacion_id)}` : null;
+  } else if (e.tabla === 'conversacion') {
+    sujeto = `la conversación «${String(d.titulo ?? '')}»`;
+    enlace = `../mensajes?conversacion=${e.registro_id}`;
+  } else if (e.tabla === 'mensaje') {
+    sujeto = d.emisor ? `un mensaje de ${String(d.emisor)}` : 'un mensaje';
+    enlace = `../mensajes?mensaje=${e.registro_id}`;
   }
 
   let frase: ReactNode;
@@ -405,12 +437,33 @@ function Evento({ eventos, quien, efectos }: { eventos: EventoHistorial[]; quien
     );
     enlace = e.tabla === 'efecto' ? '../efectos' : e.tabla === 'pieza' ? '../indice' : e.tabla === 'persona' ? '../personas' : null;
   } else if (e.tabla === 'importacion' && e.accion === 'alta') {
-    frase = (
-      <>
-        importó <b>{String(d.filas_importadas ?? '')}</b> efectos de «{String(d.archivo ?? '')}»
-      </>
-    );
-    enlace = '../efectos';
+    const resumen = (d.resumen ?? {}) as Record<string, unknown>;
+    if (d.destino === 'contrataciones') {
+      frase = (
+        <>
+          importó la contratación <b>{String(resumen.identificador ?? '')}</b> de «{String(d.archivo ?? '')}»
+        </>
+      );
+      enlace = resumen.contratacion ? `../contrataciones?c=${String(resumen.contratacion)}` : '../contrataciones';
+    } else if (d.destino === 'conversacion') {
+      frase = (
+        <>
+          importó <b>{String(d.filas_importadas ?? '')}</b> mensajes de «{String(d.archivo ?? '')}»
+        </>
+      );
+      enlace = resumen.conversacion ? `../mensajes?conversacion=${String(resumen.conversacion)}` : '../mensajes';
+    } else {
+      frase = (
+        <>
+          importó <b>{String(d.filas_importadas ?? '')}</b> efectos de «{String(d.archivo ?? '')}»
+        </>
+      );
+      enlace = '../efectos';
+    }
+  } else if (e.tabla === 'mensaje' && e.accion === 'edicion' && Object.keys(e.cambios ?? {}).join() === 'relevante') {
+    frase = (e.cambios.relevante?.despues ? <>marcó como relevante {sujeto}</> : <>le sacó la marca de relevante a {sujeto}</>);
+  } else if (e.tabla === 'vinculo' && e.accion === 'alta') {
+    frase = <>vinculó un mensaje o una pieza a otra ficha</>;
   } else if (e.accion === 'alta') {
     frase = e.tabla === 'miembro' ? <>invitó a {sujeto}</> : e.tabla === 'persona' ? <>agregó a {sujeto} al directorio</> : <>cargó {sujeto}</>;
   } else if (e.accion === 'archivo') {
@@ -431,7 +484,7 @@ function Evento({ eventos, quien, efectos }: { eventos: EventoHistorial[]; quien
       frase = (
         <>
           cambió <em>{CAMPOS[campo] ?? campo}</em> de {sujeto}
-          {cambios.length === 1 && campo !== 'observaciones' && campo !== 'resumen' ? <> a «{valorLegible(campo, v.despues)}»</> : null}
+          {cambios.length === 1 && campo !== 'observaciones' && campo !== 'resumen' && !campo.endsWith('_id') ? <> a «{valorLegible(campo, v.despues)}»</> : null}
           {cambios.length > 1 ? ` y ${cambios.length - 1} campo${cambios.length > 2 ? 's' : ''} más` : ''}
         </>
       );

@@ -28,6 +28,17 @@ export function Sello({ numero, grande }: { numero: string | null | undefined; g
   );
 }
 
+/** Fojas del expediente, con el mismo sello foliado. */
+export function Fojas({ fojas }: { fojas: string | null | undefined }) {
+  if (!fojas) return <span className={unir(s.sello, s.selloVacio)} title="Sin fojas"><i>fs.</i>—</span>;
+  return (
+    <span className={s.sello}>
+      <i>fs.</i>
+      {fojas}
+    </span>
+  );
+}
+
 /** Número de efecto como etiqueta de secuestro. */
 export function EtiquetaEfecto({ numero }: { numero: string | null | undefined }) {
   return <span className={s.efecto}>EF.{numero ? ` ${numero}` : ''}</span>;

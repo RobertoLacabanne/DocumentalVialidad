@@ -112,7 +112,32 @@ export const CAMPOS: Record<string, string> = {
   procedimiento_id: 'Procedimiento',
   tipo_persona: 'Tipo',
   cargo: 'Cargo',
+  identificador: 'Identificador',
+  expediente: 'Expediente',
+  tipo_procedimiento: 'Tipo de procedimiento',
+  presupuesto_oficial: 'Presupuesto oficial',
+  reserva_presupuestaria: 'Reserva presupuestaria',
+  monto_adjudicado: 'Monto adjudicado',
+  fecha_apertura: 'Apertura de sobres',
+  fecha_inicio_texto: 'Fecha de inicio (texto)',
+  link: 'Link',
+  descripcion: 'Procedimiento',
+  fecha: 'Fecha',
+  fecha_texto: 'Fecha tal cual figura',
+  firmante_texto: 'Firmante',
+  oferente_texto: 'Oferente',
+  monto: 'Monto',
+  relevante: 'Relevante',
+  observacion: 'Observación',
+  participantes: 'Participantes',
+  titular_dispositivo: 'Titular del teléfono',
+  contacto_relevante: 'Número de la conversación',
+  agendado_como: 'Agendado como',
+  periodo_desde: 'Período desde',
+  periodo_hasta: 'Período hasta',
 };
+
+const CAMPOS_EN_PESOS = new Set(['presupuesto_oficial', 'reserva_presupuestaria', 'monto_adjudicado', 'monto']);
 
 export function valorLegible(campo: string, valor: unknown): string {
   if (valor === null || valor === undefined || valor === '') return 'vacío';
@@ -124,6 +149,9 @@ export function valorLegible(campo: string, valor: unknown): string {
   if (campo === 'apto_analisis' && typeof valor === 'string') return APTO_ETIQUETA[valor] ?? valor;
   if (campo === 'tipo_material' && typeof valor === 'string') return MATERIALES_ETIQUETA[valor] ?? valor;
   if (campo === 'prioridad' && typeof valor === 'string') return PRIORIDAD_ETIQUETA[valor] ?? valor;
+  if (CAMPOS_EN_PESOS.has(campo) && (typeof valor === 'number' || typeof valor === 'string') && !Number.isNaN(Number(valor))) {
+    return Number(valor).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+  }
   if (typeof valor === 'boolean') return valor ? 'sí' : 'no';
   if (Array.isArray(valor)) return valor.length ? valor.join(', ') : 'vacío';
   const texto = String(valor);

@@ -5,7 +5,7 @@ import type { EstadoGuardado } from '../componentes/estados';
 import { useToast } from '../componentes/Toast';
 import { aliasDe, CAMPOS } from '../lib/etiquetas';
 import { supabase } from '../lib/supabase';
-import type { Miembro, Pieza, ResultadoGuardado } from '../lib/tipos';
+import type { Mensaje, Miembro, Pieza, ResultadoGuardado } from '../lib/tipos';
 
 type Pendiente = { tabla: string; id: string; campo: string; anterior: unknown; nuevo: unknown };
 
@@ -65,6 +65,12 @@ export function ProveedorGuardado({ children }: { children: ReactNode }) {
           if (previa && previa.version > p.version) return lista;
           return previa ? lista.map((x) => (x.id === p.id ? p : x)) : [...lista, p];
         });
+      } else if (tabla === 'mensaje') {
+        const m = fila as unknown as Mensaje;
+        qc.setQueryData<Mensaje[]>(['mensajes', m.conversacion_id], (lista) =>
+          lista?.map((x) => (x.id === m.id && x.version <= m.version ? { ...x, ...m } : x)),
+        );
+        void qc.invalidateQueries({ queryKey: ['conversaciones-resumen', m.causa_id] });
       } else if (tabla === 'causa') {
         void qc.invalidateQueries({ queryKey: ['causas'] });
       } else if (tabla === 'miembro') {
@@ -79,6 +85,11 @@ export function ProveedorGuardado({ children }: { children: ReactNode }) {
           identificador: ['identificadores'],
           rol_en_causa: ['roles'],
           incidencia_procesal: ['incidencias', 'estado-procesal-efectos', 'estado-procesal'],
+          contratacion: ['contrataciones'],
+          paso_tramite: ['pasos'],
+          oferta: ['ofertas'],
+          conversacion: ['conversaciones'],
+          vinculo: ['vinculos'],
         };
         for (const k of claves[tabla] ?? []) void qc.invalidateQueries({ queryKey: causa ? [k, causa] : [k] });
       }

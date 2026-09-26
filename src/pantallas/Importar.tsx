@@ -520,7 +520,7 @@ export function Importar() {
   );
 }
 
-function Cifra({ valor, texto: t, tono }: { valor: number; texto: string; tono?: 'exito' | 'peligro' | 'alerta' }) {
+export function Cifra({ valor, texto: t, tono }: { valor: number; texto: string; tono?: 'exito' | 'peligro' | 'alerta' }) {
   return (
     <span className={`${s.cifra} ${tono ? s[`cifra_${tono}`] : ''} ${valor ? '' : s.cifraCero}`}>
       <b className="cifras">{valor}</b>
@@ -529,7 +529,7 @@ function Cifra({ valor, texto: t, tono }: { valor: number; texto: string; tono?:
   );
 }
 
-function Bloque({ icono, titulo, tono, children }: { icono: ReactNode; titulo: string; tono?: 'peligro' | 'alerta'; children: ReactNode }) {
+export function Bloque({ icono, titulo, tono, children }: { icono: ReactNode; titulo: string; tono?: 'peligro' | 'alerta'; children: ReactNode }) {
   return (
     <div className={`${s.bloque} ${tono ? s[`bloque_${tono}`] : ''}`}>
       <div className={s.bloqueTitulo}>

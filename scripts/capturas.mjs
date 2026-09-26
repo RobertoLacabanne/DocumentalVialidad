@@ -1,7 +1,7 @@
 // Capturas de las pantallas en 1440×900 y 390×844, como pide la skill de diseño.
 // Requiere: npm run db:start, node scripts/preparar-local.mjs --ejemplos,
 // node e2e/fixtures/generar-planillas.mjs y npm run dev.
-// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,diseno,acceso]
+// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,contrataciones,mensajes,diseno,acceso]
 // La importación se hace en la primera pasada (1440); en la segunda solo se revisa.
 import { chromium } from '@playwright/test';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -76,7 +76,7 @@ for (const [n, t] of TAMANOS.entries()) {
     await foto(p, 'acceso', t);
   }
 
-  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo'];
+  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo', 'contrataciones', 'mensajes'];
   if (resto.some(quiero)) {
     const causa = await entrar(p);
 
@@ -145,6 +145,76 @@ for (const [n, t] of TAMANOS.entries()) {
         await foto(p, 'ficha-edicion', t);
         await p.keyboard.press('Escape');
       }
+    }
+    if (quiero('contrataciones')) {
+      await p.goto(`${causa}/importar-contrataciones`);
+      await p.locator('input[type=file]').setInputFiles(`${PLANILLAS}/contrataciones-prueba.xlsx`);
+      await p.getByText('contrataciones-prueba.xlsx').waitFor();
+      await foto(p, 'contrataciones-importar-1', t);
+      const seguir = p.getByRole('button', { name: /Seguir: revisar/ });
+      if (await seguir.isEnabled()) {
+        await seguir.click();
+        await foto(p, 'contrataciones-importar-2', t, true);
+        if (n === 0) {
+          await p.getByLabel(/Presupuesto oficial: /).first().check();
+          await p.getByRole('button', { name: /^Importar \d+ contratac/ }).click();
+          await p.getByText(/importadas?$/).first().waitFor();
+          await foto(p, 'contrataciones-importar-3', t);
+        }
+      }
+      await medir('importar contrataciones');
+      await p.goto(`${causa}/contrataciones`);
+      await p.getByRole('heading', { name: 'Contrataciones', exact: true }).waitFor();
+      await foto(p, 'contrataciones', t);
+      await p.getByRole('button', { name: /LP 90001\/2020/ }).first().click();
+      await p.getByRole('heading', { name: 'LP 90001/2020' }).waitFor();
+      await foto(p, 'contratacion', t);
+      await foto(p, 'contratacion-completa', t, true);
+      await medir('contratacion');
+      await p.getByRole('row', { name: /Proveedora Ejemplo/ }).click();
+      await p.getByRole('dialog', { name: 'Oferta' }).waitFor();
+      await foto(p, 'contratacion-oferta', t);
+      await p.keyboard.press('Escape');
+    }
+    if (quiero('mensajes')) {
+      if (n === 0) {
+        await p.goto(`${causa}/importar-conversacion`);
+        await p.locator('input[type=file]').setInputFiles(`${PLANILLAS}/conversacion-prueba.docx`);
+        await p.getByText('mensajes detectados').first().waitFor();
+        await foto(p, 'conversacion-importar', t, true);
+        await p.getByRole('button', { name: /^Importar \d+ mensajes?$/ }).click();
+        await p.getByText(/mensajes importados$/).waitFor();
+        await p.getByRole('link', { name: /Abrir la conversación/ }).click();
+      } else {
+        await p.goto(`${causa}/mensajes`);
+        await p.getByRole('button', { name: /Conversación entre Ficticio y Muestra/ }).first().click();
+      }
+      await p.getByRole('region', { name: /Conversación entre Ficticio y Muestra/ }).waitFor();
+      await p.waitForTimeout(400);
+      if (n === 0) {
+        const burbuja = p.getByRole('button', { name: /Mensaje de Ficticio/ }).first();
+        await burbuja.hover();
+        await p.getByRole('button', { name: 'Marcar como relevante' }).first().click();
+      }
+      await foto(p, 'mensajes', t);
+      await medir('mensajes');
+      await p.getByRole('button', { name: /Mensaje de Ficticio/ }).first().click();
+      await p.getByRole('complementary', { name: 'Ficha del mensaje' }).waitFor();
+      if (n === 0) {
+        await p.getByLabel('Contratación a vincular').selectOption({ label: 'LP 90001/2020 · Expte. 90500' });
+        await p.getByRole('button', { name: 'Vincular', exact: true }).first().click();
+        await p.getByText('Vinculado a LP 90001/2020.').waitFor();
+      }
+      await foto(p, 'mensaje-ficha', t);
+      await p.keyboard.press('Escape');
+      await p.getByRole('button', { name: 'Datos de la conversación' }).click();
+      await p.getByRole('complementary', { name: 'Datos de la conversación' }).waitFor();
+      await foto(p, 'conversacion-datos', t);
+      await p.keyboard.press('Escape');
+      await p.getByRole('button', { name: 'Informe .docx' }).click();
+      await p.getByRole('dialog', { name: 'Informe de relevamiento de mensajes' }).waitFor();
+      await foto(p, 'informe', t);
+      await p.keyboard.press('Escape');
     }
     if (quiero('equipo')) {
       await p.goto(`${causa}/equipo`);

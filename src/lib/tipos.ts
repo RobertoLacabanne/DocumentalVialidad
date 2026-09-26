@@ -207,3 +207,110 @@ export type EventoHistorial = {
 };
 
 export type ResultadoGuardado<T> = { ok: boolean; fila: T };
+
+// ---------------------------------------------------------------------
+// Fase 2: contrataciones y mensajes
+// ---------------------------------------------------------------------
+export type PrecisionTramite = 'dia' | 'mes' | 'anio' | 'aproximada' | 'sin_fecha';
+
+export type Contratacion = Comunes & {
+  causa_id: string;
+  identificador: string;
+  expediente: string | null;
+  tipo_procedimiento: string | null;
+  objeto: string | null;
+  presupuesto_oficial: number | null;
+  reserva_presupuestaria: number | null;
+  monto_adjudicado: number | null;
+  adjudicatario_id: string | null;
+  fecha_apertura: string | null;
+  fecha_inicio: string | null;
+  fecha_inicio_texto: string | null;
+  link: string | null;
+  observaciones: string | null;
+  origen: Record<string, unknown> | null;
+};
+
+export type PasoTramite = Comunes & {
+  causa_id: string;
+  contratacion_id: string;
+  orden: number | null;
+  descripcion: string;
+  fojas: string | null;
+  fecha: string | null;
+  fecha_precision: PrecisionTramite;
+  fecha_texto: string | null;
+  firmante_id: string | null;
+  firmante_texto: string | null;
+  cargo: string | null;
+  link: string | null;
+  observaciones: string | null;
+  origen: Record<string, unknown> | null;
+};
+
+export type Oferta = Comunes & {
+  causa_id: string;
+  contratacion_id: string;
+  orden: number | null;
+  oferente_id: string | null;
+  oferente_texto: string | null;
+  monto: number | null;
+  fecha: string | null;
+  fojas: string | null;
+  link: string | null;
+  observaciones: string | null;
+  origen: Record<string, unknown> | null;
+};
+
+export type Conversacion = Comunes & {
+  causa_id: string;
+  efecto_id: string | null;
+  informe_id: string | null;
+  titulo: string;
+  participantes: string | null;
+  titular_dispositivo: string | null;
+  contacto_relevante: string | null;
+  agendado_como: string | null;
+  periodo_desde: string | null;
+  periodo_hasta: string | null;
+  observaciones: string | null;
+  origen: Record<string, unknown> | null;
+};
+
+export type ConversacionResumen = {
+  conversacion_id: string;
+  causa_id: string;
+  mensajes: number;
+  relevantes: number;
+  primera_fecha: string | null;
+  ultima_fecha: string | null;
+};
+
+export type TipoMensaje = 'texto' | 'audio_transcripto' | 'imagen' | 'archivo' | 'otro';
+
+export type Mensaje = Comunes & {
+  causa_id: string;
+  conversacion_id: string;
+  orden: number | null;
+  fecha: string | null;
+  fecha_hora: string | null;
+  fecha_hora_texto: string | null;
+  emisor: string | null;
+  receptor: string | null;
+  tipo: TipoMensaje;
+  contenido: string | null;
+  hash_contenido: string | null;
+  relevante: boolean;
+  observacion: string | null;
+  origen: Record<string, unknown> | null;
+};
+
+export type TipoVinculo = 'relacionado' | 'responde_a' | 'adjunto_de' | 'misma_operacion' | 'menciona_a' | 'prueba_de' | 'imputado_vinculado' | 'otro';
+
+export type Vinculo = Comunes & {
+  causa_id: string;
+  origen_id: string;
+  destino_id: string;
+  tipo: TipoVinculo;
+  nota: string | null;
+};
