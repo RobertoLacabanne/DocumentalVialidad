@@ -2,8 +2,17 @@
 
 > **Estado del proyecto** (se actualiza al cerrar cada paso o fase)
 >
-> - 26/09/2026. Paso 1 (sección 11) respondido en `docs/PROPUESTA_INICIAL.md`, con el boceto `docs/diseno/boceto-indice-prueba.html`. Pendiente: OK del usuario a la propuesta, respuesta a la pregunta de arranque y el archivo de la skill `diseno-con-identidad` (la sección 8 la menciona, pero todavía no está en el repo).
-> - Próximo paso: plan corto de la Fase 0 y esperar el OK.
+> - 26/09/2026. Paso 1 (sección 11) respondido en `docs/PROPUESTA_INICIAL.md`, con el boceto `docs/diseno/boceto-indice-prueba.html`. El usuario dio el OK y pidió arrancar.
+> - 26/09/2026. Fase 0 construida y probada contra Supabase local (34 pruebas SQL, 12 unitarias, 2 de punta a punta con dos sesiones). Publicada en https://tablero-prueba-ufil.netlify.app (sitio Netlify `tablero-prueba-ufil`, id 349bfd0f-2d95-45c5-92dd-841af40290bd). **Pendiente para cerrar la Fase 0:** proyecto Supabase de producción y cliente OAuth de Google (el usuario pasa un token de Supabase y el ID/secreto de Google; se corre `scripts/configurar-produccion.mjs` y se cargan las variables en Netlify). Capturas en `docs/capturas/fase-0/`.
+> - Próximo: Fase 1 (efectos, personas, búsqueda global, importación de LISTADO EFECTOS y DISTRIBUCIÓN DE TAREAS, copia completa de la causa).
+>
+> **Decisiones tomadas con el usuario** (valen por encima de lo que diga el resto de este archivo)
+>
+> - Norte del producto: una versión muy mejorada del cuadro Urribarri, fácil de usar, intuitiva y que de verdad le sirva a la fiscalía para trabajar. Ante la duda, gana la simpleza.
+> - Login: todo el equipo y el fiscal usan cuenta de Google. Se entra con "Entrar con Google" y una lista de invitados (tabla `miembro`). No hay roles: todo invitado activo lee y escribe todo.
+> - Riesgos de nube, datos personales y contraseñas de dispositivos: el usuario pidió no preocuparse. El patrón/contraseña va como campo común del efecto, igual que en la planilla.
+> - Diseño: seguir siempre la skill `.claude/skills/diseno-con-identidad/SKILL.md` y los tokens de `src/styles/tokens.css`. Sacar capturas con `npm run capturas` (1440×900 y 390×844) después de cada cambio visual.
+> - El usuario autorizó avanzar sin pedir confirmación («permito todo, no me preguntes»).
 
 > Para pegar como primer mensaje en Claude Code, dentro de una carpeta de proyecto vacía. Guardalo también como `CLAUDE.md` en la raíz del repo: así cada sesión nueva arranca con el mismo contexto.
 

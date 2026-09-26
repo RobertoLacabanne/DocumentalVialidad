@@ -1,0 +1,196 @@
+.pagina {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  background: var(--color-fondo);
+}
+.presentacion {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--esp-10);
+  padding: var(--esp-12) clamp(var(--esp-6), 6vw, var(--esp-16));
+  border-right: 1px solid var(--color-borde);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--color-borde-suave) 31px 32px),
+    var(--color-fondo);
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+}
+.sello {
+  width: 44px;
+  height: 44px;
+}
+.marcaNombre {
+  font-family: var(--fuente-titulos);
+  font-weight: var(--peso-fuerte);
+  font-size: var(--texto-xl);
+  line-height: 1.1;
+}
+.marcaSub {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  letter-spacing: 0.03em;
+}
+.tesis {
+  display: grid;
+  gap: var(--esp-5);
+  max-width: 34rem;
+}
+.eyebrow {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-tenue);
+}
+.titular {
+  font-family: var(--fuente-titulos);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+.bajada {
+  font-size: var(--texto-lg);
+  color: var(--color-texto-suave);
+  max-width: 58ch;
+}
+.rasgos {
+  display: grid;
+  gap: var(--esp-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.rasgos li {
+  display: flex;
+  gap: var(--esp-3);
+  align-items: flex-start;
+  font-size: var(--texto-md);
+  color: var(--color-texto-suave);
+}
+.rasgos li :global(svg.lucide) {
+  margin-top: 3px;
+  color: var(--color-texto);
+}
+.pie {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+
+.lado {
+  display: grid;
+  align-content: center;
+  padding: var(--esp-10) clamp(var(--esp-6), 5vw, var(--esp-12));
+}
+.tarjeta {
+  display: grid;
+  gap: var(--esp-5);
+  width: 100%;
+  max-width: 380px;
+  padding: var(--esp-8);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-2);
+}
+.tarjetaTitulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+}
+.tarjetaTexto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+.google {
+  width: 100%;
+  height: 42px;
+  font-size: var(--texto-md);
+}
+.separador {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.separador::before,
+.separador::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--color-borde);
+}
+.formulario {
+  display: grid;
+  gap: var(--esp-3);
+}
+.aviso {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+
+.centro {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--esp-6);
+}
+.cargando {
+  display: grid;
+  justify-items: center;
+  gap: var(--esp-4);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+.selloLatido {
+  width: 52px;
+  height: 52px;
+  animation: latido 1.6s ease-in-out infinite;
+}
+@keyframes latido {
+  0%, 100% { opacity: 0.55; transform: scale(0.97); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.pasos {
+  display: grid;
+  gap: var(--esp-2);
+  padding-left: 1.2em;
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+.pasos code {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  background: var(--color-cabecera);
+  border-radius: var(--radio-xs);
+  padding: 1px 5px;
+}
+
+@media (max-width: 860px) {
+  .pagina {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .presentacion {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-borde);
+    padding: var(--esp-8) var(--esp-5);
+    gap: var(--esp-6);
+  }
+  .rasgos,
+  .pie {
+    display: none;
+  }
+  .lado {
+    padding: var(--esp-6) var(--esp-4) var(--esp-10);
+    justify-items: center;
+  }
+  .tarjeta {
+    padding: var(--esp-6);
+  }
+}

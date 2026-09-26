@@ -1,0 +1,65 @@
+.grupo {
+  display: grid;
+  gap: 6px;
+}
+.etiqueta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto-suave);
+}
+.ayuda {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.error {
+  font-size: var(--texto-xs);
+  color: var(--color-peligro-texto);
+}
+
+.control {
+  width: 100%;
+  min-height: var(--alto-control);
+  padding: 6px 10px;
+  font-size: var(--texto-md);
+  line-height: 1.4;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  transition:
+    border-color var(--duracion-rapida) var(--curva-salida),
+    box-shadow var(--duracion-rapida) var(--curva-salida);
+}
+.control::placeholder {
+  color: var(--color-texto-tenue);
+}
+.control:hover:not(:disabled) {
+  border-color: var(--color-borde-fuerte);
+}
+.control:focus {
+  outline: none;
+  border-color: var(--color-acento);
+  box-shadow: var(--anillo-foco);
+}
+.control:disabled {
+  background: var(--color-cabecera);
+  color: var(--color-texto-tenue);
+}
+.control[aria-invalid='true'] {
+  border-color: var(--color-peligro);
+}
+
+textarea.control {
+  resize: vertical;
+  min-height: 84px;
+}
+
+select.control {
+  appearance: none;
+  padding-right: 30px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-texto-suave) 50%),
+    linear-gradient(135deg, var(--color-texto-suave) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}

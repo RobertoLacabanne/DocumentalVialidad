@@ -1,0 +1,94 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: var(--alto-control);
+  padding: 0 14px;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: var(--sombra-1);
+  transition:
+    background-color var(--duracion-rapida) var(--curva-salida),
+    border-color var(--duracion-rapida) var(--curva-salida),
+    box-shadow var(--duracion-rapida) var(--curva-salida),
+    transform var(--duracion-rapida) var(--curva-salida);
+}
+.boton:hover:not(:disabled) {
+  border-color: var(--color-borde-fuerte);
+  background: var(--color-hover);
+}
+.boton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.boton:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+.boton:disabled {
+  opacity: 0.55;
+}
+
+.primario {
+  background: var(--color-texto);
+  border-color: var(--color-texto);
+  color: var(--color-sobre-tinta);
+}
+.primario:hover:not(:disabled) {
+  background: var(--color-texto-hover);
+  border-color: var(--color-texto-hover);
+}
+
+.fantasma {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--color-texto-suave);
+}
+.fantasma:hover:not(:disabled) {
+  background: var(--color-hover);
+  border-color: transparent;
+  color: var(--color-texto);
+}
+
+.peligro {
+  color: var(--color-peligro-texto);
+}
+.peligro:hover:not(:disabled) {
+  border-color: var(--color-peligro);
+  background: var(--color-peligro-fondo);
+}
+
+.chico {
+  height: var(--alto-control-sm);
+  padding: 0 10px;
+  font-size: var(--texto-xs);
+  gap: 5px;
+}
+.soloIcono {
+  width: var(--alto-control);
+  padding: 0;
+}
+.chico.soloIcono {
+  width: var(--alto-control-sm);
+}
+
+.hecho {
+  color: var(--color-exito);
+  border-color: var(--color-exito);
+  background: var(--color-exito-fondo);
+}
+
+.girando {
+  animation: girar 0.9s linear infinite;
+}
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}

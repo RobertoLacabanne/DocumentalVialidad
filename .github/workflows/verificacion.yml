@@ -1,0 +1,51 @@
+name: Verificación
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  app:
+    name: Tipos, pruebas y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  base:
+    name: Reglas de la base y dos sesiones a la vez
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Supabase local
+        run: npm run db:start
+      - name: Reglas de la base
+        run: npm run db:test
+      - name: Cuentas de prueba
+        run: node scripts/preparar-local.mjs
+      - name: Variables locales
+        run: |
+          npx supabase status -o env | grep -E '^(API_URL|ANON_KEY)=' \
+            | sed 's/^API_URL=/VITE_SUPABASE_URL=/; s/^ANON_KEY=/VITE_SUPABASE_ANON_KEY=/' > .env.local
+          echo 'VITE_ACCESO_CON_CLAVE=true' >> .env.local
+      - run: npx playwright install --with-deps chromium
+      - name: Dos sesiones a la vez
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rastros-e2e
+          path: test-results/

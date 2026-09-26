@@ -1,0 +1,90 @@
+.tarjeta {
+  position: relative;
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-3) var(--esp-3) var(--esp-3) var(--esp-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-1);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition:
+    box-shadow var(--duracion-media) var(--curva-salida),
+    border-color var(--duracion-media) var(--curva-salida),
+    transform var(--duracion-media) var(--curva-salida);
+}
+.tarjeta:hover {
+  border-color: var(--color-borde-fuerte);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
+}
+.tarjeta:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+.conAlerta {
+  box-shadow: inset 3px 0 0 var(--color-peligro), var(--sombra-1);
+}
+.conAlerta:hover {
+  box-shadow: inset 3px 0 0 var(--color-peligro), var(--sombra-2);
+}
+.arriba {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+.descripcion {
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.abajo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.abajo > :last-child {
+  margin-left: auto;
+}
+.semaforo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+}
+.semaforo::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.semaforoLimpio {
+  color: var(--color-exito);
+}
+.semaforoLimpio::before {
+  background: var(--color-exito);
+  box-shadow: 0 0 0 3px var(--color-exito-fondo);
+}
+.semaforoAlerta {
+  color: var(--color-peligro-texto);
+}
+.semaforoAlerta::before {
+  background: var(--color-peligro);
+  box-shadow: 0 0 0 3px var(--color-peligro-fondo);
+}
+.prioridad {
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-alerta);
+}

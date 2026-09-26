@@ -1,0 +1,221 @@
+/* Chips por familia */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.25;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--radio-pill);
+  white-space: nowrap;
+}
+.chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.documental { background: var(--cat-documental-fondo); color: var(--cat-documental-texto); }
+.pericial { background: var(--cat-pericial-fondo); color: var(--cat-pericial-texto); }
+.mensaje { background: var(--cat-mensaje-fondo); color: var(--cat-mensaje-texto); }
+.contratacion { background: var(--cat-contratacion-fondo); color: var(--cat-contratacion-texto); }
+.persona { background: var(--cat-persona-fondo); color: var(--cat-persona-texto); }
+.otros { background: var(--cat-otros-fondo); color: var(--cat-otros-texto); }
+
+/* Sello foliado */
+.sello {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--fuente-titulos);
+  font-weight: var(--peso-fuerte);
+  font-size: 0.84375rem;
+  line-height: 1.2;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--color-texto);
+  background: var(--color-sello-fondo);
+  border: 1px solid var(--color-sello-borde);
+  border-radius: var(--radio-xs);
+  padding: 1px 7px 2px;
+  box-shadow: inset 0 0 0 2px var(--color-sello-fondo), inset 0 0 0 3px var(--color-sello-anillo);
+  white-space: nowrap;
+}
+.sello i {
+  font-family: var(--fuente-interfaz);
+  font-style: normal;
+  font-size: 0.59375rem;
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.06em;
+  color: var(--color-texto-tenue);
+}
+.selloGrande {
+  font-size: var(--texto-xl);
+  padding: 3px 11px 4px;
+}
+.selloVacio {
+  color: var(--color-texto-tenue);
+  font-weight: var(--peso-normal);
+}
+
+/* Etiqueta de secuestro */
+.efecto {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--color-texto);
+  background: var(--color-etiqueta-fondo);
+  padding: 4px 9px 4px 17px;
+  border-radius: 0 var(--radio-xs) var(--radio-xs) 0;
+  clip-path: polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%);
+  white-space: nowrap;
+}
+.efecto::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--color-superficie);
+}
+
+/* Dato faltante y sugerencia */
+.falta {
+  display: inline-block;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  line-height: 1.4;
+  color: var(--color-falta-texto);
+  background: var(--color-falta-fondo);
+  border: 1px dashed var(--color-falta-borde);
+  border-radius: var(--radio-xs);
+  padding: 0 5px;
+  white-space: nowrap;
+}
+.sugerencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-acento);
+  background: var(--color-acento-fondo);
+  border: 1px dashed var(--color-sugerencia-borde);
+  border-radius: var(--radio-xs);
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.sugerencia :global(svg.lucide) {
+  width: 12px;
+  height: 12px;
+}
+
+/* Relevancia en barras */
+.relevancia {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+}
+.barras {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.barras b {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--color-borde);
+}
+.barras b:nth-child(1) { height: 5px; }
+.barras b:nth-child(2) { height: 8.5px; }
+.barras b:nth-child(3) { height: 12px; }
+.barras b.llena { background: var(--color-texto); }
+.sinEvaluar { color: var(--color-texto-tenue); }
+.descartada { color: var(--color-texto-tenue); text-decoration: line-through; }
+
+/* Situación procesal (lacre) */
+.procesal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.25;
+  border-radius: var(--radio-pill);
+  padding: 3px 9px 3px 7px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.procesal :global(svg.lucide) {
+  width: 13px;
+  height: 13px;
+}
+.admisibilidad_cuestionada {
+  color: var(--color-peligro-texto);
+  border-color: var(--color-peligro);
+  background: var(--color-superficie);
+}
+.pendiente_resolucion {
+  color: var(--color-peligro-texto);
+  background: var(--color-peligro-fondo);
+}
+.excluida {
+  color: var(--color-sobre-tinta);
+  background: var(--color-peligro);
+}
+
+/* Avatares */
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.02em;
+  flex: none;
+  user-select: none;
+}
+.avatarChico {
+  width: 20px;
+  height: 20px;
+  font-size: 0.53125rem;
+}
+.avatarGrande {
+  width: 36px;
+  height: 36px;
+  font-size: var(--texto-xs);
+}
+.enLinea {
+  box-shadow: 0 0 0 2px var(--color-superficie), 0 0 0 3.5px var(--color-exito);
+}
+.tono1 { background: var(--avatar-1-fondo); color: var(--avatar-1-texto); }
+.tono2 { background: var(--avatar-2-fondo); color: var(--avatar-2-texto); }
+.tono3 { background: var(--avatar-3-fondo); color: var(--avatar-3-texto); }
+.tono4 { background: var(--avatar-4-fondo); color: var(--avatar-4-texto); }
+.tono5 { background: var(--avatar-5-fondo); color: var(--avatar-5-texto); }
+.tono6 { background: var(--avatar-6-fondo); color: var(--avatar-6-texto); }
+
+/* Pila de avatares */
+.pila {
+  display: inline-flex;
+  align-items: center;
+}
+.pila > * + * {
+  margin-left: -6px;
+}
