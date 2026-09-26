@@ -76,7 +76,7 @@ Antes de publicar, probar también el build de producción: `npm run build && np
 |---|---|
 | Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
 | URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
-| Esquema | `20260926120000_esquema_inicial` aplicado y registrado en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Esquema | Migraciones `20260926120000_esquema_inicial` y `20260926170000_ingreso_concurrente` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
 | Auth | Site URL y redirecciones configuradas; «Entrar con Google» activo (proyecto de Google Cloud «Tablero de Prueba», cliente web `283725982972-….apps.googleusercontent.com`) |
 | Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
 | Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |

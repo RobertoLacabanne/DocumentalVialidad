@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Miembro } from '../lib/tipos';
 
@@ -21,20 +21,30 @@ const SesionContexto = createContext<Contexto | null>(null);
 
 export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<EstadoSesion>({ tipo: 'cargando' });
+  // Al volver de Google llegan casi juntos la sesión leída y el aviso de ingreso:
+  // se verifica una sola vez por usuario.
+  const verificacion = useRef<{ usuario: string; promesa: Promise<void> } | null>(null);
 
   const verificar = useCallback(async (sesion: Session | null) => {
     if (!sesion) {
+      verificacion.current = null;
       setEstado({ tipo: 'afuera' });
       return;
     }
-    const { data, error } = await supabase.rpc('registrar_ingreso');
-    if (error) {
-      setEstado({ tipo: 'error', mensaje: error.message });
-      return;
-    }
-    const r = data as { habilitado: boolean; email?: string; miembro?: Miembro };
-    if (r.habilitado && r.miembro) setEstado({ tipo: 'adentro', sesion, miembro: r.miembro });
-    else setEstado({ tipo: 'sin_invitacion', email: r.email ?? sesion.user.email ?? '' });
+    if (verificacion.current?.usuario === sesion.user.id) return verificacion.current.promesa;
+    const promesa = (async () => {
+      const { data, error } = await supabase.rpc('registrar_ingreso');
+      if (error) {
+        verificacion.current = null;
+        setEstado({ tipo: 'error', mensaje: error.message });
+        return;
+      }
+      const r = data as { habilitado: boolean; email?: string; miembro?: Miembro };
+      if (r.habilitado && r.miembro) setEstado({ tipo: 'adentro', sesion, miembro: r.miembro });
+      else setEstado({ tipo: 'sin_invitacion', email: r.email ?? sesion.user.email ?? '' });
+    })();
+    verificacion.current = { usuario: sesion.user.id, promesa };
+    return promesa;
   }, []);
 
   useEffect(() => {
