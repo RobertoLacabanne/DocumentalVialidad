@@ -1,5 +1,5 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
-import { FileText, Landmark, LoaderCircle, MessagesSquare, Package, ScrollText, Search } from 'lucide-react';
+import { FileScan, FileText, Landmark, LoaderCircle, MessagesSquare, Package, ScrollText, ScanText, Search } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MATERIALES_ETIQUETA, SOPORTE_ETIQUETA, tipoPieza } from '../lib/etiquetas';
@@ -15,6 +15,8 @@ const GRUPOS: { tipo: string; titulo: string; icono: ReactNode; ruta?: (id: stri
   { tipo: 'persona', titulo: 'Personas y empresas', icono: <Landmark aria-hidden />, ruta: (id) => `personas?persona=${id}` },
   { tipo: 'mensaje', titulo: 'Mensajes', icono: <MessagesSquare aria-hidden />, ruta: (id) => `mensajes?mensaje=${id}` },
   { tipo: 'contratacion', titulo: 'Contrataciones', icono: <ScrollText aria-hidden />, ruta: (id) => `contrataciones?c=${id}` },
+  { tipo: 'pagina', titulo: 'Texto de los escaneos', icono: <ScanText aria-hidden />, ruta: (id) => `documentos?pagina=${id}` },
+  { tipo: 'documento', titulo: 'Documentos', icono: <FileScan aria-hidden />, ruta: (id) => `documentos?doc=${id}` },
 ];
 
 const CLAVE_RECIENTES = 'tp-busquedas';

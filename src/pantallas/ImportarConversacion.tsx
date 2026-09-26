@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Check, FileText, FileUp, Info, RotateCcw, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, FileSpreadsheet, FileText, FileUp, Info, RotateCcw, Smartphone, TriangleAlert } from 'lucide-react';
 import { useMemo, useRef, useState, type DragEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Boton, clasesBoton } from '../componentes/Boton';
@@ -13,6 +13,8 @@ import { traducirError } from '../datos/guardado';
 import { normalizar } from '../lib/importacion';
 import { leerTranscripcion, separarNombres, textoDeDocx, type ConversacionLeida, type MensajeLeido } from '../lib/conversaciones';
 import { supabase } from '../lib/supabase';
+import { CAMPOS_UFED, chatAConversacion, leerReporteUfed, type CampoUfed, type HojaCruda, type Mapeo, type ReporteUfed } from '../lib/ufed';
+import type { Celda } from '../lib/importacion';
 import { CabeceraCausa } from './CabeceraCausa';
 import { TIPO_MENSAJE } from './FichaMensaje';
 import { Bloque, Cifra } from './Importar';
@@ -57,11 +59,18 @@ export function ImportarConversacion() {
   const [encima, setEncima] = useState(false);
   const [importando, setImportando] = useState(false);
   const [resultado, setResultado] = useState<{ conversacion: string; mensajes: number } | null>(null);
+  // Reporte de UFED: se guarda entero para poder importar un chat tras otro.
+  const [ufed, setUfed] = useState<{ archivo: string; hojas: HojaCruda[]; reporte: ReporteUfed | null; forzado: { hoja: string; encabezado: number; mapeo: Mapeo }; error: string | null } | null>(null);
+  const [verColumnas, setVerColumnas] = useState(false);
   const selector = useRef<HTMLInputElement>(null);
 
   function preparar(texto: string, nombre: string) {
     const c = leerTranscripcion(texto);
     if (!c.mensajes.length) throw new Error('No encontramos mensajes. Fijate que el texto tenga líneas como «Remitente: …» y «Mensaje: …», o «Nombre:» seguido del texto.');
+    prepararLeida(c, nombre);
+  }
+
+  function prepararLeida(c: ConversacionLeida, nombre: string) {
     setArchivo(nombre);
     setLeida(c);
     setMensajes(c.mensajes);
@@ -84,16 +93,39 @@ export function ImportarConversacion() {
     setLeyendo(true);
     setError(null);
     try {
+      if (/\.xlsx$/i.test(file.name)) {
+        const { default: readXlsxFile } = await import('read-excel-file/browser');
+        const hojas = (await readXlsxFile(file)).map((h) => ({ nombre: h.sheet, filas: h.data as unknown as Celda[][] }));
+        abrirUfed(file.name, hojas);
+        return;
+      }
       let texto: string;
       if (/\.docx$/i.test(file.name)) texto = await textoDeDocx(await file.arrayBuffer());
       else if (/\.txt$/i.test(file.name)) texto = await file.text();
-      else throw new Error('Tiene que ser un .docx o un .txt. Si es un documento de Google: Archivo → Descargar → Microsoft Word (.docx).');
+      else throw new Error('Tiene que ser un .docx, un .txt o un reporte de UFED en Excel (.xlsx). Si es un documento de Google: Archivo → Descargar → Microsoft Word (.docx).');
       preparar(texto, file.name);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setLeyendo(false);
     }
+  }
+
+  function abrirUfed(nombre: string, hojas: HojaCruda[], forzado?: { hoja: string; encabezado: number; mapeo: Mapeo }) {
+    try {
+      const reporte = leerReporteUfed(hojas, forzado);
+      setUfed({ archivo: nombre, hojas, reporte, forzado: { hoja: reporte.hoja, encabezado: reporte.encabezado, mapeo: reporte.mapeo }, error: null });
+      if (!reporte.chats.length) setVerColumnas(true);
+    } catch (e) {
+      setUfed({ archivo: nombre, hojas, reporte: null, forzado: forzado ?? { hoja: hojas[0]?.nombre ?? '', encabezado: 0, mapeo: {} }, error: (e as Error).message });
+      setVerColumnas(true);
+    }
+  }
+
+  function cambiarColumnas(cambio: Partial<{ hoja: string; encabezado: number; mapeo: Mapeo }>) {
+    if (!ufed) return;
+    const forzado = { ...ufed.forzado, ...cambio };
+    abrirUfed(ufed.archivo, ufed.hojas, forzado);
   }
 
   function leerPegado() {
@@ -164,7 +196,11 @@ export function ImportarConversacion() {
     for (const k of ['conversaciones', 'conversaciones-resumen']) void qc.invalidateQueries({ queryKey: [k, causa.id] });
   }
 
-  function reiniciar() {
+  function reiniciar(conservarReporte = false) {
+    if (!conservarReporte) {
+      setUfed(null);
+      setVerColumnas(false);
+    }
     setPaso('transcripcion');
     setArchivo(null);
     setLeida(null);
@@ -193,7 +229,10 @@ export function ImportarConversacion() {
             <ArrowLeft aria-hidden /> Mensajes
           </Link>
           <h2 className={si.titulo}>Importar una conversación</h2>
-          <p className={si.bajada}>Desde la transcripción del equipo (.docx) o el texto que exporta WhatsApp. El texto de cada mensaje se guarda literal y después no se puede editar.</p>
+          <p className={si.bajada}>
+            Desde la transcripción del equipo (.docx), el texto que exporta WhatsApp o un reporte de UFED en Excel. El texto de cada mensaje se guarda literal y después no se puede
+            editar.
+          </p>
         </div>
 
         <ol className={s.pasos} aria-label="Pasos">
@@ -205,7 +244,21 @@ export function ImportarConversacion() {
           ))}
         </ol>
 
-        {paso === 'transcripcion' && (
+        {paso === 'transcripcion' && ufed && (
+          <ReporteUfedVista
+            ufed={ufed}
+            verColumnas={verColumnas}
+            onVerColumnas={setVerColumnas}
+            onCambiar={cambiarColumnas}
+            onOtro={() => reiniciar()}
+            onElegir={(clave) => {
+              const chat = ufed.reporte?.chats.find((c) => c.clave === clave);
+              if (chat && ufed.reporte) prepararLeida(chatAConversacion(chat, ufed.reporte), `${ufed.archivo} · ${chat.titulo}`);
+            }}
+          />
+        )}
+
+        {paso === 'transcripcion' && !ufed && (
           <section className={s.tarjeta}>
             <label
               className={`${s.zona} ${encima ? s.zonaEncima : ''}`}
@@ -216,12 +269,14 @@ export function ImportarConversacion() {
               onDragLeave={() => setEncima(false)}
               onDrop={soltar}
             >
-              <input ref={selector} type="file" accept=".docx,.txt" className="visualmente-oculto" onChange={(e) => void elegir(e.target.files?.[0])} />
+              <input ref={selector} type="file" accept=".docx,.txt,.xlsx" className="visualmente-oculto" onChange={(e) => void elegir(e.target.files?.[0])} />
               <span className={s.zonaIcono}>
                 <FileUp aria-hidden />
               </span>
               <strong>{leyendo ? 'Leyendo la transcripción…' : 'Arrastrá el .docx acá o hacé clic para elegirlo'}</strong>
-              <span className={s.tenue}>Word (.docx) o texto (.txt). Si es un documento de Google: Archivo → Descargar → Microsoft Word.</span>
+              <span className={s.tenue}>
+                Word (.docx), texto (.txt) o un reporte de UFED exportado a Excel (.xlsx). Si es un documento de Google: Archivo → Descargar → Microsoft Word.
+              </span>
             </label>
             <div className={h.o}>o</div>
             <div className={h.pegar}>
@@ -244,11 +299,11 @@ export function ImportarConversacion() {
                 <strong>{archivo}</strong>
                 <span className={s.tenue}>
                   {mensajes.length} {mensajes.length === 1 ? 'mensaje detectado' : 'mensajes detectados'} · {leida.omitidas.length}{' '}
-                  {leida.omitidas.length === 1 ? 'línea que no es un mensaje' : 'líneas que no son mensajes'}
+                  {leida.omitidas.length === 1 ? `${ufed ? 'fila' : 'línea'} que no es un mensaje` : `${ufed ? 'filas' : 'líneas'} que no son mensajes`}
                 </span>
               </div>
-              <Boton tamano="chico" variante="fantasma" icono={<RotateCcw aria-hidden />} onClick={reiniciar}>
-                Elegir otra
+              <Boton tamano="chico" variante="fantasma" icono={<RotateCcw aria-hidden />} onClick={() => reiniciar(!!ufed)}>
+                {ufed ? 'Elegir otro chat' : 'Elegir otra'}
               </Boton>
             </div>
 
@@ -291,7 +346,7 @@ export function ImportarConversacion() {
               <div className={s.balanceDetalle}>
                 <Cifra valor={incluidos.length} texto="se importan" tono="exito" />
                 <Cifra valor={mensajes.length - incluidos.length} texto="destildados, no entran" />
-                <Cifra valor={leida.omitidas.length} texto="líneas que no son mensajes" />
+                <Cifra valor={leida.omitidas.length} texto={ufed ? 'filas que no son mensajes' : 'líneas que no son mensajes'} />
                 <Cifra valor={conAviso.length + leida.avisos.length} texto="avisos para revisar" tono={conAviso.length + leida.avisos.length ? 'alerta' : undefined} />
               </div>
             </div>
@@ -328,7 +383,7 @@ export function ImportarConversacion() {
                 <thead>
                   <tr>
                     <th aria-label="Importar" />
-                    <th style={{ width: 54 }}>Línea</th>
+                    <th style={{ width: 54 }}>{ufed ? 'Fila' : 'Línea'}</th>
                     <th style={{ width: 120 }}>Fecha</th>
                     <th style={{ width: 160 }}>Remitente</th>
                     <th>Mensaje</th>
@@ -367,12 +422,14 @@ export function ImportarConversacion() {
             {leida.omitidas.length > 0 && (
               <details className={s.avisos}>
                 <summary>
-                  {leida.omitidas.length} {leida.omitidas.length === 1 ? 'línea no se importa' : 'líneas no se importan'} como mensaje
+                  {leida.omitidas.length} {leida.omitidas.length === 1 ? `${ufed ? 'fila' : 'línea'} no se importa` : `${ufed ? 'filas' : 'líneas'} no se importan`} como mensaje
                 </summary>
                 <ul className={s.listaFilas}>
                   {leida.omitidas.map((o) => (
                     <li key={o.linea}>
-                      <span className={s.filaNumero}>Línea {o.linea}</span>
+                      <span className={s.filaNumero}>
+                        {ufed ? 'Fila' : 'Línea'} {o.linea}
+                      </span>
                       <span>
                         «{o.texto}» · {o.motivo}
                       </span>
@@ -383,7 +440,7 @@ export function ImportarConversacion() {
             )}
 
             <div className={s.pie}>
-              <Boton variante="fantasma" onClick={reiniciar}>
+              <Boton variante="fantasma" onClick={() => reiniciar(!!ufed)}>
                 <ArrowLeft aria-hidden /> Volver
               </Boton>
               <Boton variante="primario" cargando={importando} disabled={!incluidos.length || !cabecera.titulo.trim()} onClick={() => void importar()}>
@@ -407,7 +464,12 @@ export function ImportarConversacion() {
               <Link to={`../mensajes?conversacion=${resultado.conversacion}`} relative="path" className={clasesBoton('primario')} style={{ textDecoration: 'none' }}>
                 Abrir la conversación <ArrowRight aria-hidden />
               </Link>
-              <Boton icono={<FileUp aria-hidden />} onClick={reiniciar}>
+              {ufed && (
+                <Boton icono={<Smartphone aria-hidden />} onClick={() => reiniciar(true)}>
+                  Otro chat del mismo reporte
+                </Boton>
+              )}
+              <Boton icono={<FileUp aria-hidden />} onClick={() => reiniciar()}>
                 Importar otra
               </Boton>
             </div>
@@ -415,5 +477,144 @@ export function ImportarConversacion() {
         )}
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------
+// Reporte de UFED: columnas reconocidas (se pueden cambiar) y un chat por vez.
+// ---------------------------------------------------------------------
+const letraColumna = (i: number) => (i < 26 ? String.fromCharCode(65 + i) : String.fromCharCode(64 + Math.floor(i / 26)) + String.fromCharCode(65 + (i % 26)));
+
+function ReporteUfedVista({
+  ufed,
+  verColumnas,
+  onVerColumnas,
+  onCambiar,
+  onOtro,
+  onElegir,
+}: {
+  ufed: { archivo: string; hojas: HojaCruda[]; reporte: ReporteUfed | null; forzado: { hoja: string; encabezado: number; mapeo: Mapeo }; error: string | null };
+  verColumnas: boolean;
+  onVerColumnas: (v: boolean) => void;
+  onCambiar: (c: Partial<{ hoja: string; encabezado: number; mapeo: Mapeo }>) => void;
+  onOtro: () => void;
+  onElegir: (clave: string) => void;
+}) {
+  const r = ufed.reporte;
+  const hoja = ufed.hojas.find((x) => x.nombre === ufed.forzado.hoja);
+  const columnas = (hoja?.filas[ufed.forzado.encabezado] ?? []).map((c) => (c === null || c === undefined ? '' : String(c)));
+  const total = r?.chats.reduce((n, c) => n + c.mensajes.length, 0) ?? 0;
+  return (
+    <section className={s.tarjeta}>
+      <div className={s.archivo}>
+        <FileSpreadsheet aria-hidden />
+        <div>
+          <strong>{ufed.archivo}</strong>
+          <span className={s.tenue}>
+            Reporte de extracción · hoja «{ufed.forzado.hoja}»{r ? ` · ${r.chats.length} ${r.chats.length === 1 ? 'chat' : 'chats'} · ${total} mensajes` : ''}
+          </span>
+        </div>
+        <Boton tamano="chico" variante="fantasma" icono={<RotateCcw aria-hidden />} onClick={onOtro}>
+          Elegir otro archivo
+        </Boton>
+      </div>
+
+      <div className={s.explicacion}>
+        <Info aria-hidden />
+        <p>
+          Cada chat del reporte entra como una conversación, con el texto literal y la fecha tal como figura. Revisá que las columnas reconocidas sean las correctas: el formato
+          de los reportes cambia según la versión de UFED.
+        </p>
+      </div>
+
+      <div className={h.columnasUfed}>
+        <div className={h.columnasResumen}>
+          <strong>Columnas reconocidas</strong>
+          {CAMPOS_UFED.filter((c) => ufed.forzado.mapeo[c.campo] !== undefined).map((c) => (
+            <span key={c.campo} className={h.columnaChip}>
+              {c.etiqueta} ← «{columnas[ufed.forzado.mapeo[c.campo]!] || letraColumna(ufed.forzado.mapeo[c.campo]!)}»
+            </span>
+          ))}
+          <Boton tamano="chico" variante="fantasma" onClick={() => onVerColumnas(!verColumnas)}>
+            {verColumnas ? 'Listo' : 'Cambiar columnas'}
+          </Boton>
+        </div>
+        {verColumnas && (
+          <div className={h.columnasGrilla}>
+            <Selector etiqueta="Hoja" value={ufed.forzado.hoja} onChange={(e) => onCambiar({ hoja: e.target.value, encabezado: 0, mapeo: {} })}>
+              {ufed.hojas.map((x) => (
+                <option key={x.nombre} value={x.nombre}>
+                  {x.nombre}
+                </option>
+              ))}
+            </Selector>
+            <Entrada
+              etiqueta="Fila de los títulos"
+              type="number"
+              min={1}
+              value={ufed.forzado.encabezado + 1}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                if (v >= 1) onCambiar({ encabezado: v - 1 });
+              }}
+            />
+            {CAMPOS_UFED.map((c) => (
+              <Selector
+                key={c.campo}
+                etiqueta={c.etiqueta + (c.obligatorio ? ' *' : '')}
+                value={ufed.forzado.mapeo[c.campo] ?? ''}
+                onChange={(e) => {
+                  const m: Mapeo = { ...ufed.forzado.mapeo };
+                  if (e.target.value === '') delete m[c.campo as CampoUfed];
+                  else m[c.campo as CampoUfed] = Number(e.target.value);
+                  onCambiar({ mapeo: m });
+                }}
+              >
+                <option value="">No está</option>
+                {columnas.map((t, i) => (
+                  <option key={i} value={i}>
+                    {letraColumna(i)} · {t || '(sin título)'}
+                  </option>
+                ))}
+              </Selector>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {ufed.error && <AvisoError titulo="Con estas columnas no se leen mensajes">{ufed.error}</AvisoError>}
+      {r && r.avisos.length > 0 && (
+        <Bloque icono={<TriangleAlert aria-hidden />} tono="alerta" titulo={`${r.avisos.length} ${r.avisos.length === 1 ? 'aviso' : 'avisos'} de la lectura`}>
+          <ul className={s.listaFilas}>
+            {r.avisos.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </Bloque>
+      )}
+
+      {r && r.chats.length > 0 && (
+        <ul className={h.chats} aria-label="Chats del reporte">
+          {r.chats.map((c) => (
+            <li key={c.clave} className={h.chat}>
+              <span className={h.chatIcono} aria-hidden>
+                <Smartphone />
+              </span>
+              <div className={h.chatCuerpo}>
+                <strong>{c.titulo}</strong>
+                <span className={s.tenue}>
+                  {c.mensajes.length} {c.mensajes.length === 1 ? 'mensaje' : 'mensajes'}
+                  {c.desde && ` · ${c.desde.split('-').reverse().join('/')}`}
+                  {c.hasta && c.hasta !== c.desde && ` al ${c.hasta.split('-').reverse().join('/')}`}
+                </span>
+              </div>
+              <Boton tamano="chico" variante="primario" icono={<ArrowRight aria-hidden />} onClick={() => onElegir(c.clave)}>
+                Revisar este chat
+              </Boton>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

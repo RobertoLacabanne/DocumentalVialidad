@@ -522,3 +522,17 @@
     padding: var(--esp-8) var(--esp-4);
   }
 }
+
+/* En el celular, el botón de la tarjeta del archivo baja de renglón y deja entero el nombre. */
+@media (max-width: 860px) {
+  .archivo {
+    flex-wrap: wrap;
+  }
+  .archivo > div {
+    flex-basis: calc(100% - 40px);
+  }
+  .archivo strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

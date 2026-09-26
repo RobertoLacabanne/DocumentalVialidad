@@ -315,3 +315,53 @@ export type Vinculo = Comunes & {
   nota: string | null;
   fuente: string | null;
 };
+
+export type Documento = Comunes & {
+  causa_id: string;
+  sha256: string;
+  nombre: string;
+  ruta: string | null;
+  bytes: number | null;
+  tipo_mime: string | null;
+  paginas: number | null;
+  origen: 'navegador' | 'appufil';
+  estado: 'leyendo' | 'completo';
+  indexado_en: string | null;
+  link: string | null;
+  efecto_id: string | null;
+  pieza_id: string | null;
+  observaciones: string | null;
+};
+
+export type DocumentoResumen = {
+  documento_id: string;
+  causa_id: string;
+  leidas: number;
+  con_texto: number;
+  confianza_ocr: number | null;
+  metodos: ('capa_texto' | 'ocr' | 'appufil')[];
+  caracteres: number;
+};
+
+export type DocumentoPagina = {
+  id: string;
+  documento_id: string;
+  nro: number;
+  texto: string | null;
+  metodo: 'capa_texto' | 'ocr' | 'appufil';
+  motor: string | null;
+  confianza: number | null;
+  leido_en: string;
+};
+
+export type Sugerencia = Comunes & {
+  causa_id: string;
+  entidad_id: string;
+  campo: string;
+  valor_sugerido: { id: string; tipo?: 'contratacion' | 'persona' | 'efecto' } | null;
+  fuente: string;
+  detalle: string | null;
+  estado: 'pendiente' | 'aceptada' | 'descartada';
+  resuelta_por: string | null;
+  resuelta_en: string | null;
+};

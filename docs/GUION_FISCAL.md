@@ -38,6 +38,8 @@ Paso a **Juicio**. Es el punteo de la prueba para el debate, como la planilla «
 
 Si el fiscal quiere ver la historia completa, **Cronología** pone en una sola línea de tiempo las piezas, los mensajes relevantes, el trámite de las contrataciones, los allanamientos y los planteos, y se imprime en PDF con los filtros que se hayan elegido. En **Personas y empresas**, la vista **Relaciones** dibuja quién es socio o empleado de quién y qué empresas ofertaron en cada licitación; las líneas punteadas son coincidencias de nombres en las conversaciones y están marcadas como tales, para confirmar.
 
+Y si pregunta por un papel secuestrado: en **Documentos** están los escaneos leídos. El texto de cada página, impreso o leído por OCR, entra en la misma búsqueda de `Ctrl + K`, así que una palabra de una factura o de un remito lleva directo a la página. Lo que la máquina propone (de qué efecto es, qué contratación menciona) queda como sugerencia hasta que alguien del equipo lo confirma.
+
 ---
 
 Notas para quien presenta: el guion no menciona cantidades a propósito, porque dependen de lo que esté cargado ese día; conviene leerlas de la pantalla. Si al momento de la presentación todavía no se marcó ningún efecto con el planteo de casación, el minuto 2 se puede mostrar marcando uno en vivo desde su ficha, con el botón «Marcar situación procesal». Para los minutos 3 y 4 hace falta tener importada al menos una conversación (por ejemplo, Meynet–Gervasoni) y la hoja de la LP 05/2020 de EXPEDIENTES DE CONTRATACIÓN, con un par de mensajes ya marcados y vinculados; conviene elegir de antemano qué palabra buscar. Para el minuto del juicio conviene haber sumado de antemano un par de piezas y un testigo al ofrecimiento, así los avisos ya se ven.

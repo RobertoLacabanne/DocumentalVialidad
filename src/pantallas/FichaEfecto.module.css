@@ -170,3 +170,9 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.iconoEscaneo {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--cat-documental-texto);
+}

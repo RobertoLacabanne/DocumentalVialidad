@@ -1,10 +1,11 @@
 // Capturas de las pantallas en 1440×900 y 390×844, como pide la skill de diseño.
 // Requiere: npm run db:start, node scripts/preparar-local.mjs --ejemplos,
 // node e2e/fixtures/generar-planillas.mjs y npm run dev.
-// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,contrataciones,mensajes,juicio,cronologia,relaciones,diseno,acceso]
+// Uso: npm run capturas [-- --solo=inicio,importar,efectos,personas,busqueda,indice,ficha,equipo,contrataciones,mensajes,juicio,cronologia,relaciones,documentos,ufed,diseno,acceso]
 // La importación se hace en la primera pasada (1440); en la segunda solo se revisa.
 import { chromium } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { pdfConImagen, pdfConTexto } from '../e2e/fixtures/pdf.mjs';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:5173';
 const SALIDA = 'capturas';
@@ -76,7 +77,7 @@ for (const [n, t] of TAMANOS.entries()) {
     await foto(p, 'acceso', t);
   }
 
-  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo', 'contrataciones', 'mensajes', 'juicio', 'cronologia', 'relaciones'];
+  const resto = ['inicio', 'importar', 'efectos', 'personas', 'busqueda', 'indice', 'ficha', 'equipo', 'contrataciones', 'mensajes', 'juicio', 'cronologia', 'relaciones', 'documentos', 'ufed'];
   if (resto.some(quiero)) {
     const causa = await entrar(p);
 
@@ -301,6 +302,70 @@ for (const [n, t] of TAMANOS.entries()) {
         await foto(p, 'relaciones-ficha', t);
         await p.keyboard.press('Escape');
       }
+    }
+    if (quiero('documentos')) {
+      await p.goto(`${causa}/documentos`);
+      await p.getByRole('heading', { name: 'Documentos y escaneos' }).waitFor();
+      if (n === 0) {
+        await foto(p, 'documentos-vacio', t);
+        // Una carpeta «EFECTO 48435» (el efecto de ejemplo) con un PDF con texto y otro que es solo imagen. Todo inventado.
+        const jpeg = await p.evaluate(() => {
+          const c = document.createElement('canvas');
+          c.width = 1240;
+          c.height = 1754;
+          const x = c.getContext('2d');
+          x.fillStyle = '#fff';
+          x.fillRect(0, 0, c.width, c.height);
+          x.fillStyle = '#111';
+          x.font = '44px Arial';
+          ['REMITO N° 0002-00001234 (ejemplo local)', 'Proveedora Ejemplo SRL', 'Entrega de materiales viales', 'Licitación Pública LP 99/2026', 'Firma y aclaración del receptor'].forEach((l, i) =>
+            x.fillText(l, 110, 200 + i * 90),
+          );
+          return c.toDataURL('image/jpeg', 0.92).split(',')[1];
+        });
+        const carpeta = `${SALIDA}/escaneos/EFECTO 48435`;
+        mkdirSync(carpeta, { recursive: true });
+        writeFileSync(`${carpeta}/Remito escaneado (ejemplo).pdf`, pdfConImagen(Buffer.from(jpeg, 'base64'), 1240, 1754));
+        writeFileSync(
+          `${carpeta}/Compras de ejemplo.pdf`,
+          pdfConTexto([
+            ['Compras de ejemplo local', 'Factura B 0024-00004850', 'Referencia: Licitación Pública LP 99/2026', 'Constructora Ejemplo SA'],
+            ['Segunda hoja del documento de ejemplo', 'Detalle de materiales entregados en la planta'],
+          ]),
+        );
+        await p.locator('input[aria-label="Elegir una carpeta para leer"]').setInputFiles(carpeta);
+        await p.getByText('Lectura terminada').waitFor({ timeout: 120000 });
+      }
+      await foto(p, 'documentos', t);
+      await medir('documentos');
+      await p.getByRole('button', { name: /^Sugerencias/ }).click();
+      await p.waitForTimeout(300);
+      await foto(p, 'documentos-sugerencias', t);
+      await medir('documentos sugerencias');
+      await p.getByRole('button', { name: 'Documentos', exact: true }).click();
+      const fila = p.getByRole('row', { name: /Remito escaneado/ }).first();
+      await fila.waitFor({ timeout: 10000 }).catch(() => undefined);
+      if (await fila.count()) {
+        await fila.click();
+        await p.getByRole('complementary', { name: /Ficha del documento/ }).waitFor();
+        await foto(p, 'documentos-ficha', t);
+        await p.keyboard.press('Escape');
+      }
+      await p.getByRole('button', { name: 'Traer texto de AppUFIL' }).click();
+      await p.getByRole('dialog', { name: 'Traer texto de AppUFIL' }).waitFor();
+      await foto(p, 'documentos-appufil', t);
+      await p.keyboard.press('Escape');
+    }
+    if (quiero('ufed')) {
+      await p.goto(`${causa}/importar-conversacion`);
+      await p.getByRole('heading', { name: 'Importar una conversación' }).waitFor();
+      await p.locator('input[type=file]').setInputFiles(`${PLANILLAS}/reporte-ufed-prueba.xlsx`);
+      await p.getByRole('list', { name: 'Chats del reporte' }).waitFor();
+      await foto(p, 'ufed-chats', t, true);
+      await medir('ufed');
+      await p.getByRole('button', { name: 'Revisar este chat' }).first().click();
+      await p.getByText('Revisión').first().waitFor();
+      await foto(p, 'ufed-revision', t);
     }
     if (quiero('equipo')) {
       await p.goto(`${causa}/equipo`);

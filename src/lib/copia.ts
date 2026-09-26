@@ -8,7 +8,7 @@ const TABLAS_POR_CAUSA = [
   'caratula_historial', 'procedimiento', 'informe', 'efecto', 'conversacion', 'mensaje', 'marca', 'pieza',
   'enlace', 'persona', 'identificador', 'rol_en_causa', 'contratacion', 'paso_tramite', 'oferta',
   'incidencia_procesal', 'incidencia_alcance', 'ofrecimiento_item', 'acto_procesal', 'vinculo', 'tarea',
-  'sugerencia', 'importacion', 'auditoria',
+  'sugerencia', 'importacion', 'documento', 'documento_pagina', 'auditoria',
 ] as const;
 
 async function traerTabla(tabla: string, causaId: string) {

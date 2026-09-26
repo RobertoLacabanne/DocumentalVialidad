@@ -47,6 +47,22 @@ Desde la Fase 3 (`20260929100000_fase3_juicio.sql`, probada por `supabase/tests/
 - `cronologia(causa)`: una sola línea de tiempo con piezas fechadas, mensajes relevantes, pasos de trámite, allanamientos, actos procesales (`acto_procesal`, que suma `link`) y planteos y resoluciones de las incidencias, cada hito con las fichas vinculadas (`relacionados`).
 - `vinculo` suma `fuente`: de dónde surge una relación entre personas (tipo `relacionado`, la relación va en `nota`). Se edita con `guardar_campo()` y queda en el historial.
 
+Desde la Fase 4 (`20260930100000_fase4_documentos.sql`, probada por `supabase/tests/fase4.sql`):
+
+- `documento`: un archivo leído, identificado por su huella SHA-256 (única por causa: el mismo contenido con otro nombre es el mismo documento). Guarda nombre, ruta dentro de la carpeta arrastrada, tamaño, páginas, origen (`navegador` o `appufil`), estado (`leyendo`/`completo`), `indexado_en`, link del Drive, efecto y pieza. La huella y el tamaño no se pueden modificar (disparador `a_huella`, y `guardar_campo()` los rechaza). Pasa por el historial como cualquier ficha y está en Realtime.
+- `documento_pagina`: el texto de cada página con su método (`capa_texto`, `ocr`, `appufil`), motor y confianza, e índice de texto completo en castellano. Es un derivado del original (se puede volver a leer): no se audita página por página. Vista `documento_resumen`: páginas leídas, con texto, confianza media del OCR y métodos.
+- `registrar_documento()` da de alta un archivo o devuelve el que ya estaba con esa huella (y cuántas páginas tiene leídas, para seguir). `guardar_paginas()` guarda tandas de páginas sin pisar lo ya leído (salvo pedido expreso) y, con todas, deja el documento completo con su fecha de indexado.
+- Sugerencias: `guardar_sugerencias()` las carga como pendientes sin repetirlas (índice `sugerencia_unica`: una descartada no vuelve); `resolver_sugerencia()` la aplica recién cuando una persona la confirma (asocia el efecto o la pieza, o crea el vínculo con de dónde salió) y registra quién y cuándo.
+- `buscar()` suma los documentos por nombre y el texto de sus páginas (primero elige las páginas que más coinciden y recién después arma el fragmento, para que ande con miles de páginas).
+
+Del lado de la app:
+
+- **OCR en el navegador** (`lib/lector.ts`, `datos/lectura.tsx`): pdf.js saca la capa de texto; si la página es una imagen, se dibuja a unos 2.200 px de ancho y se lee con tesseract.js (castellano, motor LSTM), con 1 a 4 trabajadores según los núcleos. Se usa la versión **legacy** de pdf.js, que trae lo que les falta a los navegadores que no son de este año. La cola vive en el marco de la causa (sigue aunque se cambie de pantalla), guarda de a 4 páginas y retoma por huella.
+- **Nada del OCR depende de un CDN:** `scripts/copiar-ocr.mjs` copia a `public/ocr/` el trabajador de tesseract.js, su núcleo en WebAssembly (solo las variantes LSTM) y los datos del castellano (`@tesseract.js-data/spa`, `best_int`). Corre en `postinstall` y en `npm run build`; `public/ocr/` no se versiona. Se baja solo cuando alguien usa el OCR (unos 6 MB, con caché de una semana).
+- `lib/sugerencias.ts`: propone el efecto por la carpeta o el nombre del archivo («EFECTO 48435»), contrataciones por identificador (reconoce «LP 05/2020», «Licitación Pública Nº 5/20», «L.P. 05-2020») o por número de expediente, personas por CUIT, efectos mencionados y piezas por huella o nombre de archivo. Solo compara contra lo que ya existe en la causa: nunca crea fichas.
+- **AppUFIL** (evaluado e integrado sin acoplarlo): es un sistema offline (Python, PyMuPDF y Tesseract, una base SQLite por legajo) que lee mejor los escaneos (endereza las hojas, compara dos lecturas). El único contrato entre las dos aplicaciones es el «paquete de texto» (`tablero-texto/1`, un JSON con la huella y el texto de cada página). Lo arma `public/herramientas/appufil-a-tablero.py` (solo biblioteca estándar, abre la base en solo lectura, toma la mejor lectura de cada página con la misma regla que el buscador de AppUFIL y reconstruye los renglones con las coordenadas; de la ruta original guarda solo carpeta y archivo). Se baja desde el diálogo y lo prueba `herramientas/test_appufil_a_tablero.py`; se verificó también contra el esquema real de AppUFIL.
+- `lib/ufed.ts`: reportes de UFED exportados a Excel. Encuentra la hoja de chats y la fila de encabezados, reconoce columnas en inglés y castellano (se pueden cambiar a mano), arrastra los datos del chat de las celdas combinadas y agrupa por chat. La fecha se guarda tal cual; la fecha interpretada, solo si es clara (si puede ser día/mes o mes/día, se toma día/mes y se avisa). **Pendiente:** probarlo contra un reporte real del Gabinete; los reportes en HTML y PDF no se leen (desde UFED Reader se exportan a Excel).
+
 Lectores y generador del lado de la app (con pruebas en `src/lib/*.test.ts`):
 
 - `lib/contrataciones.ts`: lee una hoja con el formato de la planilla (encabezado PROCEDIMIENTO · Fs. · FECHA · FIRMANTE · OBSERVACIONES), une las filas combinadas al paso de arriba (el link suele venir en la fila siguiente), arma el cuadro de ofertas con los pasos que empiezan con «Oferta» y propone como sugerencia los montos escritos (uno solo por oferta). Repone la «/» que Excel no admite en el nombre de la hoja.
@@ -64,23 +80,28 @@ src/
   styles/        tokens.css (único lugar de colores, tipografía, espaciado) y base.css
   componentes/   piezas del sistema de diseño: marcas, botones, tabla, panel, ficha, estados,
                  tarjeta de efecto, búsqueda global (Ctrl+K), menú de exportar
-  pantallas/     acceso, causas, inicio, índice, efectos, contrataciones, personas (directorio y
-                 grafo de relaciones), mensajes, cronología, juicio, importadores (efectos,
-                 contrataciones, conversaciones), informe, equipo, fichas, sistema de diseño (/diseno)
-  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts, hechos.ts, juicio.ts), guardado con
+  pantallas/     acceso, causas, inicio, índice, efectos, documentos, contrataciones, personas
+                 (directorio y grafo de relaciones), mensajes, cronología, juicio, importadores
+                 (efectos, contrataciones, conversaciones y reportes UFED), informe, equipo, fichas,
+                 sistema de diseño (/diseno)
+  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts, hechos.ts, juicio.ts,
+                 documentos.ts), cola de lectura de documentos (lectura.tsx), guardado con
                  cola sin conexión, presencia
   lib/           orden jerárquico, cita, fechas, etiquetas, links de Drive, importación de
                  planillas, exportación, copia completa, comparación de nombres, lectura de
                  contrataciones y de transcripciones, informe .docx, resaltado, ofrecimiento y
-                 listado para la remisión, cronología, grafo y su disposición (con pruebas)
+                 listado para la remisión, cronología, grafo y su disposición, documentos, lector
+                 (pdf.js + tesseract.js), sugerencias y reportes UFED (con pruebas)
 supabase/
   migrations/    esquema
   seed.sql       datos reales del legajo 299113 (solo lo que figura en las fuentes)
   tests/         pruebas SQL de las reglas
-e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K, Fase 2, Fase 3);
+public/herramientas/appufil-a-tablero.py   script para traer el texto de AppUFIL (se baja desde la app)
+herramientas/    prueba del script de AppUFIL (python3 -m unittest herramientas/test_appufil_a_tablero.py)
+e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K, Fases 2, 3 y 4);
                  fixtures/generar-planillas.mjs arma planillas y una transcripción .docx sintéticas
                  con la forma de las reales
-scripts/         preparar-local, capturas, test-sql, configurar-produccion
+scripts/         preparar-local, capturas, test-sql, configurar-produccion, copiar-ocr
 ```
 
 ## Desarrollo local
@@ -104,11 +125,15 @@ En `.env.local` local conviene `VITE_ACCESO_CON_CLAVE=true` para entrar con corr
 ```bash
 npm run typecheck      # tipos
 npm test               # lógica: orden, citas, fechas, links, importación, nombres, contrataciones,
-                       # transcripciones, informe .docx, resaltado, ofrecimiento, cronología, grafo (67)
-npm run db:test        # reglas de la base, Fase 1, Fase 2 y Fase 3 (92 comprobaciones)
+                       # transcripciones, informe .docx, resaltado, ofrecimiento, cronología, grafo,
+                       # documentos, sugerencias, reportes UFED (85)
+python3 -m unittest herramientas/test_appufil_a_tablero.py   # script de AppUFIL (3)
+npm run db:test        # reglas de la base, Fases 1 a 4 (119 comprobaciones)
 npm run test:e2e       # dos personas a la vez, importaciones, tablero en vivo, Ctrl+K, mensajes
                        # relevantes en vivo, vínculos e informe descargado y verificado, ofrecimiento
-                       # con aviso procesal, listado .docx verificado, cronología y relaciones (7)
+                       # con aviso procesal, listado .docx verificado, cronología y relaciones,
+                       # carpeta de escaneos leída con capa de texto y OCR, sugerencias validadas,
+                       # texto encontrado con Ctrl+K, paquete de AppUFIL y chats de un reporte UFED (8)
 node e2e/fixtures/generar-planillas.mjs   # planillas y transcripción sintéticas en e2e/fixtures/generadas/
 npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas (importa las planillas sintéticas)
 ```
@@ -117,18 +142,18 @@ Antes de publicar, probar también el build de producción: `npm run build && np
 
 ## Puesta en marcha de producción
 
-### Estado actual (26/09/2026, Fase 3)
+### Estado actual (26/09/2026, Fase 4)
 
 | Pieza | Valor |
 |---|---|
 | Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
 | URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
-| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente`, `20260927100000_fase1_efectos_importacion`, `20260928100000_fase2_contrataciones_mensajes`, `20260928110000_fase2_completar_contratacion` y `20260929100000_fase3_juicio` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente`, `20260927100000_fase1_efectos_importacion`, `20260928100000_fase2_contrataciones_mensajes`, `20260928110000_fase2_completar_contratacion`, `20260929100000_fase3_juicio` y `20260930100000_fase4_documentos` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
 | Auth | Site URL y redirecciones configuradas; «Entrar con Google» activo (proyecto de Google Cloud «Tablero de Prueba», cliente web `283725982972-….apps.googleusercontent.com`) |
 | Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
 | Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |
 
-Las pruebas de `supabase/tests/reglas.sql`, `supabase/tests/fase2.sql` y `supabase/tests/fase3.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro). Para correr un archivo de pruebas por la API de administración hay que sacarle las líneas que empiezan con `\` (son comandos de psql).
+Las pruebas de `supabase/tests/reglas.sql`, `supabase/tests/fase2.sql`, `supabase/tests/fase3.sql` y `supabase/tests/fase4.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro). Para correr un archivo de pruebas por la API de administración hay que sacarle las líneas que empiezan con `\` (son comandos de psql).
 
 ### Con el script (recomendado)
 
@@ -180,12 +205,13 @@ La primera persona que entra con Google queda habilitada automáticamente (la li
   npx supabase db dump --linked --data-only -f copia-datos-$(date +%F).sql
   npx supabase db dump --linked -f copia-esquema-$(date +%F).sql
   ```
-- **Copia completa de la causa** (botón en **Inicio**): un .zip con `causa.json` (todas las tablas de la causa, incluido lo archivado y la `auditoria` completa) y una planilla CSV por tabla. Es la copia que puede guardar cualquiera del equipo en el Drive de la UFIL, sin credenciales. Sirve como resguardo legible y para auditar; para reconstruir la base entera se usa el volcado de arriba. La exportación semanal automática queda pendiente.
+- **Copia completa de la causa** (botón en **Inicio**): un .zip con `causa.json` (todas las tablas de la causa, incluido lo archivado, el texto de los documentos leídos y la `auditoria` completa) y una planilla CSV por tabla. Es la copia que puede guardar cualquiera del equipo en el Drive de la UFIL, sin credenciales. Sirve como resguardo legible y para auditar; para reconstruir la base entera se usa el volcado de arriba. La exportación semanal automática queda pendiente.
 - **Restaurar en un proyecto nuevo:** crear el proyecto, aplicar `supabase/migrations/` (o `copia-esquema`), después `psql "<cadena de conexión>" -f copia-datos-AAAA-MM-DD.sql`. Revisar que la tabla `auditoria` quede con la misma cantidad de filas que en la copia.
 - **Recuperar algo pisado por error:** está en `auditoria` (columna `cambios` o `antes`). La ficha muestra el historial; restaurar un valor es volver a cargarlo, y queda registrado.
 
 ## Límites a tener en cuenta (verificados el 26/09/2026)
 
-- Supabase gratuito: 500 MB de base, 200 conexiones en tiempo real, pausa tras una semana sin uso, sin copias. Pro: desde US$ 25/mes.
+- Supabase gratuito: 500 MB de base, 200 conexiones en tiempo real, pausa tras una semana sin uso, sin copias. Pro: desde US$ 25/mes (8 GB de base).
+- Texto de los escaneos: cada página ocupa unos 5 KB con su índice. En el plan gratuito entran unas 60.000 páginas además del resto; con Pro, no es un límite práctico.
 - Netlify gratuito: 300 créditos por mes; si se agotan, el sitio queda pausado hasta el mes siguiente. Personal: US$ 9/mes.
 - Correo de Supabase por defecto: solo a miembros del proyecto y 2 por hora. No afecta al acceso con Google.

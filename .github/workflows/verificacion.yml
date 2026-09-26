@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - name: Script que trae el texto de AppUFIL
+        run: python3 -m unittest herramientas/test_appufil_a_tablero.py
       - run: npm run build
 
   base:

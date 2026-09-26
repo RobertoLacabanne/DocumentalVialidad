@@ -1,6 +1,6 @@
 # Tablero de Prueba
 
-El índice vivo de la prueba de una causa, para la Unidad Fiscal de Investigación y Litigación de Paraná. Es el cuadro de siempre (una fila por pieza, con su número de orden, su cita y el link al Drive) pero compartido en tiempo real, con historial y con la situación procesal de cada documento a la vista. Suma el tablero de los efectos secuestrados, las contrataciones investigadas con su trámite a fojas, un lector de las conversaciones extraídas de los teléfonos que arma el informe de relevamiento, el directorio de personas y empresas con su grafo de relaciones, la cronología de la causa, la preparación del juicio con los avisos procesales y un buscador que encuentra cualquier cosa de la causa.
+El índice vivo de la prueba de una causa, para la Unidad Fiscal de Investigación y Litigación de Paraná. Es el cuadro de siempre (una fila por pieza, con su número de orden, su cita y el link al Drive) pero compartido en tiempo real, con historial y con la situación procesal de cada documento a la vista. Suma el tablero de los efectos secuestrados, las contrataciones investigadas con su trámite a fojas, un lector de las conversaciones extraídas de los teléfonos que arma el informe de relevamiento, el directorio de personas y empresas con su grafo de relaciones, la cronología de la causa, la preparación del juicio con los avisos procesales, el texto de los escaneos para buscar adentro y un buscador que encuentra cualquier cosa de la causa.
 
 **Dirección:** https://tablero-prueba-ufil.netlify.app
 
@@ -17,6 +17,7 @@ Los archivos siguen en el Drive de la UFIL. El tablero no los toca: guarda los l
 - **Inicio:** cómo viene la causa. El avance de los efectos, cuánto lleva cada uno, las alertas procesales, lo pendiente y lo último que pasó. Desde acá se baja la copia completa de la causa.
 - **Índice de prueba:** una fila por pieza, como el cuadro Urribarri.
 - **Efectos:** cada cosa secuestrada. En **Tablero** se arrastran las tarjetas entre columnas (Sin iniciar, En proceso, Escaneado, Finalizado, Observado); en **Por allanamiento** se ven agrupadas por procedimiento, y se pueden marcar varias para cargarles una situación procesal de una vez.
+- **Documentos:** los escaneos leídos. Se arrastran los PDF (o la carpeta entera del Drive) y el texto de cada página queda buscable con `Ctrl + K`. El archivo se lee en tu computadora: no se sube ni se modifica. Acá también está la bandeja de **sugerencias** para validar.
 - **Contrataciones:** una ficha por licitación con el trámite paso a paso (fojas, fecha tal cual figura, firmante), el cuadro comparativo de ofertas con la menor marcada y la diferencia contra el presupuesto oficial, y los mensajes y piezas que la prueban.
 - **Personas y empresas:** el directorio de la causa, con teléfonos, CUIT y cómo figura cada uno agendado en los celulares. Con **Relaciones** se ve el grafo: quién es socio, familiar o empleado de quién, qué empresas ofertaron en cada contratación y quiénes aparecen juntos en una conversación.
 - **Mensajes:** las conversaciones de los teléfonos, como un chat, en orden y con la fecha de cada mensaje. Se marcan los relevantes, se les escribe la observación y se vinculan a su contratación. Desde acá sale el **Informe de relevamiento de mensajes** en Word.
@@ -49,6 +50,28 @@ Importar dos veces la misma planilla no duplica nada: lo que ya está cargado no
 
 Los montos que falten se completan tocando la oferta en la ficha, escritos como en el expediente (18.415.263,50).
 
+## Cómo leer escaneos para buscar adentro
+
+1. Bajá del Drive el PDF o la carpeta entera (en el Drive: clic derecho sobre la carpeta → **Descargar**, y descomprimí el .zip).
+2. En **Documentos**, arrastrá los archivos o la carpeta, o usá **Leer escaneos** / **Elegir carpeta**.
+3. La app calcula la **huella SHA-256** de cada archivo y lee cada página: si el PDF ya trae texto, lo toma tal cual; si la página es una imagen, le hace **OCR en castellano**. Arriba ves el avance. Podés seguir trabajando en otra pantalla (el riel muestra el progreso), pero no cierres la pestaña.
+4. Si se corta, volvé a arrastrar el archivo: lo reconoce por la huella y sigue desde la página donde quedó. Si lo arrastra otra persona, tampoco se duplica.
+5. Listo: `Ctrl + K` encuentra las palabras de los escaneos, y al elegir un resultado se abre la página con el término resaltado.
+
+**Qué esperar del OCR:** lee bien lo impreso (facturas, remitos, expedientes); lo escrito a mano (las agendas, por ejemplo) casi no lo lee. El texto leído por máquina sirve para **encontrar** el documento, no para citarlo: citá siempre el original. Para volúmenes grandes conviene AppUFIL, que lee mejor (endereza las hojas y compara dos lecturas).
+
+## Sugerencias para validar
+
+Al leer un documento, la app propone de qué efecto es (si la carpeta o el archivo se llaman «EFECTO 48435»), qué contratación menciona (por el identificador, como «Licitación Pública Nº 5/20», o por el número de expediente), qué persona (por el CUIT) y si ya es una pieza del índice (por la huella o el nombre del archivo). **Nada se aplica solo:** en **Documentos → Sugerencias** (o en la ficha del documento) alguien la confirma y queda con su nombre, o la descarta y no vuelve a aparecer. El menú muestra cuántas hay pendientes.
+
+## Cómo traer el texto de AppUFIL
+
+Si los escaneos ya se procesaron en AppUFIL, no hace falta volver a leerlos:
+
+1. En **Documentos → Traer texto de AppUFIL**, bajá el script `appufil-a-tablero.py`.
+2. En la computadora de AppUFIL, corrélo sobre la base del legajo: `python3 appufil-a-tablero.py datos/legajos/<legajo>/ufil.sqlite`. Lee la base sin modificarla y arma un archivo `texto-para-el-tablero-….json`.
+3. Llevá ese archivo (en un pendrive, si AppUFIL está sin internet) y elegilo en el mismo diálogo. Se reconocen por la huella los documentos que ya estaban; podés elegir reemplazar su texto por el de AppUFIL.
+
 ## Cómo importar una conversación
 
 1. Abrí la transcripción en el Drive (por ejemplo, desde APUNTES LEG. 299113) y bajala como Word: **Archivo → Descargar → Microsoft Word (.docx)**. También sirve el .txt que exporta WhatsApp, o pegar el texto.
@@ -56,6 +79,8 @@ Los montos que falten se completan tocando la oferta en la ficha, escritos como 
 3. **Revisión:** la app separa fecha, remitente y mensaje, y te muestra todo en una tabla. Entiende las dos formas que usa el equipo («Remitente: …» / «Mensaje: …» y «Nombre:» seguido del texto), los audios e imágenes, y la hora cuando figura. Las notas entre paréntesis del analista, como «(al otro día)», no se importan como mensajes; las **notas al pie** pasan a la observación del mensaje. Destildá lo que no sea un mensaje (resúmenes del analista, tramos repetidos: la app avisa cuando ve el mismo texto dos veces) y corregí el remitente si no lo reconoció.
 4. Completá los datos del encabezado (título, participantes, efecto, titular, número, cómo estaba agendado): son los que usa el informe.
 5. **Importar.** El texto de cada mensaje queda **literal** y ya no se puede editar: se guarda con su huella SHA-256.
+
+**Desde un reporte de UFED:** en UFED Reader, exportá el reporte a **Excel (.xlsx)** y arrastralo en el mismo lugar. La app encuentra la hoja de chats, reconoce las columnas (Body/Mensaje, From/De, fecha y hora…) y te muestra cuáles tomó: si alguna no es, la cambiás. Cada chat se revisa e importa como una conversación, con la fecha tal cual figura en el reporte; después podés seguir con otro chat del mismo reporte. Si las fechas pueden leerse como día/mes o mes/día, avisa.
 
 ## Cómo marcar mensajes y sacar el informe
 
@@ -120,7 +145,7 @@ Desde la misma pantalla se puede cambiar el alias de alguien (con el lápiz que 
 | 1 | Inicio, efectos (tablero y por allanamiento), personas y empresas, búsqueda global, importación de planillas, exportar a Excel, copia completa | Lista |
 | 2 | Contrataciones con trámite y ofertas, lector de mensajes, relevantes y vínculos, informe de relevamiento en .docx | Lista |
 | 3 | Preparación del juicio con avisos procesales y listado para la remisión, cronología exportable a PDF, grafo de relaciones | Lista |
-| 4 | OCR y sugerencias automáticas (siempre pendientes de validar) | Opcional |
+| 4 | Texto de los escaneos (capa del PDF y OCR en el navegador), búsqueda adentro, texto de AppUFIL, sugerencias para validar, reportes de UFED en Excel | Lista |
 
 ## Si algo no anda
 

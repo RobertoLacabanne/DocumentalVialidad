@@ -282,3 +282,78 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Reporte de UFED: columnas reconocidas y lista de chats */
+.columnasUfed {
+  display: grid;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-fondo);
+}
+.columnasResumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--esp-2);
+  font-size: var(--texto-sm);
+}
+.columnaChip {
+  padding: 2px 9px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pill);
+  background: var(--color-superficie);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.columnasGrilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: start;
+  gap: var(--esp-3);
+}
+.chats {
+  display: grid;
+  gap: var(--esp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chat {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+}
+.chatIcono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--cat-mensaje-fondo);
+  color: var(--cat-mensaje-texto);
+}
+.chatIcono :global(svg.lucide) {
+  width: 17px;
+  height: 17px;
+}
+.chatCuerpo {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.chatCuerpo strong {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 860px) {
+  .chat {
+    flex-wrap: wrap;
+  }
+}

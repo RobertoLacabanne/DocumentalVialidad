@@ -212,6 +212,63 @@
   white-space: nowrap;
 }
 
+.cuentaNav {
+  position: relative; /* contiene el texto oculto para lectores de pantalla dentro del menú que se desplaza */
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radio-pill);
+  background: var(--color-acento-fondo);
+  border: 1px dashed var(--color-sugerencia-borde);
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-acento);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lectura de documentos en curso: se ve desde cualquier pantalla. */
+.lectura {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  text-decoration: none;
+  transition: border-color var(--duracion-rapida) var(--curva-salida);
+}
+.lectura:hover {
+  border-color: var(--color-borde-fuerte);
+}
+.lectura:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 1px;
+}
+.lecturaTitulo {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+}
+.lecturaDetalle {
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+  font-variant-numeric: tabular-nums;
+}
+.lecturaBarra {
+  height: 4px;
+  border-radius: var(--radio-pill);
+  background: var(--color-cabecera);
+  overflow: hidden;
+}
+.lecturaBarra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-acento);
+  transition: width var(--duracion-lenta) var(--curva-salida);
+}
+
 .contenido {
   min-width: 0;
   min-height: 0;
@@ -245,6 +302,17 @@
   }
   .causa {
     flex: 1;
+  }
+  .lectura {
+    order: 10;
+    width: 100%;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: var(--esp-2);
+    padding: 6px 10px;
+  }
+  .lecturaBarra {
+    grid-column: 1 / -1;
   }
   .buscar {
     width: var(--alto-control);

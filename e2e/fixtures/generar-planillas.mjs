@@ -124,4 +124,17 @@ const docx = new Document({
 });
 writeFileSync(join(carpeta, 'conversacion-prueba.docx'), await Packer.toBuffer(docx));
 
+// Reporte de extracción con la forma habitual de UFED exportado a Excel: título arriba, encabezados en
+// inglés en la segunda fila y los datos del chat solo en su primera fila (celdas combinadas). Todo inventado.
+const ufed = [
+  [c('Chats (2)')],
+  ['#', 'Chat #', 'Participants', 'Source', 'Instant Message #', 'From', 'To', 'Body', 'Timestamp: Date', 'Timestamp: Time', 'Attachment #1'].map(c),
+  [1, 1, 'Ficticio, Muestra', 'WhatsApp', 1, 'Ficticio', 'Muestra', `Mañana sale la invitación de la ${lp}, arreglá con los otros`, '16/04/2021', '10:23:45(UTC-3)', null].map(c),
+  [2, null, null, null, 2, 'Muestra', 'Ficticio', 'Dale, lo coordinamos entre los tres', '16/04/2021', '10:25:01(UTC-3)', null].map(c),
+  [3, null, null, null, 3, 'Ficticio', 'Muestra', null, '04/05/2021', '19:58:00(UTC-3)', 'IMG-20210504-WA0003.jpg'].map(c),
+  [4, null, null, null, null, null, null, null, null, null, null].map(c),
+  [5, 2, 'Ficticio, Otro', 'SMS', 1, 'Otro', 'Ficticio', `Reporte UFED ${base}: llamame cuando puedas`, '20/05/2021', '08:00:00', null].map(c),
+];
+await writeXlsxFile(ufed, { sheet: 'Chats' }).toFile(join(carpeta, 'reporte-ufed-prueba.xlsx'));
+
 console.log(`Planillas de prueba en ${carpeta} (contrataciones ${lp} y ${cp})`);

@@ -44,6 +44,11 @@ select public.aplicar_incidencia(
   (select id from public.incidencia_procesal where titulo = 'Planteo de prueba F3'),
   array[(select id from public.efecto where numero = '99301')]);
 
+-- Si la causa ya tiene un ofrecimiento cargado, se aparta mientras dura la
+-- prueba (la transacción se deshace al final y queda como estaba).
+update public.ofrecimiento_item set archivado_en = now()
+ where causa_id = current_setting('prueba.causa')::uuid and archivado_en is null;
+
 -- ---------------------------------------------------------------------
 -- 1. Ofrecimiento
 -- ---------------------------------------------------------------------

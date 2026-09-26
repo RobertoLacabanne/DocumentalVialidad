@@ -14,3 +14,5 @@ supabase/.temp/
 .env.produccion
 .claude/settings.local.json
 /e2e/fixtures/generadas/
+/public/ocr/
+__pycache__/

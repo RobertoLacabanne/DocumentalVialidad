@@ -17,6 +17,7 @@ import { ImportarConversacion } from './pantallas/ImportarConversacion';
 import { Indice } from './pantallas/Indice';
 import { Inicio } from './pantallas/Inicio';
 import { Juicio } from './pantallas/Juicio';
+import { Documentos } from './pantallas/Documentos';
 import { Marco } from './pantallas/Marco';
 import { Mensajes } from './pantallas/Mensajes';
 import { Personas } from './pantallas/Personas';
@@ -74,6 +75,7 @@ function Protegida() {
           <Route path="mensajes" element={<Mensajes />} />
           <Route path="cronologia" element={<Cronologia />} />
           <Route path="juicio" element={<Juicio />} />
+          <Route path="documentos" element={<Documentos />} />
           <Route path="importar" element={<Importar />} />
           <Route path="importar-contrataciones" element={<ImportarContrataciones />} />
           <Route path="importar-conversacion" element={<ImportarConversacion />} />

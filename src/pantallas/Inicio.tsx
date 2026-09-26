@@ -354,6 +354,8 @@ const NOMBRE_TABLA: Record<string, string> = {
   conversacion: 'la conversación',
   mensaje: 'un mensaje',
   vinculo: 'un vínculo entre fichas',
+  documento: 'un documento',
+  sugerencia: 'una sugerencia',
 };
 const PLURAL_TABLA: Record<string, [string, string]> = {
   efecto: ['efecto', 'efectos'],
@@ -366,6 +368,7 @@ const PLURAL_TABLA: Record<string, [string, string]> = {
   paso_tramite: ['paso del trámite', 'pasos del trámite'],
   oferta: ['oferta', 'ofertas'],
   vinculo: ['vínculo', 'vínculos'],
+  documento: ['documento leído', 'documentos leídos'],
 };
 
 /** Junta altas seguidas de la misma persona en la misma tabla (una importación trae decenas). */

@@ -25,3 +25,15 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# El OCR del navegador (tesseract.js y los datos del castellano) se sirve desde la app.
+[[headers]]
+  for = "/ocr/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# El script para traer el texto de AppUFIL se baja como texto.
+[[headers]]
+  for = "/herramientas/*"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"

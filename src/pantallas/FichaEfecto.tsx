@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, ExternalLink, FileText, Lock, Pencil, Plus, Smartphone, TriangleAlert, X } from 'lucide-react';
+import { Check, ExternalLink, FileScan, FileText, Lock, Pencil, Plus, Smartphone, TriangleAlert, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Boton, clasesBoton } from '../componentes/Boton';
@@ -51,6 +51,19 @@ export function FichaEfecto({
   const [marcando, setMarcando] = useState(false);
   const [creandoPieza, setCreandoPieza] = useState(false);
 
+  const escaneos = useQuery({
+    queryKey: ['documentos-efecto', efecto.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('documento')
+        .select('id,nombre,paginas')
+        .eq('efecto_id', efecto.id)
+        .is('archivado_en', null)
+        .order('nombre');
+      if (error) throw new Error(error.message);
+      return data as { id: string; nombre: string; paginas: number | null }[];
+    },
+  });
   const piezas = useQuery({
     queryKey: ['piezas-efecto', efecto.id],
     queryFn: async () => {
@@ -401,6 +414,25 @@ export function FichaEfecto({
           </ul>
         ) : (
           <span className={s.tenue}>Todavía no se cargó ninguna pieza de este efecto.</span>
+        )}
+      </Seccion>
+
+      <Seccion titulo={`Escaneos leídos${escaneos.data?.length ? ` · ${escaneos.data.length}` : ''}`}>
+        {escaneos.data?.length ? (
+          <ul className={s.piezas}>
+            {escaneos.data.map((d) => (
+              <li key={d.id}>
+                <Link to={`../documentos?doc=${d.id}`} relative="path" className={s.pieza}>
+                  <FileScan aria-hidden className={s.iconoEscaneo} />
+                  <span>
+                    {d.nombre} <span className={s.tenue}>· {d.paginas ?? '¿?'} págs.</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className={s.tenue}>Ningún escaneo leído está asociado a este efecto. Se asocian desde Documentos.</span>
         )}
       </Seccion>
 
