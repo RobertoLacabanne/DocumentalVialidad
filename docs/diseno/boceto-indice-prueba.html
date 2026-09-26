@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero de Prueba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  /* Superficies */
+  --papel:#FAF9F6;
+  --superficie:#FFFFFF;
+  --riel:#F6F5F1;
+  --cabecera:#F2F1EC;
+  --hover:#F8F7F3;
+  --seleccion:#EDF2F9;
+  --seleccion-borde:#C4D2E6;
+  --linea:#E4E1D8;
+  --linea-suave:#EEECE6;
+  /* Tinta */
+  --tinta:#1E3350;
+  --tinta-hover:#2A4468;
+  --tinta-2:#4A5B73;
+  --tinta-3:#667387;
+  --sobre-tinta:#FFFFFF;
+  --enlace:#2F5A93;
+  --foco:#2F5A93;
+  /* Lacre: solo alertas procesales */
+  --lacre:#A63D2A;
+  --lacre-fondo:#F8E8E4;
+  --lacre-tinta:#8A3121;
+  /* Estados de sistema */
+  --ok:#2F6B4A;
+  --ok-fondo:#E4F1E8;
+  --falta-tinta:#7A6436;
+  --falta-fondo:#FFFBF0;
+  --falta-borde:#D8C9A3;
+  --sug-borde:#9DB3D3;
+  --nota-fondo:#FBF7EC;
+  --nota-borde:#E9DFC6;
+  /* Foliado */
+  --sello-fondo:#FFFEFA;
+  --sello-borde:#B9C2D0;
+  --sello-anillo:#DCE1E9;
+  --etiqueta-fondo:#E9EDF3;
+  /* Familias de pieza (fondo / texto) */
+  --doc-f:#F4EAD5; --doc-t:#6A4B12;
+  --per-f:#E2E9F6; --per-t:#2C4C80;
+  --men-f:#DCF0EE; --men-t:#1D5D58;
+  --con-f:#E5EEDC; --con-t:#3B5A28;
+  --pes-f:#ECE5F6; --pes-t:#56408C;
+  --otr-f:#EEEBE5; --otr-t:#4D4840;
+  /* Avatares */
+  --av-ag-f:#E3ECF7; --av-ag-t:#274B7A;
+  --av-in-f:#F3E6DA; --av-in-t:#7A4222;
+  --av-ca-f:#E3F0E6; --av-ca-t:#2F5E3D;
+  --av-ro-f:#ECE6F5; --av-ro-t:#523D86;
+  --av-fi-f:#EEE9E1; --av-fi-t:#4D4840;
+  /* Tipografía */
+  --serif:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif;
+  --sans:"Inter","Roboto",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --sombra:0 1px 2px rgba(30,51,80,.06),0 14px 36px -18px rgba(30,51,80,.22);
+}
+*{box-sizing:border-box}
+body{
+  background:var(--papel);color:var(--tinta);
+  font:14px/1.5 var(--sans);
+  padding-inline:clamp(16px,3vw,40px);padding-block:28px 56px;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit}
+.pagina{max-width:1580px;margin-inline:auto;display:grid;gap:32px}
+svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--foco);outline-offset:2px}
+
+/* Encabezado del documento */
+.doc-cab{display:grid;gap:10px;max-width:880px}
+.eyebrow{margin:0;font:600 11.5px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-3)}
+.doc-cab h1{margin:0;font:600 clamp(28px,4vw,40px)/1.1 var(--serif);letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:0;font-size:15.5px;color:var(--tinta-2);max-width:68ch}
+.aviso{margin:0;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--tinta-2);background:var(--superficie);border:1px solid var(--linea);border-radius:8px;padding:10px 14px;max-width:88ch}
+.aviso svg{margin-top:2px;color:var(--tinta-3)}
+
+/* Marco de la app */
+.app{
+  display:grid;grid-template-columns:212px minmax(0,1fr) 352px;
+  background:var(--superficie);border:1px solid var(--linea);border-radius:12px;overflow:hidden;box-shadow:var(--sombra);
+  min-height:700px;
+}
+
+/* Riel lateral */
+.riel{background:var(--riel);border-right:1px solid var(--linea);padding:18px 12px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.marca{display:flex;align-items:center;gap:10px;padding-inline:4px}
+.marca-sello{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 13px/1 var(--serif);letter-spacing:.03em;color:var(--tinta);border:1.5px solid var(--tinta);box-shadow:inset 0 0 0 2.5px var(--riel),inset 0 0 0 3.5px var(--tinta);flex:none}
+.marca-nombre{font:600 15px/1.15 var(--serif)}
+.marca-sub{font-size:11.5px;color:var(--tinta-3);letter-spacing:.03em}
+.causa-sel{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:var(--superficie);border:1px solid var(--linea);border-radius:8px;padding:8px 10px;cursor:pointer}
+.causa-sel:hover{border-color:var(--sello-borde)}
+.causa-sel-eti{display:block;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-3)}
+.causa-sel-num{display:block;font:600 14px/1.3 var(--serif);font-variant-numeric:lining-nums tabular-nums}
+.nav{display:grid;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:7px;background:none;text-align:left;font-size:13.5px;font-weight:500;color:var(--tinta-2);cursor:pointer;white-space:nowrap}
+.nav-item:hover{background:var(--superficie);color:var(--tinta)}
+.nav-item.activo{background:var(--superficie);color:var(--tinta);font-weight:600;box-shadow:0 0 0 1px var(--linea)}
+.riel-rotulo{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-3);padding-inline:10px;margin-bottom:6px}
+.equipo ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.equipo li{display:flex;align-items:center;gap:9px;padding:3px 10px;font-size:13px;color:var(--tinta-2)}
+.equipo .donde{margin-left:auto;font-size:11.5px;color:var(--tinta-3)}
+.riel-pie{margin-top:auto;display:grid;gap:8px}
+.guardado{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--ok);background:var(--ok-fondo);border-radius:6px;padding:6px 10px}
+.atajo{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tinta-3);padding-inline:10px}
+kbd{font:600 10.5px/1 var(--sans);color:var(--tinta-2);background:var(--superficie);border:1px solid var(--linea);border-bottom-width:2px;border-radius:4px;padding:3px 5px;white-space:nowrap}
+
+/* Avatares */
+.av{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font:600 9.5px/1 var(--sans);letter-spacing:.02em;flex:none}
+.av.mini{width:20px;height:20px;font-size:8.5px}
+.av-ag{background:var(--av-ag-f);color:var(--av-ag-t)}
+.av-in{background:var(--av-in-f);color:var(--av-in-t)}
+.av-ca{background:var(--av-ca-f);color:var(--av-ca-t)}
+.av-ro{background:var(--av-ro-f);color:var(--av-ro-t)}
+.av-fi{background:var(--av-fi-f);color:var(--av-fi-t)}
+.av.en-linea{box-shadow:0 0 0 2px var(--riel),0 0 0 3.5px var(--ok)}
+.sin-asignar{font-size:12px;color:var(--tinta-3)}
+
+/* Zona principal */
+.principal{min-width:0;display:flex;flex-direction:column}
+.causa{padding:18px 24px 16px;border-bottom:1px solid var(--linea-suave);display:grid;gap:6px}
+.causa-meta{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:12px;color:var(--tinta-3);font-variant-numeric:tabular-nums}
+.causa-meta b{color:var(--tinta);font-weight:600}
+.causa-caratula{margin:0;font:600 18px/1.3 var(--serif);letter-spacing:.02em;text-wrap:balance}
+.causa-caratula span{display:block;font-weight:400;font-size:14.5px;color:var(--tinta-2);letter-spacing:.03em}
+.vista-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 20px;padding:18px 24px 12px}
+.vista-tit{margin:0;font:600 21px/1.2 var(--sans);letter-spacing:-.01em}
+.vista-sub{margin:4px 0 0;font-size:13px;color:var(--tinta-3)}
+.acciones{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;line-height:1;color:var(--tinta);background:var(--superficie);border:1px solid var(--linea);border-radius:7px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--sello-borde);background:var(--hover)}
+.btn-prim{background:var(--tinta);border-color:var(--tinta);color:var(--sobre-tinta)}
+.btn-prim:hover{background:var(--tinta-hover);border-color:var(--tinta-hover)}
+.btn.hecho{color:var(--ok);border-color:var(--ok);background:var(--ok-fondo)}
+.filtros{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:0 24px 14px}
+.buscar{display:flex;align-items:center;gap:8px;flex:1 1 260px;max-width:360px;height:32px;padding:0 8px 0 10px;border:1px solid var(--linea);border-radius:8px;background:var(--superficie);color:var(--tinta-3)}
+.buscar:focus-within{border-color:var(--foco);box-shadow:0 0 0 3px var(--seleccion)}
+.buscar input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:13px;color:var(--tinta)}
+.buscar input::placeholder{color:var(--tinta-3)}
+.filtros-lista{display:flex;flex-wrap:wrap;gap:6px}
+.filtro{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border:1px solid var(--linea);border-radius:15px;background:var(--superficie);font-size:12.5px;font-weight:500;color:var(--tinta-2);cursor:pointer;white-space:nowrap}
+.filtro:hover{border-color:var(--sello-borde);color:var(--tinta)}
+.filtro svg.i{width:14px;height:14px}
+.filtro-proc .cuenta{font-weight:600;color:var(--lacre-tinta)}
+.filtro-proc > svg.i:first-child{color:var(--lacre)}
+.vista-ctrl{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.segmento{display:inline-flex;border:1px solid var(--linea);border-radius:15px;padding:2px;background:var(--cabecera)}
+.segmento button{border:0;background:none;border-radius:13px;padding:0 10px;height:24px;font-size:12px;font-weight:500;color:var(--tinta-2);cursor:pointer}
+.segmento button[aria-pressed="true"]{background:var(--superficie);color:var(--tinta);box-shadow:0 0 0 1px var(--linea)}
+
+/* Tabla (estilo planilla) */
+.tabla-marco{overflow-x:auto;border-top:1px solid var(--linea)}
+.tabla{width:100%;min-width:1120px;border-collapse:separate;border-spacing:0;font-size:13px}
+.tabla th{background:var(--cabecera);color:var(--tinta-2);font-size:12px;font-weight:600;text-align:left;padding:7px 12px;border-bottom:1px solid var(--linea);border-right:1px solid var(--linea);white-space:nowrap}
+.tabla th:last-child{border-right:0}
+.tabla th .orden{display:inline-flex;align-items:center;gap:4px;color:var(--tinta)}
+.tabla td{padding:11px 12px;border-bottom:1px solid var(--linea-suave);vertical-align:top;background:var(--superficie);transition:background-color .12s}
+.tabla tbody tr{cursor:pointer}
+.tabla tbody tr:hover td{background:var(--hover)}
+.tabla tbody tr.sel td{background:var(--seleccion)}
+.tabla tbody tr:focus-visible{outline:2px solid var(--foco);outline-offset:-2px}
+.tabla tr.alerta td:first-child{box-shadow:inset 3px 0 0 var(--lacre)}
+.app[data-densidad="compacta"] .tabla td{padding-block:5px}
+.app[data-densidad="compacta"] .tabla .sub,
+.app[data-densidad="compacta"] .tabla .prec,
+.app[data-densidad="compacta"] .tabla .orig-det{display:none}
+.c-num{white-space:nowrap}
+.tit{font-weight:500;color:var(--tinta)}
+.sub{margin-top:2px;font-size:12px;color:var(--tinta-3)}
+.sub .flecha{color:var(--tinta-3);padding-inline:3px}
+.fecha{font-variant-numeric:tabular-nums}
+.prec{display:block;font-size:11.5px;color:var(--tinta-3)}
+.nada{color:var(--tinta-3)}
+.orig{display:grid;gap:4px;justify-items:start}
+.orig > span:not(.orig-det){white-space:nowrap}
+.orig-det{font-size:12px;color:var(--tinta-2)}
+.lista{display:flex;flex-wrap:wrap;gap:4px}
+.viendo{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:11.5px;color:var(--tinta-3)}
+.rama{display:inline-block;width:12px;height:12px;border-left:1px solid var(--sello-borde);border-bottom:1px solid var(--sello-borde);margin:0 6px 6px 10px;vertical-align:middle}
+.pie-tabla{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;padding:10px 24px;font-size:12.5px;color:var(--tinta-3);border-top:1px solid var(--linea-suave);margin-top:auto}
+.novedad{display:inline-flex;align-items:center;gap:8px;color:var(--tinta-2);background:var(--superficie);border:1px solid var(--linea);border-radius:15px;padding:4px 6px 4px 10px}
+.punto{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px var(--ok-fondo)}
+.link{border:0;background:none;padding:2px 6px;border-radius:4px;color:var(--enlace);font-size:12.5px;font-weight:600;cursor:pointer}
+.link:hover{background:var(--seleccion)}
+
+/* Foliado y etiquetas */
+.folio{display:inline-flex;align-items:baseline;gap:3px;font:600 13.5px/1.2 var(--serif);font-variant-numeric:lining-nums tabular-nums;color:var(--tinta);background:var(--sello-fondo);border:1px solid var(--sello-borde);border-radius:3px;padding:1px 7px 2px;box-shadow:inset 0 0 0 2px var(--sello-fondo),inset 0 0 0 3px var(--sello-anillo);white-space:nowrap}
+.folio i{font:600 9.5px/1 var(--sans);font-style:normal;letter-spacing:.06em;color:var(--tinta-3)}
+.folio.grande{font-size:17px;padding:3px 10px 4px}
+.efecto{position:relative;display:inline-flex;align-items:center;font:600 12px/1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--tinta);background:var(--etiqueta-fondo);padding:4px 8px 4px 17px;border-radius:0 3px 3px 0;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);white-space:nowrap}
+.efecto::before{content:"";position:absolute;left:7px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:var(--superficie)}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1.2 var(--sans);padding:3px 8px;border-radius:4px;white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:2px;background:currentColor;opacity:.6}
+.chip-doc{background:var(--doc-f);color:var(--doc-t)}
+.chip-per{background:var(--per-f);color:var(--per-t)}
+.chip-men{background:var(--men-f);color:var(--men-t)}
+.chip-con{background:var(--con-f);color:var(--con-t)}
+.chip-pes{background:var(--pes-f);color:var(--pes-t)}
+.chip-otr{background:var(--otr-f);color:var(--otr-t)}
+.vin{display:inline-flex;align-items:center;gap:5px;font:500 12px/1.2 var(--sans);padding:2px 8px;border-radius:10px;border:1px solid var(--linea);color:var(--tinta-2);background:var(--superficie);white-space:nowrap}
+.vin::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c,var(--tinta-3))}
+.vin-con{--c:var(--con-t)}
+.vin-pes{--c:var(--pes-t)}
+.sin-id{font-size:11px;font-weight:600;color:var(--pes-t);background:var(--pes-f);border-radius:3px;padding:1px 5px;margin-left:6px;white-space:nowrap}
+.relev{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tinta-2);white-space:nowrap}
+.barras{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.barras b{width:3px;border-radius:1px;background:var(--linea)}
+.barras b:nth-child(1){height:5px}
+.barras b:nth-child(2){height:8.5px}
+.barras b:nth-child(3){height:12px}
+.relev[data-n="1"] b:nth-child(-n+1),
+.relev[data-n="2"] b:nth-child(-n+2),
+.relev[data-n="3"] b:nth-child(-n+3){background:var(--tinta)}
+.relev[data-n="0"]{color:var(--tinta-3)}
+.proc{display:inline-flex;align-items:center;gap:5px;font:600 11.5px/1.25 var(--sans);border-radius:4px;padding:3px 7px;border:1px solid transparent}
+.proc svg.i{width:13px;height:13px}
+.proc-cuestionada{color:var(--lacre-tinta);border-color:var(--lacre);background:var(--superficie)}
+.proc-pendiente{color:var(--lacre-tinta);background:var(--lacre-fondo)}
+.proc-excluida{color:var(--sobre-tinta);background:var(--lacre)}
+.falta{display:inline-block;font:500 11.5px/1.35 var(--sans);color:var(--falta-tinta);background:var(--falta-fondo);border:1px dashed var(--falta-borde);border-radius:3px;padding:0 5px;white-space:nowrap}
+.sug{display:inline-flex;align-items:center;gap:5px;font-weight:500;color:var(--enlace);border-bottom:1px dashed var(--sug-borde)}
+.sug-tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;color:var(--enlace);background:var(--seleccion);border:1px dashed var(--sug-borde);border-radius:3px;padding:0 5px;white-space:nowrap}
+
+/* Panel lateral (ficha) */
+.panel{background:var(--superficie);border-left:1px solid var(--linea);display:flex;flex-direction:column;min-width:0}
+.panel-aviso{margin:12px 20px 0;font-size:12px;color:var(--tinta-2);background:var(--cabecera);border-radius:6px;padding:6px 10px}
+.panel-cab{padding:18px 20px 16px;border-bottom:1px solid var(--linea-suave);display:grid;gap:10px}
+.panel-fila{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel-cerrar{margin-left:auto;border:0;background:none;color:var(--tinta-3);border-radius:6px;padding:4px;cursor:pointer;display:grid;place-items:center}
+.panel-cerrar:hover{background:var(--hover);color:var(--tinta)}
+.panel-tit{margin:0;font:600 26px/1.15 var(--serif);letter-spacing:-.005em;text-wrap:balance}
+.panel-id{font-size:12px;color:var(--tinta-3)}
+.panel-acc{display:flex;flex-wrap:wrap;gap:6px}
+.bloque{padding:14px 20px;border-bottom:1px solid var(--linea-suave);display:grid;gap:9px}
+.bloque h4{margin:0;display:flex;align-items:center;gap:8px;font:600 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-2)}
+.bloque h4 .natur{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:none;border-radius:3px;padding:1px 6px}
+.natur-dato{color:var(--tinta-2);background:var(--cabecera)}
+.natur-interp{color:var(--falta-tinta);background:var(--superficie);border:1px solid var(--nota-borde)}
+.datos{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0;font-size:13px}
+.datos dt{color:var(--tinta-3)}
+.datos dd{margin:0;min-width:0}
+.resumen{margin:0;font-size:13px;color:var(--tinta-2)}
+.enlace-fila{display:grid;gap:3px;padding:9px 10px;border:1px solid var(--linea);border-radius:8px}
+.enlace-eti{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--tinta-3)}
+.enlace-dest{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--enlace)}
+.hash{font-size:11.5px;color:var(--tinta-3)}
+.interpretacion{background:var(--nota-fondo);border-top:1px solid var(--nota-borde);border-bottom:1px solid var(--nota-borde)}
+.interpretacion p{margin:0;font:italic 15px/1.5 var(--serif);color:var(--tinta-2)}
+.estado-ok{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ok)}
+.hereda{font-size:12px;color:var(--tinta-3);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cita{font:14px/1.5 var(--serif);color:var(--tinta);background:var(--papel);border:1px solid var(--linea);border-radius:6px;padding:10px 12px}
+.hist{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.hist li{display:flex;gap:9px;font-size:12.5px;color:var(--tinta-2)}
+.hist b{color:var(--tinta);font-weight:600}
+.hist em{font-style:normal;color:var(--tinta)}
+.hist s{color:var(--tinta-3)}
+.hist time{display:block;font-size:11.5px;color:var(--tinta-3)}
+
+/* Sistema visual */
+.sistema{display:grid;gap:18px}
+.sis-cab{display:grid;gap:6px;max-width:80ch}
+.sis-cab h2{margin:0;font:600 26px/1.2 var(--serif)}
+.sis-cab p{margin:0;color:var(--tinta-2)}
+.sis-grilla{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sis-bloque{background:var(--superficie);border:1px solid var(--linea);border-radius:10px;padding:18px;display:grid;gap:12px;align-content:start}
+.sis-bloque h3{margin:0;font:600 11.5px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-2)}
+.sis-bloque p{margin:0;font-size:13px;color:var(--tinta-2)}
+.muestras{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.muestras li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:4px 10px;font-size:13px}
+.mu{width:28px;height:28px;border-radius:6px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(30,51,80,.14);grid-row:span 2}
+.muestras b{font-weight:600}
+.muestras code{font:500 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:var(--tinta-2)}
+.muestras .uso{grid-column:2 / 4;font-size:12px;color:var(--tinta-3)}
+.tipo-serif{font:600 30px/1.15 var(--serif);letter-spacing:-.01em}
+.tipo-serif-it{font:italic 17px/1.4 var(--serif);color:var(--tinta-2)}
+.tipo-sans{font:500 15px/1.4 var(--sans)}
+.tipo-num{font:600 20px/1.2 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.tipo-eti{font-size:12px;color:var(--tinta-3)}
+.fila-chips{display:flex;flex-wrap:wrap;gap:6px}
+.demo-fila{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--linea-suave);border-radius:6px;box-shadow:inset 3px 0 0 var(--lacre);font-size:13px}
+.par{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.par > div{border-radius:8px;padding:10px 12px;display:grid;gap:4px}
+.par .p-dato{border:1px solid var(--linea)}
+.par .p-interp{background:var(--nota-fondo);border:1px solid var(--nota-borde)}
+.par .p-interp span{font:italic 14px/1.45 var(--serif);color:var(--tinta-2)}
+
+/* Responsive */
+@media (max-width:1600px){
+  .app{grid-template-columns:212px minmax(0,1fr)}
+  .panel{grid-column:2;border-left:0;border-top:1px solid var(--linea);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+  .panel-cab,.panel-aviso{grid-column:1 / -1}
+  .bloque:nth-of-type(odd){border-right:1px solid var(--linea-suave)}
+}
+@media (max-width:1100px){
+  .sis-grilla{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:700px){
+  .sis-grilla{grid-template-columns:minmax(0,1fr)}
+  .panel{grid-template-columns:minmax(0,1fr)}
+  .bloque:nth-of-type(odd){border-right:0}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .riel{flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--linea);gap:12px}
+  .causa-sel{width:auto;flex:1 1 180px}
+  .nav{display:flex;overflow-x:auto;width:100%;padding-bottom:2px}
+  .nav-item{width:auto}
+  .equipo,.riel-pie{display:none}
+  .panel{grid-column:1}
+  .causa,.vista-cab,.filtros{padding-inline:16px}
+  .pie-tabla{padding-inline:16px}
+  .vista-ctrl{margin-left:0}
+  .par{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-inicio" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-indice" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-efectos" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-contrato" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-personas" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></symbol>
+  <symbol id="i-mensajes" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-crono" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-juicio" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0zM19 7l-3 7a3.5 3.5 0 0 0 6 0z"/></symbol>
+  <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-externo" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-editar" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4 10-10"/></symbol>
+  <symbol id="i-abajo" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-arriba" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-columnas" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M9 4v16M15 4v16"/></symbol>
+  <symbol id="i-importar" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-exportar" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-carpeta" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-chispa" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+</svg>
+
+<div class="pagina">
+
+  <header class="doc-cab">
+    <p class="eyebrow">UFIL Paraná · Propuesta visual · 26/09/2026</p>
+    <h1>Tablero de Prueba</h1>
+    <p class="lead">Boceto de la pantalla «Índice de prueba» para el Legajo 299113. Es HTML estático: sirve para discutir el aspecto y la organización antes de escribir la app.</p>
+    <p class="aviso"><svg class="i"><use href="#i-info"/></svg><span>Las filas usan nombres y números que figuran en el prompt maestro. Todo dato que no figura ahí se muestra como <span class="falta">[completar]</span>. Relevancias, responsables, presencia e historial son ilustrativos. No hay ninguna base de datos detrás.</span></p>
+  </header>
+
+  <div class="app" data-densidad="comoda">
+
+    <aside class="riel">
+      <div class="marca">
+        <span class="marca-sello" aria-hidden="true">TP</span>
+        <div><div class="marca-nombre">Tablero de Prueba</div><div class="marca-sub">UFIL Paraná · MPF ER</div></div>
+      </div>
+      <button class="causa-sel" type="button">
+        <span><span class="causa-sel-eti">Causa</span><span class="causa-sel-num">Legajo 299113</span></span>
+        <svg class="i"><use href="#i-abajo"/></svg>
+      </button>
+      <nav class="nav" aria-label="Secciones">
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-inicio"/></svg>Inicio</button>
+        <button type="button" class="nav-item activo" aria-current="page"><svg class="i"><use href="#i-indice"/></svg>Índice de prueba</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-efectos"/></svg>Efectos</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-contrato"/></svg>Contrataciones</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-personas"/></svg>Personas y empresas</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-mensajes"/></svg>Mensajes</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-crono"/></svg>Cronología</button>
+        <button type="button" class="nav-item"><svg class="i"><use href="#i-juicio"/></svg>Juicio</button>
+      </nav>
+      <div class="equipo">
+        <div class="riel-rotulo">En línea ahora</div>
+        <ul>
+          <li><span class="av av-ro en-linea">RO</span>ROBER<span class="donde">vos</span></li>
+          <li><span class="av av-in en-linea">IN</span>INES<span class="donde">Índice</span></li>
+          <li><span class="av av-ca en-linea">CA</span>CARLI<span class="donde">Efectos</span></li>
+          <li><span class="av av-ag">AG</span>AGUS</li>
+          <li><span class="av av-fi">F</span>Fiscal</li>
+        </ul>
+      </div>
+      <div class="riel-pie">
+        <div class="atajo">Buscar en la causa <kbd>Ctrl K</kbd></div>
+        <div class="guardado"><svg class="i"><use href="#i-check"/></svg>Guardado · hace 2 s</div>
+      </div>
+    </aside>
+
+    <main class="principal">
+      <header class="causa">
+        <div class="causa-meta">
+          <span>Legajo Fiscalía <b>299113</b></span>
+          <span>OGA <b>34445</b></span>
+          <span>Dirección Provincial de Vialidad</span>
+        </div>
+        <h2 class="causa-caratula">NN S/ FRAUDE A LA ADMINISTRACIÓN PÚBLICA <span>(DENUNCIA DE DONDA EXEQUIEL MATÍAS)</span></h2>
+      </header>
+
+      <div class="vista-cab">
+        <div>
+          <h3 class="vista-tit">Índice de prueba</h3>
+          <p class="vista-sub">Una fila por pieza, como el cuadro Urribarri, con vínculos, responsables y estado procesal.</p>
+        </div>
+        <div class="acciones">
+          <button type="button" class="btn"><svg class="i"><use href="#i-importar"/></svg>Importar planilla</button>
+          <button type="button" class="btn"><svg class="i"><use href="#i-exportar"/></svg>Exportar</button>
+          <button type="button" class="btn btn-prim"><svg class="i"><use href="#i-mas"/></svg>Nueva pieza</button>
+        </div>
+      </div>
+
+      <div class="filtros">
+        <label class="buscar" for="buscar"><svg class="i"><use href="#i-buscar"/></svg><input id="buscar" type="search" placeholder="Buscar en fichas y mensajes…"><kbd>Ctrl K</kbd></label>
+        <div class="filtros-lista">
+          <button type="button" class="filtro">Tipo<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro">Relevancia<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro">Persona<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro">Contratación<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro">Efecto<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro">Responsable<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro filtro-proc"><svg class="i"><use href="#i-alerta"/></svg>Estado procesal <span class="cuenta">· 1</span><svg class="i"><use href="#i-abajo"/></svg></button>
+        </div>
+        <div class="vista-ctrl">
+          <button type="button" class="filtro">Agrupar: ninguno<svg class="i"><use href="#i-abajo"/></svg></button>
+          <button type="button" class="filtro"><svg class="i"><use href="#i-columnas"/></svg>Columnas</button>
+          <div class="segmento" role="group" aria-label="Densidad de la tabla">
+            <button type="button" data-dens="comoda" aria-pressed="true">Cómoda</button>
+            <button type="button" data-dens="compacta" aria-pressed="false">Compacta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabla-marco">
+        <table class="tabla">
+          <colgroup>
+            <col style="width:96px"><col style="width:168px"><col><col style="width:104px"><col style="width:196px"><col style="width:200px"><col style="width:100px"><col style="width:56px"><col style="width:176px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th><span class="orden">Nº <svg class="i" style="width:12px;height:12px"><use href="#i-arriba"/></svg></span></th>
+              <th>Tipo</th>
+              <th>Título / asunto</th>
+              <th>Fecha</th>
+              <th>Origen</th>
+              <th>Estado procesal</th>
+              <th>Relevancia</th>
+              <th>Resp.</th>
+              <th>Vínculos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>1</span></td>
+              <td><span class="chip chip-doc">Expediente administrativo</span></td>
+              <td><div class="tit">Expte. 154782 – LP 05/2020</div><div class="sub">Dirección Provincial de Vialidad</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="3"><span class="barras"><b></b><b></b><b></b></span>Alta</span></td>
+              <td><span class="av av-ca" title="CARLI">CA</span></td>
+              <td><div class="lista"><span class="vin vin-con">LP 05/2020</span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>2</span></td>
+              <td><span class="chip chip-men">Conversación</span></td>
+              <td><div class="tit">Conversación Meynet – Gervasoni</div><div class="sub">Meynet<span class="flecha">↔</span>Gervasoni · período <span class="falta">[completar]</span></div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span><span class="orig-det">Informe de extracción <span class="falta">[completar]</span></span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="3"><span class="barras"><b></b><b></b><b></b></span>Alta</span></td>
+              <td><span class="av av-ro" title="ROBER">RO</span></td>
+              <td><div class="lista"><span class="vin vin-pes">Meynet</span><span class="vin vin-pes">Gervasoni</span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="rama" aria-hidden="true"></span><span class="folio"><i>Nº</i>2.1</span></td>
+              <td><span class="chip chip-men">Mensaje</span></td>
+              <td><div class="tit">Mensaje sobre el reparto de la cotización</div><div class="sub">Gervasoni<span class="flecha">→</span>Meynet</div><div class="viendo"><span class="av av-in mini">IN</span>INES está viendo esta pieza</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span class="orig-det">Dentro de la conversación Nº 2</span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="3"><span class="barras"><b></b><b></b><b></b></span>Alta</span></td>
+              <td><span class="av av-ro" title="ROBER">RO</span></td>
+              <td><div class="lista"><span class="vin vin-con">Contratación <span class="falta">[completar]</span></span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>3</span></td>
+              <td><span class="chip chip-men">Conversación</span></td>
+              <td><div class="tit">Conversación Meynet – Difiori</div><div class="sub">Meynet<span class="flecha">↔</span>Difiori</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="2"><span class="barras"><b></b><b></b><b></b></span>Media</span></td>
+              <td><span class="av av-ag" title="AGUS">AG</span></td>
+              <td><div class="lista"><span class="vin vin-pes">Meynet</span><span class="vin vin-pes">Difiori</span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>4</span></td>
+              <td><span class="chip chip-men">Conversación</span></td>
+              <td><div class="tit">Conversación Meynet – Fernández (Equivial)</div><div class="sub">Meynet<span class="flecha">↔</span>Fernández</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="2"><span class="barras"><b></b><b></b><b></b></span>Media</span></td>
+              <td><span class="av av-ag" title="AGUS">AG</span></td>
+              <td><div class="lista"><span class="vin vin-pes">Fernández</span><span class="vin vin-pes">Equivial</span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>5</span></td>
+              <td><span class="chip chip-men">Conversación</span></td>
+              <td><div class="tit">Conversación Meynet – “Emiliano”<span class="sin-id">contacto sin identificar</span></div><div class="sub">Así figura agendado en el dispositivo</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="2"><span class="barras"><b></b><b></b><b></b></span>Media</span></td>
+              <td><span class="av av-in" title="INES">IN</span></td>
+              <td><div class="lista"><span class="vin vin-pes">Meynet</span></div></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>6</span></td>
+              <td><span class="chip chip-men">Conversación</span></td>
+              <td><div class="tit">Conversación Forlín – “Francisco”<span class="sin-id">contacto sin identificar</span></div><div class="sub">Así figura agendado en el dispositivo</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="1"><span class="barras"><b></b><b></b><b></b></span>Baja</span></td>
+              <td><span class="av av-ca" title="CARLI">CA</span></td>
+              <td><div class="lista"><span class="vin vin-pes">Forlín</span></div></td>
+            </tr>
+            <tr tabindex="0" class="alerta">
+              <td class="c-num"><span class="folio"><i>Nº</i>11</span></td>
+              <td><span class="chip chip-per">Extracción forense</span></td>
+              <td><div class="tit">Extracción de teléfono celular</div><div class="sub">Titular <span class="falta">[completar]</span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><div class="orig"><span><span class="efecto">EF.</span> <span class="falta">[completar]</span></span></div></td>
+              <td><span class="proc proc-pendiente"><svg class="i"><use href="#i-alerta"/></svg>Extracción suspendida · casación</span></td>
+              <td><span class="relev" data-n="3"><span class="barras"><b></b><b></b><b></b></span>Alta</span></td>
+              <td><span class="av av-ro" title="ROBER">RO</span></td>
+              <td><span class="nada">—</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>14</span></td>
+              <td><span class="chip chip-otr">Acta de procedimiento</span></td>
+              <td><div class="tit">Acta de allanamiento – DPV</div><div class="sub">Firmantes <span class="falta">[completar]</span></div></td>
+              <td><span class="fecha">28/10/2025</span><span class="prec">día exacto</span></td>
+              <td><div class="orig"><span class="orig-det">Procedimiento del 28/10/2025</span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="3"><span class="barras"><b></b><b></b><b></b></span>Alta</span></td>
+              <td><span class="av av-in" title="INES">IN</span></td>
+              <td><span class="nada">—</span></td>
+            </tr>
+            <tr tabindex="0" class="sel" data-ficha="19">
+              <td class="c-num"><span class="folio"><i>Nº</i>19</span></td>
+              <td><span class="chip chip-doc">Documental secuestrada</span></td>
+              <td><div class="tit">Agenda 2021</div><div class="sub">Autor <span class="falta">[completar]</span></div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span class="efecto">EF. 48435</span><span class="orig-det">Sobre <span class="falta">[completar]</span> · fs. <span class="falta">[completar]</span></span><span class="orig-det">Informe C6855</span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="2"><span class="barras"><b></b><b></b><b></b></span>Media</span></td>
+              <td><span class="av av-in" title="INES">IN</span></td>
+              <td><span class="nada">—</span></td>
+            </tr>
+            <tr tabindex="0">
+              <td class="c-num"><span class="folio"><i>Nº</i>23</span></td>
+              <td><span class="chip chip-doc">Documental secuestrada</span></td>
+              <td><div class="tit"><span class="sug"><svg class="i" style="width:13px;height:13px"><use href="#i-chispa"/></svg>‹nombre del archivo en Drive›</span><span class="sug-tag">sugerencia · validar</span></div><div class="sub">Alta rápida desde la carpeta EFECTO 48436</div></td>
+              <td><span class="falta">[completar]</span></td>
+              <td><div class="orig"><span class="efecto">EF. 48436</span></div></td>
+              <td><span class="nada">—</span></td>
+              <td><span class="relev" data-n="0"><span class="barras"><b></b><b></b><b></b></span>Sin evaluar</span></td>
+              <td><span class="sin-asignar">Sin asignar</span></td>
+              <td><span class="nada">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pie-tabla">
+        <span>11 filas de muestra · orden jerárquico por Nº</span>
+        <span class="novedad"><span class="punto" aria-hidden="true"></span>CARLI cargó una pieza nueva · recién <button type="button" class="link">Ver</button></span>
+      </div>
+    </main>
+
+    <aside class="panel" aria-label="Ficha de la pieza seleccionada">
+      <p class="panel-aviso" id="panel-aviso" hidden>En este boceto solo está armada la ficha Nº 19.</p>
+      <div class="panel-cab">
+        <div class="panel-fila">
+          <span class="folio grande"><i>Nº</i>19</span>
+          <span class="chip chip-doc">Documental secuestrada</span>
+          <button type="button" class="panel-cerrar" aria-label="Cerrar ficha"><svg class="i"><use href="#i-cerrar"/></svg></button>
+        </div>
+        <h3 class="panel-tit">Agenda 2021</h3>
+        <div class="panel-id">ID interno inmutable · se asigna al crear la ficha</div>
+        <div class="panel-acc">
+          <button type="button" class="btn btn-prim"><svg class="i"><use href="#i-externo"/></svg>Abrir en Drive</button>
+          <button type="button" class="btn" id="copiar-cita"><svg class="i"><use href="#i-copiar"/></svg><span>Copiar cita</span></button>
+          <button type="button" class="btn"><svg class="i"><use href="#i-editar"/></svg>Editar</button>
+        </div>
+      </div>
+
+      <section class="bloque">
+        <h4>Datos del documento <span class="natur natur-dato">dato objetivo</span></h4>
+        <dl class="datos">
+          <dt>Fecha</dt><dd><span class="falta">[completar]</span></dd>
+          <dt>Autor</dt><dd><span class="falta">[completar]</span></dd>
+          <dt>Destinatario</dt><dd><span class="nada">—</span></dd>
+          <dt>Fojas</dt><dd><span class="falta">[completar]</span></dd>
+        </dl>
+        <p class="resumen">Resumen del contenido: <span class="falta">[completar]</span></p>
+      </section>
+
+      <section class="bloque">
+        <h4>Origen</h4>
+        <dl class="datos">
+          <dt>Efecto</dt><dd><span class="efecto">EF. 48435</span></dd>
+          <dt>Sobre</dt><dd><span class="falta">[completar]</span></dd>
+          <dt>Informe</dt><dd>C6855</dd>
+          <dt>Secuestro</dt><dd><span class="falta">[completar]</span></dd>
+        </dl>
+      </section>
+
+      <section class="bloque">
+        <h4>Enlaces</h4>
+        <div class="enlace-fila">
+          <span class="enlace-eti">Original escaneado</span>
+          <span class="enlace-dest"><svg class="i"><use href="#i-carpeta"/></svg>Carpeta EFECTO 48435 · Google Drive</span>
+          <span class="hash">SHA-256: se toma de Drive al vincular el archivo</span>
+        </div>
+      </section>
+
+      <section class="bloque interpretacion">
+        <h4>Observaciones del analista <span class="natur natur-interp">interpretación</span></h4>
+        <p>Todavía no hay observaciones. Escribí acá por qué importa esta pieza y con qué hecho o contratación se conecta.</p>
+      </section>
+
+      <section class="bloque">
+        <h4>Estado procesal</h4>
+        <div class="estado-ok"><svg class="i"><use href="#i-check"/></svg>Sin incidencias registradas</div>
+        <div class="hereda">Hereda de <span class="efecto">EF. 48435</span> → procedimiento <span class="falta">[completar]</span></div>
+      </section>
+
+      <section class="bloque">
+        <h4>Cita para escritos</h4>
+        <div class="cita" id="cita">Efecto Nº 48435 – Agenda 2021 (Sobre Nº [completar]), fs. [completar], informe C6855, pieza Nº 19</div>
+      </section>
+
+      <section class="bloque">
+        <h4>Historial</h4>
+        <ol class="hist">
+          <li><span class="av av-in mini">IN</span><div><b>INES</b> cambió <em>Relevancia</em>: <s>baja</s> → media<time>hace 4 min</time></div></li>
+          <li><span class="av av-ro mini">RO</span><div><b>ROBER</b> agregó el enlace «Original escaneado»<time>ayer</time></div></li>
+          <li><span class="av av-in mini">IN</span><div><b>INES</b> creó la ficha<time><span class="falta">[fecha]</span></time></div></li>
+        </ol>
+      </section>
+    </aside>
+  </div>
+
+  <section class="sistema" aria-labelledby="sis-tit">
+    <div class="sis-cab">
+      <h2 id="sis-tit">Sistema visual · borrador</h2>
+      <p>Tokens base del estilo «expediente moderno». Todos los pares de texto y fondo superan el contraste AA (4,5:1); los chips de tipo están entre 6,4 y 7,6:1.</p>
+    </div>
+    <div class="sis-grilla">
+      <article class="sis-bloque">
+        <h3>Paleta</h3>
+        <ul class="muestras">
+          <li><span class="mu" style="--c:#FAF9F6"></span><b>Papel</b><code>#FAF9F6</code><span class="uso">Fondo general</span></li>
+          <li><span class="mu" style="--c:#F2F1EC"></span><b>Cabecera</b><code>#F2F1EC</code><span class="uso">Encabezados de tabla, al estilo planilla</span></li>
+          <li><span class="mu" style="--c:#E4E1D8"></span><b>Línea</b><code>#E4E1D8</code><span class="uso">Bordes y divisiones</span></li>
+          <li><span class="mu" style="--c:#1E3350"></span><b>Tinta</b><code>#1E3350</code><span class="uso">Texto principal y botón primario</span></li>
+          <li><span class="mu" style="--c:#4A5B73"></span><b>Tinta 2</b><code>#4A5B73</code><span class="uso">Texto secundario</span></li>
+          <li><span class="mu" style="--c:#2F5A93"></span><b>Enlace</b><code>#2F5A93</code><span class="uso">Links, foco y selección</span></li>
+          <li><span class="mu" style="--c:#A63D2A"></span><b>Lacre</b><code>#A63D2A</code><span class="uso">Solo alertas procesales</span></li>
+          <li><span class="mu" style="--c:#2F6B4A"></span><b>Verde archivo</b><code>#2F6B4A</code><span class="uso">Guardado y presencia</span></li>
+        </ul>
+      </article>
+
+      <article class="sis-bloque">
+        <h3>Tipografía</h3>
+        <div class="tipo-serif">Legajo 299113</div>
+        <div class="tipo-eti">Source Serif 4 · carátulas y títulos de ficha</div>
+        <div class="tipo-serif-it">Observaciones del analista, en itálica, para que la interpretación nunca se confunda con el dato.</div>
+        <div class="tipo-sans">Inter · interfaz, tablas y formularios</div>
+        <div class="tipo-num">48435 · 154782 · 2.1 · 28/10/2025</div>
+        <div class="tipo-eti">Cifras tabulares: las columnas numéricas quedan alineadas</div>
+      </article>
+
+      <article class="sis-bloque">
+        <h3>Chips por familia de pieza</h3>
+        <div class="fila-chips">
+          <span class="chip chip-doc">Documental</span>
+          <span class="chip chip-per">Pericial y forense</span>
+          <span class="chip chip-men">Mensajes y correos</span>
+          <span class="chip chip-con">Contratación</span>
+          <span class="chip chip-pes">Persona o empresa</span>
+          <span class="chip chip-otr">Otros</span>
+        </div>
+        <p>El color identifica la familia; el texto del chip dice el tipo exacto («Expediente administrativo», «Extracción forense»). Así alcanzan seis colores para diez tipos.</p>
+      </article>
+
+      <article class="sis-bloque">
+        <h3>Foliado</h3>
+        <div class="fila-chips">
+          <span class="folio"><i>Nº</i>2</span>
+          <span class="folio"><i>Nº</i>2.1</span>
+          <span class="folio"><i>Nº</i>2.2</span>
+          <span class="folio"><i>Nº</i>2 bis</span>
+          <span class="folio"><i>Nº</i>2 ter</span>
+          <span class="folio"><i>Nº</i>3</span>
+        </div>
+        <p>Los números de orden van en sello, y así se ordenan: 2, 2.1, 2.2, 2 bis, 2 ter, 3. Los efectos llevan etiqueta de secuestro:</p>
+        <div class="fila-chips"><span class="efecto">EF. 48435</span><span class="efecto">EF. 48436</span><span class="efecto">EF. 48438</span></div>
+      </article>
+
+      <article class="sis-bloque">
+        <h3>Estado procesal</h3>
+        <div class="fila-chips">
+          <span class="proc proc-cuestionada"><svg class="i"><use href="#i-alerta"/></svg>Admisibilidad cuestionada</span>
+          <span class="proc proc-pendiente"><svg class="i"><use href="#i-alerta"/></svg>Pendiente de resolución</span>
+          <span class="proc proc-excluida"><svg class="i"><use href="#i-alerta"/></svg>Excluida</span>
+        </div>
+        <div class="demo-fila"><span class="folio"><i>Nº</i>11</span>Las filas con alerta llevan una franja de lacre</div>
+        <p>El lacre no se usa para nada más: si aparece, hay un problema procesal.</p>
+      </article>
+
+      <article class="sis-bloque">
+        <h3>Dato, interpretación y faltantes</h3>
+        <div class="par">
+          <div class="p-dato"><span class="tipo-eti">Dato del documento</span><span>Informe C6855</span></div>
+          <div class="p-interp"><span class="tipo-eti">Interpretación</span><span>Texto del analista</span></div>
+        </div>
+        <div class="fila-chips"><span class="falta">[completar]</span><span class="sug-tag">sugerencia · pendiente de validar</span></div>
+        <p>Lo que falta se ve. Lo que propone una máquina queda en azul punteado hasta que una persona lo confirma.</p>
+      </article>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var app=document.querySelector('.app');
+  var densidad=document.querySelectorAll('[data-dens]');
+  densidad.forEach(function(b){
+    b.addEventListener('click',function(){
+      app.setAttribute('data-densidad',b.getAttribute('data-dens'));
+      densidad.forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    });
+  });
+
+  var filas=document.querySelectorAll('.tabla tbody tr');
+  var aviso=document.getElementById('panel-aviso');
+  filas.forEach(function(tr){
+    function elegir(){
+      filas.forEach(function(f){f.classList.remove('sel');});
+      tr.classList.add('sel');
+      aviso.hidden=(tr.getAttribute('data-ficha')==='19');
+    }
+    tr.addEventListener('click',elegir);
+    tr.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();elegir();}
+    });
+  });
+
+  var boton=document.getElementById('copiar-cita');
+  var cita=document.getElementById('cita');
+  boton.addEventListener('click',function(){
+    var rotulo=boton.querySelector('span');
+    function listo(){
+      rotulo.textContent='Cita copiada';
+      boton.classList.add('hecho');
+      setTimeout(function(){rotulo.textContent='Copiar cita';boton.classList.remove('hecho');},1800);
+    }
+    function seleccionar(){
+      var r=document.createRange();r.selectNodeContents(cita);
+      var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+    }
+    try{navigator.clipboard.writeText(cita.textContent.trim()).then(listo,seleccionar);}
+    catch(e){seleccionar();}
+  });
+
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('buscar').focus();}
+  });
+})();
+</script>
