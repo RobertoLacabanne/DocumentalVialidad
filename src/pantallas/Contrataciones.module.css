@@ -490,6 +490,11 @@ a.metaDato:hover {
 }
 
 /* ------- Cuadro de ofertas ------- */
+/* En pantallas angostas la tabla se desplaza dentro de su marco y la página no se corre. */
+.ofertasMarco {
+  min-width: 0;
+  overflow-x: auto;
+}
 .ofertas {
   width: 100%;
   border-collapse: collapse;

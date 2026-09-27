@@ -26,7 +26,7 @@ import { useContrataciones, useMensajesPorId, usePiezasRef, useVinculos, vinculo
 import { diferenciaPorcentual, formatoPesos, montoEditable } from '../lib/contrataciones';
 import { CAMPOS, valorLegible } from '../lib/etiquetas';
 import { fechaCorta } from '../lib/informe';
-import { haceCuanto } from '../lib/tiempo';
+import { fechaConPrecision, haceCuanto } from '../lib/tiempo';
 import type { Oferta, PasoTramite } from '../lib/tipos';
 import { CabeceraCausa } from './CabeceraCausa';
 import { DialogoOferta, DialogoPaso, NuevaContratacion, guardarMonto } from './DialogosContratacion';
@@ -265,7 +265,7 @@ function Detalle({ c, onVolver }: { c: ContratacionVista; onVolver: () => void }
               {c.pasos.map((p) => (
                 <li key={p.id} className={s.paso}>
                   <div className={s.pasoFecha}>
-                    {p.fecha_texto ?? (p.fecha ? fechaCorta(p.fecha) : <span className={s.tenue}>sin fecha</span>)}
+                    {p.fecha_texto ?? (p.fecha ? fechaConPrecision(p.fecha, p.fecha_precision) : <span className={s.tenue}>sin fecha</span>)}
                     {p.fecha_precision !== 'dia' && p.fecha_texto && <span className={s.precision}>{PRECISION_CORTA[p.fecha_precision]}</span>}
                   </div>
                   <div className={s.pasoCuerpo}>
@@ -331,48 +331,50 @@ function Ofertas({ c, onEditar, onNueva }: { c: ContratacionVista; onEditar: (o:
       {c.ofertas.length === 0 ? (
         <p className={s.bloqueVacio}>Sin ofertas cargadas.</p>
       ) : (
-        <table className={s.ofertas}>
-          <thead>
-            <tr>
-              <th>Oferente</th>
-              <th className={s.derecha}>Monto ofertado</th>
-              <th className={s.derecha} title="Diferencia contra el presupuesto oficial">
-                vs. presupuesto oficial
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {c.ofertas.map((o) => {
-              const dif = diferenciaPorcentual(o.monto, c.presupuesto_oficial);
-              const esMenor = menor !== null && o.monto === menor;
-              return (
-                <tr key={o.id} className={esMenor ? s.menor : undefined} tabIndex={0} onClick={() => onEditar(o)} onKeyDown={(e) => (e.key === 'Enter' ? onEditar(o) : undefined)}>
-                  <td>
-                    <span className={s.oferente}>{o.oferente_texto ?? <Falta texto="[completar: oferente]" />}</span>
-                    {o.observaciones && <span className={s.ofertaObservaciones}>{o.observaciones}</span>}
-                    <span className={s.ofertaMeta}>
-                      {o.fojas && <Fojas fojas={o.fojas} />}
-                      {esMenor && (
-                        <span className={s.menorChip}>
-                          <Trophy aria-hidden /> menor oferta
-                        </span>
-                      )}
-                      {o.link && (
-                        <a href={o.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className={s.enlace}>
-                          <ExternalLink aria-hidden /> ver
-                        </a>
-                      )}
-                    </span>
-                  </td>
-                  <td className={`${s.derecha} cifras`}>{o.monto === null ? <Falta /> : formatoPesos(o.monto)}</td>
-                  <td className={`${s.derecha} cifras ${dif !== null && dif > 0 ? s.arriba : ''}`}>
-                    {dif === null ? <Nada /> : `${dif > 0 ? '+' : ''}${dif.toLocaleString('es-AR', { maximumFractionDigits: 1 })} %`}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className={s.ofertasMarco}>
+          <table className={s.ofertas}>
+            <thead>
+              <tr>
+                <th>Oferente</th>
+                <th className={s.derecha}>Monto ofertado</th>
+                <th className={s.derecha} title="Diferencia contra el presupuesto oficial">
+                  vs. presupuesto oficial
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {c.ofertas.map((o) => {
+                const dif = diferenciaPorcentual(o.monto, c.presupuesto_oficial);
+                const esMenor = menor !== null && o.monto === menor;
+                return (
+                  <tr key={o.id} className={esMenor ? s.menor : undefined} tabIndex={0} onClick={() => onEditar(o)} onKeyDown={(e) => (e.key === 'Enter' ? onEditar(o) : undefined)}>
+                    <td>
+                      <span className={s.oferente}>{o.oferente_texto ?? <Falta texto="[completar: oferente]" />}</span>
+                      {o.observaciones && <span className={s.ofertaObservaciones}>{o.observaciones}</span>}
+                      <span className={s.ofertaMeta}>
+                        {o.fojas && <Fojas fojas={o.fojas} />}
+                        {esMenor && (
+                          <span className={s.menorChip}>
+                            <Trophy aria-hidden /> menor oferta
+                          </span>
+                        )}
+                        {o.link && (
+                          <a href={o.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className={s.enlace}>
+                            <ExternalLink aria-hidden /> ver
+                          </a>
+                        )}
+                      </span>
+                    </td>
+                    <td className={`${s.derecha} cifras`}>{o.monto === null ? <Falta /> : formatoPesos(o.monto)}</td>
+                    <td className={`${s.derecha} cifras ${dif !== null && dif > 0 ? s.arriba : ''}`}>
+                      {dif === null ? <Nada /> : `${dif > 0 ? '+' : ''}${dif.toLocaleString('es-AR', { maximumFractionDigits: 1 })} %`}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
       {c.ofertas.some((o) => o.monto === null) && <p className={s.nota}>Los montos que faltan se completan tocando la oferta. La app no los deduce de las observaciones sin que alguien los confirme.</p>}
     </section>
