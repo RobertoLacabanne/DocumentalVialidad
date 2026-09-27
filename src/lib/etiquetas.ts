@@ -135,6 +135,12 @@ export const CAMPOS: Record<string, string> = {
   agendado_como: 'Agendado como',
   periodo_desde: 'Período desde',
   periodo_hasta: 'Período hasta',
+  pieza_id: 'Pieza',
+  oferente_id: 'Oferente (ficha)',
+  adjudicatario_id: 'Adjudicatario',
+  firmante_id: 'Firmante (ficha)',
+  nota: 'Nota',
+  fuente: 'De dónde surge',
 };
 
 const CAMPOS_EN_PESOS = new Set(['presupuesto_oficial', 'reserva_presupuestaria', 'monto_adjudicado', 'monto']);

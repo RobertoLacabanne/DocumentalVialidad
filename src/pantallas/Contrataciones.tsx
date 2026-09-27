@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  CalendarCheck,
   CalendarDays,
   Check,
   ExternalLink,
@@ -12,12 +13,13 @@ import {
   Search,
   Trophy,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Boton, clasesBoton } from '../componentes/Boton';
 import { AvisoError, EstadoVacio, FilasEsqueleto } from '../componentes/estados';
-import { CampoEditable, Nada } from '../componentes/Ficha';
+import { CampoEditable, Nada, Seccion, TextoInterpretacion } from '../componentes/Ficha';
 import { Avatar, Chip, Falta, Fojas, Sello } from '../componentes/marcas';
+import { usePersonas } from '../datos/causa';
 import { useDirectorio, useHistorial } from '../datos/consultas';
 import { useGuardado } from '../datos/guardado';
 import { useContrataciones, useMensajesPorId, usePiezasRef, useVinculos, vinculosDe, type ContratacionVista } from '../datos/hechos';
@@ -158,6 +160,8 @@ function Detalle({ c, onVolver }: { c: ContratacionVista; onVolver: () => void }
   const [paso, setPaso] = useState<PasoTramite | 'nuevo' | null>(null);
   const [oferta, setOferta] = useState<Oferta | 'nueva' | null>(null);
   const guardar = (campo: string) => (nuevo: string | null, anterior: string | null) => guardarCampo('contratacion', c.id, campo, anterior, nuevo);
+  const { filas: personas } = usePersonas(c.causa_id);
+  const adjudicatario = c.adjudicatario_id ? personas.find((p) => p.id === c.adjudicatario_id) : undefined;
 
   return (
     <article className={s.detalle} aria-label={`Contratación ${c.identificador}`}>
@@ -180,6 +184,11 @@ function Detalle({ c, onVolver }: { c: ContratacionVista; onVolver: () => void }
             {(c.fecha_inicio || c.fecha_inicio_texto) && (
               <span className={s.metaDato}>
                 <CalendarDays aria-hidden /> Inicio: {c.fecha_inicio ? fechaCorta(c.fecha_inicio) : c.fecha_inicio_texto}
+              </span>
+            )}
+            {c.fecha_apertura && (
+              <span className={s.metaDato}>
+                <CalendarCheck aria-hidden /> Apertura: {fechaCorta(c.fecha_apertura)}
               </span>
             )}
             {c.link && (
@@ -216,11 +225,26 @@ function Detalle({ c, onVolver }: { c: ContratacionVista; onVolver: () => void }
           <CampoEditable campo="observaciones" etiqueta="Observaciones del analista" tipo="textoLargo" interpretacion valor={c.observaciones} onGuardar={guardar('observaciones')} />
         </section>
       ) : (
-        <dl className={s.montos}>
-          <Monto etiqueta="Presupuesto oficial" valor={c.presupuesto_oficial} />
-          <Monto etiqueta="Reserva presupuestaria" valor={c.reserva_presupuestaria} />
-          <Monto etiqueta="Adjudicado" valor={c.monto_adjudicado} />
-        </dl>
+        <>
+          <dl className={s.montos}>
+            <Monto etiqueta="Presupuesto oficial" valor={c.presupuesto_oficial} />
+            <Monto etiqueta="Reserva presupuestaria" valor={c.reserva_presupuestaria} />
+            <Monto etiqueta="Adjudicado" valor={c.monto_adjudicado}>
+              {adjudicatario && (
+                <Link to={`../personas?persona=${adjudicatario.id}`} relative="path" className={s.adjudicatario}>
+                  {adjudicatario.nombre}
+                </Link>
+              )}
+            </Monto>
+          </dl>
+          {c.observaciones && (
+            <div className={s.analisis}>
+              <Seccion titulo="Observaciones del analista" naturaleza="interpretacion">
+                <TextoInterpretacion>{c.observaciones}</TextoInterpretacion>
+              </Seccion>
+            </div>
+          )}
+        </>
       )}
 
       <Ofertas c={c} onEditar={(o) => setOferta(o)} onNueva={() => setOferta('nueva')} />
@@ -282,11 +306,12 @@ function Detalle({ c, onVolver }: { c: ContratacionVista; onVolver: () => void }
   );
 }
 
-function Monto({ etiqueta, valor }: { etiqueta: string; valor: number | null }) {
+function Monto({ etiqueta, valor, children }: { etiqueta: string; valor: number | null; children?: ReactNode }) {
   return (
     <div className={s.monto}>
       <dt>{etiqueta}</dt>
       <dd className="cifras">{valor === null ? <Falta /> : formatoPesos(valor)}</dd>
+      {children && <dd className={s.montoDetalle}>{children}</dd>}
     </div>
   );
 }
@@ -324,6 +349,7 @@ function Ofertas({ c, onEditar, onNueva }: { c: ContratacionVista; onEditar: (o:
                 <tr key={o.id} className={esMenor ? s.menor : undefined} tabIndex={0} onClick={() => onEditar(o)} onKeyDown={(e) => (e.key === 'Enter' ? onEditar(o) : undefined)}>
                   <td>
                     <span className={s.oferente}>{o.oferente_texto ?? <Falta texto="[completar: oferente]" />}</span>
+                    {o.observaciones && <span className={s.ofertaObservaciones}>{o.observaciones}</span>}
                     <span className={s.ofertaMeta}>
                       {o.fojas && <Fojas fojas={o.fojas} />}
                       {esMenor && (

@@ -67,6 +67,18 @@ test('contrataciones, mensajes relevantes e informe de relevamiento', async ({ b
   await expect(ofertas.getByRole('row', { name: /Empresa Imaginaria/ })).toContainText('$ 18.415.263,00');
   await expect(ofertas.getByRole('row', { name: /Comercio Supuesto/ })).toContainText('menor oferta');
 
+  // Las observaciones del analista y la apertura se leen sin entrar a editar.
+  await ficha.getByRole('button', { name: 'Editar datos' }).click();
+  await ficha.locator('[data-campo="fecha_apertura"] input').fill('2020-08-19');
+  await ficha.locator('[data-campo="fecha_apertura"] input').blur();
+  const nota = ficha.locator('[data-campo="observaciones"] textarea');
+  await nota.fill('Nota de prueba del analista.');
+  await nota.blur();
+  await expect(rober.getByText('Guardado').first()).toBeVisible();
+  await ficha.getByRole('button', { name: 'Listo' }).click();
+  await expect(ficha.getByRole('region', { name: 'Observaciones del analista' })).toContainText('Nota de prueba del analista.');
+  await expect(ficha.getByText('Apertura: 19/08/2020')).toBeVisible();
+
   // 2. La transcripción entra literal, con la nota al pie como observación.
   await irA(rober, 'Mensajes');
   await rober.getByRole('link', { name: /Importar conversación/ }).first().click();
@@ -117,7 +129,8 @@ test('contrataciones, mensajes relevantes e informe de relevamiento', async ({ b
   expect(xml).toContain('Ref.: Legajo N.º 299113');
   expect(xml).toContain(`Hoy te llega la invitación de la ${lp}, arreglá con los otros la cotización.`);
   expect(xml).toContain(`Se vincula con: ${lp} (Expte. ${base + 500}).`);
-  expect(xml).toContain('[completar: emisor]');
+  // «Emisor» es el titular del teléfono: la conversación de prueba no lo tiene cargado.
+  expect(xml).toMatch(/Emisor: <\/w:t><\/w:r><w:r>(?:<w:rPr>.*?<\/w:rPr>)?<w:t xml:space="preserve">\[completar: titular del teléfono\]/);
 
   // 5. La búsqueda global encuentra el mensaje y lleva a la conversación.
   await ines.keyboard.press('Control+k');

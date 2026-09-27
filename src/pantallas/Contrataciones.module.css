@@ -247,6 +247,31 @@ a.metaDato:hover {
   font-size: var(--texto-xl);
   font-weight: var(--peso-fuerte);
 }
+.monto .montoDetalle {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+.adjudicatario {
+  color: var(--color-texto-suave);
+  text-decoration: underline;
+  text-decoration-color: var(--color-borde);
+  text-underline-offset: 3px;
+  transition: color var(--duracion-rapida) var(--curva-salida), text-decoration-color var(--duracion-rapida) var(--curva-salida);
+}
+.adjudicatario:hover {
+  color: var(--color-texto);
+  text-decoration-color: currentColor;
+}
+
+/* Observaciones del analista: se leen sin entrar a editar, con el tono de interpretación. */
+.analisis {
+  border: 1px solid var(--color-nota-borde);
+  border-radius: var(--radio-lg);
+}
+.analisis > section {
+  border: 0;
+  border-radius: calc(var(--radio-lg) - 1px);
+}
 
 .edicion {
   display: grid;
@@ -518,6 +543,14 @@ a.metaDato:hover {
 }
 .ofertas td:nth-child(3) {
   width: 180px;
+}
+.ofertaObservaciones {
+  display: block;
+  max-width: 60ch;
+  margin-top: 3px;
+  font-size: var(--texto-xs);
+  line-height: 1.45;
+  color: var(--color-texto-suave);
 }
 .ofertaMeta {
   display: flex;
