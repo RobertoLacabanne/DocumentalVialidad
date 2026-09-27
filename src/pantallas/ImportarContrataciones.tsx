@@ -71,12 +71,14 @@ export function ImportarContrataciones() {
     setLeyendo(true);
     setError(null);
     try {
-      const { default: readXlsxFile } = await import('read-excel-file/browser');
+      const [{ default: readXlsxFile }, { fechasSinDia, conFechasSinDia }] = await Promise.all([import('read-excel-file/browser'), import('../lib/fechasExcel')]);
       const hojas = await readXlsxFile(file);
+      // «febrero 2020» es una fecha con formato de mes: sin esto llegaría como el 1/2/2020.
+      const sinDia = fechasSinDia(new Uint8Array(await file.arrayBuffer()));
       const encontradas: Leida[] = [];
       const sinTramite: string[] = [];
       for (const hoja of hojas) {
-        const c = leerHojaContratacion(hoja.sheet, hoja.data as unknown as Celda[][]);
+        const c = leerHojaContratacion(hoja.sheet, conFechasSinDia(hoja.data as unknown as Celda[][], sinDia.get(hoja.sheet)));
         if (!c) sinTramite.push(hoja.sheet);
         else encontradas.push({ ...c, elegida: true, montos: {}, sugerencias: c.sugerencias.map((x) => ({ ...x, usar: false })) });
       }

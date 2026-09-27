@@ -20,9 +20,6 @@ export type MensajeInforme = {
 
 export type ConversacionInforme = { titulo: string; mensajes: MensajeInforme[] };
 
-/** Qué va en el rótulo «Emisor» de cada mensaje. «Remitente» es siempre quien lo envía. */
-export type CampoEmisor = 'completar' | 'envia' | 'recibe';
-
 export type DatosInforme = {
   legajo: string;
   caratula: string;
@@ -34,7 +31,6 @@ export type DatosInforme = {
   agendado?: string | null;
   desde?: string | null;
   hasta?: string | null;
-  campoEmisor: CampoEmisor;
   conversaciones: ConversacionInforme[];
 };
 
@@ -63,12 +59,6 @@ export function observacionDelMensaje(m: MensajeInforme): string | undefined {
   const partes = [m.observacion?.trim()];
   if (m.vinculos?.length) partes.push(`Se vincula con: ${m.vinculos.join('; ')}.`);
   return partes.filter(Boolean).join('\n') || undefined;
-}
-
-export function emisorDelMensaje(m: MensajeInforme, campo: CampoEmisor): string | undefined {
-  if (campo === 'envia') return m.emisor ?? undefined;
-  if (campo === 'recibe') return m.receptor ?? undefined;
-  return undefined;
 }
 
 /** Arma el documento. Se separa de la descarga para poder probarlo. */
@@ -125,7 +115,8 @@ export async function armarInforme(d: DatosInforme) {
     for (const m of c.mensajes) {
       cuerpo.push(
         rotulo('Fecha', dato(fechaDelMensaje(m), 'fecha')),
-        rotulo('Emisor', dato(emisorDelMensaje(m, d.campoEmisor), 'emisor')),
+        // «Emisor» es el titular del teléfono analizado; «Remitente», quien envía el mensaje.
+        rotulo('Emisor', dato(d.titular, 'titular del teléfono')),
         rotulo('Remitente', dato(m.emisor, 'remitente')),
         rotulo('Mensaje', dato(m.contenido, 'mensaje'), 140),
         rotulo('OBSERVACIONES', dato(observacionDelMensaje(m), 'vinculación con una contratación, expediente u otra documental'), 140),

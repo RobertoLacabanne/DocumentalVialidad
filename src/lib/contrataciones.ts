@@ -141,6 +141,18 @@ export function leerHojaContratacion(hoja: string, filas: Celda[][]): Contrataci
     const m = /^(licitaci[oó]n(?: p[uú]blica| privada)?|concurso de precios|contrataci[oó]n directa|compra directa)\b/i.exec(r.titulo);
     if (m) r.tipo_procedimiento = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
   }
+  // Google Sheets, al bajar la planilla como Excel, directamente borra la «/»: «LP 05/2020» llega
+  // como «LP 052020». Si el título de la hoja trae ese mismo número con la barra, se repone.
+  if (!r.identificador.includes('/') && r.titulo) {
+    for (const m of r.titulo.matchAll(/(\d{1,4})\s*\/\s*(\d{2,4})/g)) {
+      const junto = new RegExp(`(^|\\D)${m[1]}${m[2]}(?!\\d)`);
+      if (!junto.test(r.identificador)) continue;
+      const repuesto = r.identificador.replace(junto, `$1${m[1]}/${m[2]}`);
+      r.avisos.push(`La hoja se llama «${r.identificador}» (al bajarla como Excel se pierde la «/») y el título dice «${r.titulo}»: se toma «${repuesto}». Revisalo.`);
+      r.identificador = repuesto;
+      break;
+    }
+  }
 
   const val = (f: Celda[], i: number) => (i < 0 ? '' : texto(f[i]));
   let actual: PasoImportado | null = null;

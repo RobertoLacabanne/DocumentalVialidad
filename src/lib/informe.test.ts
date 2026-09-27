@@ -14,7 +14,6 @@ const base: DatosInforme = {
   agendado: 'Uno Prueba',
   desde: '2021-04-16',
   hasta: '2021-05-07',
-  campoEmisor: 'completar',
   conversaciones: [
     {
       titulo: 'Conversación entre Persona Uno y Persona Dos',
@@ -69,7 +68,7 @@ describe('informe de relevamiento de mensajes', () => {
     const parrafos = soloTexto((await xml(base)).documento);
     expect(parrafos.slice(6, 12)).toEqual([
       'Fecha: 16/04/2021',
-      'Emisor: [completar: emisor]',
+      'Emisor: Persona Uno',
       'Remitente: Persona Dos',
       'Mensaje: Precio & plazo, "literal"\nsegunda línea',
       'OBSERVACIONES: Menciona la cotización.\nSe vincula con: LP 99/2020 (Expte. 999999).',
@@ -77,17 +76,17 @@ describe('informe de relevamiento de mensajes', () => {
     ]);
     expect(parrafos.slice(12, 16)).toEqual([
       'Fecha: [completar: fecha]',
-      'Emisor: [completar: emisor]',
+      'Emisor: Persona Uno',
       'Remitente: Persona Uno',
       'Mensaje: Sin fecha',
     ]);
   });
 
-  it('el rótulo «Emisor» se completa solo si se elige qué va ahí', async () => {
-    const recibe = soloTexto((await xml({ ...base, campoEmisor: 'recibe' })).documento);
-    expect(recibe[7]).toBe('Emisor: Persona Uno');
-    const envia = soloTexto((await xml({ ...base, campoEmisor: 'envia' })).documento);
-    expect(envia[7]).toBe('Emisor: Persona Dos');
+  it('«Emisor» es el titular del teléfono; si falta, queda para completar', async () => {
+    const sinTitular = soloTexto((await xml({ ...base, titular: null })).documento);
+    expect(sinTitular[3]).toContain('pertenece a [completar: datos del titular]');
+    expect(sinTitular[7]).toBe('Emisor: [completar: titular del teléfono]');
+    expect(sinTitular[8]).toBe('Remitente: Persona Dos');
   });
 
   it('agrega la hora cuando la transcripción la trae', () => {

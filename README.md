@@ -87,7 +87,7 @@ Si los escaneos ya se procesaron en AppUFIL, no hace falta volver a leerlos:
 1. En **Mensajes**, abrí la conversación. Pasá el mouse por un mensaje y tocá el marcador, o elegilo y apretá **R**: queda marcado como relevante para todo el equipo al instante.
 2. Tocá el mensaje para abrir su ficha: ahí escribís la **observación** (por qué es relevante) y lo **vinculás** a la contratación o a la pieza que prueba. El vínculo aparece también en la ficha de la contratación.
 3. Con **Relevantes** ves solo los marcados; el buscador de la conversación no distingue tildes.
-4. Tocá **Informe .docx**. Sale con la plantilla del equipo (Palatino 11, justificado, interlineado 1,5): referencia del legajo, los dos párrafos de introducción, la transcripción por conversación y en orden, y cada mensaje con Fecha, Emisor, Remitente, Mensaje y OBSERVACIONES (con la contratación vinculada). Si el teléfono tiene otras conversaciones, se pueden sumar al mismo informe.
+4. Tocá **Informe .docx**. Sale con la plantilla del equipo (Palatino 11, justificado, interlineado 1,5): referencia del legajo, los dos párrafos de introducción, la transcripción por conversación y en orden, y cada mensaje con Fecha, Emisor (el titular del teléfono, que se carga en «Datos de la conversación»), Remitente (quien lo envía), Mensaje y OBSERVACIONES (con la contratación vinculada). Si el teléfono tiene otras conversaciones, se pueden sumar al mismo informe.
 5. Lo que falte (dispositivo, informe del gabinete, titular…) sale como `[completar: …]`. Se carga desde **Datos de la conversación**. Revisá el documento en Word antes de firmarlo.
 
 ## Cómo armar el ofrecimiento de prueba

@@ -8,16 +8,10 @@ import { Falta } from '../componentes/marcas';
 import { useToast } from '../componentes/Toast';
 import { todas, type EfectoVista } from '../datos/causa';
 import type { ContratacionVista, ConversacionVista, PiezaRef } from '../datos/hechos';
-import { fechaCorta, informeEnDocx, nombreDelInforme, type CampoEmisor, type DatosInforme } from '../lib/informe';
+import { fechaCorta, informeEnDocx, nombreDelInforme, type DatosInforme } from '../lib/informe';
 import { supabase } from '../lib/supabase';
 import type { Causa, Mensaje, Vinculo } from '../lib/tipos';
 import s from './Mensajes.module.css';
-
-const OPCIONES_EMISOR: { valor: CampoEmisor; etiqueta: string }[] = [
-  { valor: 'completar', etiqueta: 'Dejarlo para completar' },
-  { valor: 'recibe', etiqueta: 'Quien recibe el mensaje' },
-  { valor: 'envia', etiqueta: 'Quien lo envía (igual que Remitente)' },
-];
 
 /** Arma el informe con los mensajes marcados como relevantes de una o más conversaciones del mismo teléfono. */
 export function InformeMensajes({
@@ -47,7 +41,6 @@ export function InformeMensajes({
     [conversacion, conversaciones],
   );
   const [elegidas, setElegidas] = useState<string[]>([conversacion.id]);
-  const [campoEmisor, setCampoEmisor] = useState<CampoEmisor>('completar');
   const [armando, setArmando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -128,7 +121,6 @@ export function InformeMensajes({
         agendado: conversacion.agendado_como,
         desde,
         hasta,
-        campoEmisor,
         conversaciones: bloques,
       };
       const blob = await informeEnDocx(d);
@@ -184,17 +176,7 @@ export function InformeMensajes({
         {periodoDeducido && <p className={s.tenue}>El período sale de las fechas del primer y del último mensaje. Si el informe abarca otro, cargalo en «Datos de la conversación».</p>}
         {datos.some(([, v]) => !v) && <p className={s.tenue}>Lo que falta sale como [completar] en el documento. Se carga desde «Datos de la conversación».</p>}
 
-        <label className={s.informeCampo}>
-          <span>¿Qué va en el rótulo «Emisor» de cada mensaje?</span>
-          <select className={s.informeSelect} value={campoEmisor} onChange={(e) => setCampoEmisor(e.target.value as CampoEmisor)}>
-            {OPCIONES_EMISOR.map((o) => (
-              <option key={o.valor} value={o.valor}>
-                {o.etiqueta}
-              </option>
-            ))}
-          </select>
-          <span className={s.tenue}>«Remitente» siempre es quien envía, como en las transcripciones del equipo.</span>
-        </label>
+        <p className={s.tenue}>En cada mensaje, «Emisor» es el titular del teléfono y «Remitente», quien lo envía.</p>
 
         {relevantes === 0 && (
           <p className={s.informeAviso}>
