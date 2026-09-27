@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   ChevronsUpDown,
   Clock,
   FileScan,
@@ -146,6 +147,9 @@ export function Marco() {
           </div>
 
           <div className={s.pie}>
+            <a className={s.manual} href="/manual/Manual-Tablero-de-Prueba.pdf" target="_blank" rel="noreferrer">
+              <BookOpen aria-hidden /> Manual de uso
+            </a>
             <IndicadorGuardado estado={guardado} />
             <div className={s.yo}>
               <Avatar texto={alias} email={yo.email} tamano="chico" />

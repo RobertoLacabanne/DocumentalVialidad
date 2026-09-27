@@ -197,6 +197,25 @@
   display: grid;
   gap: var(--esp-2);
 }
+.manual {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px;
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  text-decoration: none;
+  transition: background-color var(--duracion-rapida) var(--curva-salida), color var(--duracion-rapida) var(--curva-salida);
+}
+.manual svg {
+  width: 16px;
+  height: 16px;
+}
+.manual:hover {
+  background: var(--color-hover);
+  color: var(--color-texto);
+}
 .yo {
   display: flex;
   align-items: center;

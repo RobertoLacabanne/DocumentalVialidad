@@ -64,7 +64,7 @@ export function Equipo() {
 
   const direccion = window.location.origin;
   const mensaje = invitado
-    ? `Hola ${invitado.alias}: ya podés entrar al Tablero de Prueba de la UFIL.\n\n1. Abrí ${direccion}\n2. Tocá «Entrar con Google» y elegí ${invitado.email}.\n\nAhí vas a ver el índice de prueba de la causa y lo que va cargando el equipo.`
+    ? `Hola ${invitado.alias}: ya podés entrar al Tablero de Prueba de la UFIL.\n\n1. Abrí ${direccion}\n2. Tocá «Entrar con Google» y elegí ${invitado.email}.\n\nAhí vas a ver el índice de prueba de la causa y lo que va cargando el equipo. El manual de uso está en ${direccion}/manual/Manual-Tablero-de-Prueba.pdf`
     : '';
 
   async function invitar(e: FormEvent<HTMLFormElement>) {

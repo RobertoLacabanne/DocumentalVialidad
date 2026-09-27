@@ -197,6 +197,21 @@ Aplica las migraciones nuevas (cada una una sola vez), vuelve a pasar la semilla
 
 La primera persona que entra con Google queda habilitada automáticamente (la lista de invitados está vacía). Desde **Equipo** invita al resto.
 
+## Manual de uso
+
+El manual para el equipo es `public/manual/Manual-Tablero-de-Prueba.pdf` (la app lo sirve en `/manual/Manual-Tablero-de-Prueba.pdf` y lo enlaza desde el menú). Su fuente es `docs/manual/manual.html`; las capturas salen de una causa de ejemplo **inventada**, porque el PDF es público y no puede mostrar datos reales. Para regenerarlo después de un cambio visual:
+
+```bash
+npx supabase db reset                     # base local limpia
+node scripts/preparar-local.mjs           # cuentas de prueba
+node scripts/preparar-manual.mjs          # causa de ejemplo (Legajo 123456, todo inventado)
+npm run dev                               # en otra terminal
+node scripts/capturas-manual.mjs          # capturas en public/manual/img
+node scripts/manual-pdf.mjs               # arma el PDF
+```
+
+La captura de la pantalla de ingreso (`01-acceso`) se saca de la app publicada, que no muestra datos.
+
 ## Copias de seguridad y restauración
 
 - **Supabase Pro** hace una copia diaria y la guarda 7 días (**Database → Backups**). El plan gratuito **no hace copias**: por eso conviene Pro desde que entra información real.

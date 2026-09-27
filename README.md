@@ -6,6 +6,8 @@ El índice vivo de la prueba de una causa, para la Unidad Fiscal de Investigaci�
 
 Los archivos siguen en el Drive de la UFIL. El tablero no los toca: guarda los links, los ordena y deja encontrarlos en dos clics.
 
+**Manual de uso** (paso a paso, con capturas): https://tablero-prueba-ufil.netlify.app/manual/Manual-Tablero-de-Prueba.pdf. También se abre desde el menú de la app, con «Manual de uso».
+
 ## Cómo entrar
 
 1. Abrí la dirección desde cualquier computadora o desde el celular.

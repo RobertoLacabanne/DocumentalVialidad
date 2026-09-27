@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de uso · Tablero de Prueba</title>
+<style>
+  @font-face { font-family: 'Inter'; font-weight: 100 900; font-style: normal; src: url('../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Inter'; font-weight: 100 900; font-style: italic; src: url('../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-italic.woff2') format('woff2'); }
+  @font-face { font-family: 'Source Serif 4'; font-weight: 200 900; font-style: normal; src: url('../../node_modules/@fontsource-variable/source-serif-4/files/source-serif-4-latin-wght-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Source Serif 4'; font-weight: 200 900; font-style: italic; src: url('../../node_modules/@fontsource-variable/source-serif-4/files/source-serif-4-latin-wght-italic.woff2') format('woff2'); }
+
+  :root {
+    --papel: #FAF9F6; --superficie: #FFFFFF; --cabecera: #F2F1EC; --borde: #E4E1D8; --borde-suave: #EEECE6;
+    --tinta: #1E3350; --tinta-suave: #4A5B73; --tinta-tenue: #667387;
+    --acento: #2F5A93; --acento-fondo: #EDF2F9; --exito: #2F6B4A; --exito-fondo: #E4F1E8;
+    --alerta: #7E520A; --alerta-fondo: #FBF0DA; --lacre: #A63D2A; --lacre-fondo: #F8E8E4;
+    --nota-fondo: #FBF7EC; --nota-borde: #E9DFC6; --falta: #7A6436; --falta-fondo: #FFFBF0; --falta-borde: #D8C9A3;
+    --sello-borde: #B9C2D0; --sello-anillo: #DCE1E9;
+    --serif: 'Source Serif 4', Georgia, serif; --sans: 'Inter', system-ui, sans-serif;
+  }
+  @page { size: A4; margin: 20mm 18mm 20mm 18mm;
+    @bottom-left { content: "Tablero de Prueba · Manual de uso"; font-family: Inter, sans-serif; font-size: 7.5pt; color: #667387; }
+    @bottom-right { content: counter(page); font-family: Inter, sans-serif; font-size: 7.5pt; color: #667387; } }
+  @page portada { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: var(--sans); font-size: 10.2pt; line-height: 1.55; color: var(--tinta); background: var(--superficie); font-variant-numeric: tabular-nums; }
+  p { margin: 0 0 .7em; max-width: 72ch; }
+  strong { font-weight: 650; }
+  a { color: var(--acento); text-decoration: none; }
+
+  /* Portada */
+  .portada { page: portada; height: 297mm; width: 210mm; background: var(--papel); position: relative; padding: 26mm 22mm; display: flex; flex-direction: column; break-after: page;
+    box-shadow: inset 14mm 0 0 -13.6mm var(--sello-borde); }
+  .marca { display: flex; align-items: center; gap: 14px; }
+  .sello-tp { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--tinta); display: grid; place-items: center; box-shadow: 0 0 0 4px var(--papel), 0 0 0 5px var(--sello-borde); font-family: var(--serif); font-weight: 700; font-size: 17pt; background: #FFFEFA; }
+  .marca b { display: block; font-family: var(--serif); font-size: 15pt; }
+  .marca span { font-size: 9pt; color: var(--tinta-suave); }
+  .portada .rotulo { margin-top: auto; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 650; }
+  .portada h1 { font-family: var(--serif); font-size: 44pt; line-height: 1.05; margin: 6mm 0 6mm; letter-spacing: -.01em; }
+  .portada .bajada { font-size: 13pt; color: var(--tinta-suave); max-width: 120mm; line-height: 1.5; }
+  .portada .pie { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9pt; color: var(--tinta-suave); border-top: 1px solid var(--borde); padding-top: 5mm; }
+  .portada .direccion { font-family: var(--serif); font-size: 12pt; color: var(--tinta); }
+
+  /* Títulos */
+  h2 { font-family: var(--serif); font-size: 22pt; line-height: 1.15; margin: 0 0 4mm; break-after: avoid; letter-spacing: -.005em; }
+  h2 .num { display: inline-block; min-width: 1.5em; color: var(--tinta-tenue); font-weight: 500; }
+  .capitulo { break-before: page; }
+  .capitulo > .entrada { font-size: 11.5pt; color: var(--tinta-suave); margin-bottom: 6mm; max-width: 70ch; }
+  h3 { font-family: var(--sans); font-size: 11.5pt; font-weight: 700; margin: 7mm 0 2.5mm; break-after: avoid; }
+  h4 { font-size: 9pt; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-suave); margin: 5mm 0 2mm; font-weight: 700; }
+
+  /* Pasos con número foliado */
+  ol.pasos { list-style: none; padding: 0; margin: 0 0 4mm; counter-reset: paso; }
+  ol.pasos > li { counter-increment: paso; position: relative; padding-left: 12mm; margin-bottom: 2.6mm; break-inside: avoid; max-width: 74ch; }
+  ol.pasos > li::before { content: counter(paso); position: absolute; left: 0; top: -.5mm; min-width: 7.5mm; height: 6.2mm; padding: 0 1.5mm; display: grid; place-items: center; font-family: var(--serif); font-weight: 700; font-size: 10pt; color: var(--tinta); background: #FFFEFA; border: 1px solid var(--sello-borde); border-radius: 3px; box-shadow: 0 0 0 2px var(--sello-anillo); }
+  ul.lista { padding-left: 5mm; margin: 0 0 4mm; max-width: 74ch; }
+  ul.lista li { margin-bottom: 1.6mm; }
+  ul.lista li::marker { color: var(--tinta-tenue); }
+
+  /* Botones, teclas y marcas como en la app */
+  .b { display: inline-block; font-weight: 600; font-size: 9pt; padding: .5mm 2.2mm; border: 1px solid var(--borde); border-radius: 5px; background: var(--superficie); white-space: nowrap; }
+  .b.p { background: var(--tinta); color: #fff; border-color: var(--tinta); }
+  kbd { font-family: var(--sans); font-size: 8.5pt; font-weight: 600; padding: .2mm 1.6mm; border: 1px solid var(--borde); border-bottom-width: 2px; border-radius: 4px; background: var(--cabecera); }
+  .falta { font-size: 8.8pt; color: var(--falta); background: var(--falta-fondo); border: 1px dashed var(--falta-borde); border-radius: 3px; padding: 0 1.4mm; white-space: nowrap; }
+  .chip { display: inline-block; font-size: 8.5pt; font-weight: 600; padding: .2mm 2.2mm; border-radius: 999px; white-space: nowrap; }
+  .chip.lacre { color: #8A3121; background: var(--lacre-fondo); }
+  .chip.dato { color: var(--tinta-suave); background: var(--cabecera); border-radius: 3px; }
+  .chip.interp { color: var(--falta); background: var(--superficie); border: 1px solid var(--nota-borde); border-radius: 3px; }
+  .ef { display: inline-block; font-weight: 700; font-size: 8.8pt; padding: 0 2mm 0 3mm; background: #E9EDF3; clip-path: polygon(6px 0, 100% 0, 100% 100%, 6px 100%, 0 50%); }
+
+  /* Figuras */
+  figure { margin: 4mm 0 6mm; break-inside: avoid; }
+  figure img { display: block; width: 100%; border: 1px solid var(--borde); border-radius: 8px; box-shadow: 0 1px 2px rgba(30,51,80,.06), 0 6px 18px rgba(30,51,80,.07); }
+  figure.celular { display: flex; gap: 6mm; justify-content: center; }
+  figure.celular img { width: 52mm; }
+  figcaption { font-size: 8.8pt; color: var(--tinta-tenue); margin-top: 2mm; }
+  figcaption b { color: var(--tinta-suave); }
+
+  /* Recuadros */
+  .consejo, .ojo, .regla, .procesal { break-inside: avoid; border-radius: 8px; padding: 3.2mm 4.5mm; margin: 4mm 0 5mm; font-size: 9.6pt; max-width: 170mm; }
+  .consejo { background: var(--acento-fondo); border-left: 3px solid var(--acento); }
+  .ojo { background: var(--alerta-fondo); border-left: 3px solid var(--alerta); }
+  .procesal { background: var(--lacre-fondo); border-left: 3px solid var(--lacre); }
+  .regla { background: var(--nota-fondo); border: 1px solid var(--nota-borde); }
+  .consejo > b:first-child, .ojo > b:first-child, .procesal > b:first-child { display: block; font-size: 8.5pt; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1mm; }
+  .consejo p, .ojo p, .procesal p, .regla p { margin: 0 0 .4em; }
+
+  /* Índice */
+  .indice { columns: 2; column-gap: 12mm; font-size: 10pt; margin-top: 4mm; }
+  .indice div { break-inside: avoid; padding: 1.6mm 0; border-bottom: 1px solid var(--borde-suave); display: flex; gap: 3mm; }
+  .indice span { color: var(--tinta-tenue); min-width: 7mm; font-family: var(--serif); font-weight: 600; }
+
+  /* Reglas de la casa */
+  .reglas { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 4mm 0; }
+  .reglas .regla { margin: 0; }
+  .reglas .regla b { display: block; font-family: var(--serif); font-size: 11pt; margin-bottom: 1mm; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 9.3pt; margin: 3mm 0 5mm; break-inside: avoid; }
+  table.t th { text-align: left; font-size: 8pt; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-suave); background: var(--cabecera); padding: 2mm 3mm; }
+  table.t td { padding: 2.2mm 3mm; border-bottom: 1px solid var(--borde-suave); vertical-align: top; }
+  table.t td:first-child { font-weight: 600; white-space: nowrap; }
+
+  .faq h3 { margin-top: 3.5mm; margin-bottom: 1mm; }
+  .faq p { margin-bottom: 1.5mm; }
+  .contacto { margin-top: 8mm; padding: 5mm 6mm; border: 1px solid var(--borde); border-radius: 10px; background: var(--papel); break-inside: avoid; }
+  .contacto b { font-family: var(--serif); font-size: 13pt; }
+
+  @media screen {
+    body { background: var(--papel); }
+    main, .portada { max-width: 210mm; margin: 0 auto; }
+    main { background: var(--superficie); padding: 18mm; }
+  }
+</style>
+</head>
+<body>
+
+<section class="portada">
+  <div class="marca">
+    <div class="sello-tp">TP</div>
+    <div><b>Tablero de Prueba</b><span>UFIL Paraná · Ministerio Público Fiscal de Entre Ríos</span></div>
+  </div>
+  <div class="rotulo">Manual de uso</div>
+  <h1>Toda la prueba de la causa, ordenada y a dos clics.</h1>
+  <p class="bajada">Cómo entrar, qué hay en cada pantalla y cómo sacarle el jugo, paso a paso. Pensado para quien nunca abrió la app.</p>
+  <div class="pie">
+    <div><span class="direccion">tablero-prueba-ufil.netlify.app</span><br>Se entra con la cuenta de Google invitada.</div>
+    <div style="text-align:right">Versión del 27 de septiembre de 2026<br>Las capturas muestran una causa de ejemplo inventada.</div>
+  </div>
+</section>
+
+<main>
+
+<section>
+  <h2>Qué vas a encontrar</h2>
+  <p class="entrada" style="font-size:11.5pt;color:var(--tinta-suave)">El manual sigue el orden del menú de la app. Si tenés poco tiempo, leé los capítulos 1 a 3 y después andá directo a lo que te toque hacer.</p>
+  <div class="indice">
+    <div><span>1</span>Qué es el Tablero de Prueba</div>
+    <div><span>2</span>Cómo entrar</div>
+    <div><span>3</span>La pantalla, de un vistazo</div>
+    <div><span>4</span>Inicio</div>
+    <div><span>5</span>Índice de prueba y ficha de cada pieza</div>
+    <div><span>6</span>Efectos secuestrados</div>
+    <div><span>7</span>Documentos y escaneos</div>
+    <div><span>8</span>Contrataciones</div>
+    <div><span>9</span>Personas y empresas</div>
+    <div><span>10</span>Mensajes e informe de relevamiento</div>
+    <div><span>11</span>Cronología</div>
+    <div><span>12</span>Preparación del juicio</div>
+    <div><span>13</span>El buscador (Ctrl + K)</div>
+    <div><span>14</span>Equipo</div>
+    <div><span>15</span>Trabajar a la vez sin pisarse</div>
+    <div><span>16</span>Exportar, copias y planillas</div>
+    <div><span>17</span>Desde el celular</div>
+    <div><span>18</span>Preguntas frecuentes y ayuda</div>
+  </div>
+  <h3 style="margin-top:12mm">Para empezar, en cinco minutos</h3>
+  <ol class="pasos">
+    <li>Entrá con <span class="b">Entrar con Google</span>, con la cuenta a la que te llegó la invitación (capítulo 2).</li>
+    <li>Mirá <strong>Inicio</strong>: ahí está cómo viene la causa y qué efectos tenés a tu cargo (capítulo 4).</li>
+    <li>Apretá <kbd>Ctrl</kbd> + <kbd>K</kbd> y buscá cualquier cosa: un número de efecto, un apellido, una palabra de un mensaje (capítulo 13).</li>
+    <li>Abrí una contratación y recorré su trámite, sus ofertas y la prueba que la respalda (capítulo 8).</li>
+    <li>Tocá una pieza del índice y probá <span class="b">Copiar cita</span>: la referencia sale lista para el escrito (capítulo 5).</li>
+  </ol>
+  <div class="consejo"><b>Una sola idea para llevarse</b><p>Todo lo que ves lo ve el resto del equipo, y todo lo que cambiás queda guardado con tu nombre. No hay forma de «romper» nada: lo que se saca se archiva y se puede recuperar.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">1</span>Qué es el Tablero de Prueba</h2>
+  <p class="entrada">Es el índice vivo de la prueba de una causa. Toma el cuadro que usamos siempre (una fila por pieza, con su número de orden, su origen y el link al Drive) y lo convierte en una herramienta compartida: lo que carga una persona le aparece al resto al instante, queda registrado quién hizo cada cosa y cada documento muestra su situación procesal.</p>
+  <p>Alrededor del índice hay todo lo que hace falta para trabajar una causa compleja: el tablero de los efectos secuestrados, las contrataciones con su trámite a fojas, las conversaciones extraídas de los teléfonos con el informe de relevamiento, el directorio de personas y empresas con sus relaciones, la cronología de la causa, la preparación del juicio y un buscador que encuentra cualquier cosa, incluso adentro de los escaneos.</p>
+  <p><strong>Los archivos siguen en el Drive de la UFIL.</strong> El tablero no los mueve ni los modifica: guarda el link, los ordena y te deja llegar a cada uno en dos clics.</p>
+
+  <h3>Las reglas de la casa</h3>
+  <div class="reglas">
+    <div class="regla"><b>El dato y la interpretación van separados</b><p>Cada ficha muestra arriba lo que dice el documento (<span class="chip dato">dato objetivo</span>) y aparte, sobre fondo de nota y en cursiva, las <em>Observaciones del analista</em> (<span class="chip interp">interpretación</span>).</p></div>
+    <div class="regla"><b>Nada se inventa</b><p>Si un dato falta, se ve como <span class="falta">[completar]</span>. Ninguna función automática completa fechas, números ni datos de personas por su cuenta.</p></div>
+    <div class="regla"><b>Nada se borra</b><p>Lo que se saca se <em>archiva</em> y se puede recuperar. Cada ficha guarda quién cambió qué, cuándo, y qué decía antes.</p></div>
+    <div class="regla"><b>Lo que propone la máquina se valida</b><p>Si la app sugiere algo (por ejemplo, de qué efecto es un escaneo), queda como <em>sugerencia</em> hasta que alguien del equipo la confirma.</p></div>
+    <div class="regla"><b>El rojo lacre es solo procesal</b><p>Aparece únicamente cuando una prueba tiene un problema procesal: admisibilidad cuestionada, pendiente de resolución o excluida.</p></div>
+    <div class="regla"><b>Las transcripciones son literales</b><p>El texto de un mensaje no se puede editar. Se marca, se comenta y se vincula, pero queda tal cual se transcribió, con su huella digital.</p></div>
+  </div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">2</span>Cómo entrar</h2>
+  <p class="entrada">No hay que instalar nada ni recordar contraseñas nuevas: se entra con la misma cuenta de Gmail a la que te llegó la invitación.</p>
+  <ol class="pasos">
+    <li>Abrí <strong>tablero-prueba-ufil.netlify.app</strong> en Chrome, Edge o Firefox, desde la computadora o desde el celular. Conviene guardarla en favoritos.</li>
+    <li>Tocá <span class="b">Entrar con Google</span>.</li>
+    <li>Elegí la cuenta de Gmail invitada (la misma a la que te llegó este manual). Si Google te pregunta si confiás en la app, aceptá: solo le pide tu nombre y tu correo.</li>
+    <li>Listo: se abre la causa en la pantalla de <strong>Inicio</strong>. La próxima vez vas a entrar directo, sin volver a elegir la cuenta.</li>
+  </ol>
+  <figure><img src="../../public/manual/img/01-acceso.jpg" alt="Pantalla de ingreso"><figcaption><b>La pantalla de ingreso.</b> Solo entran las personas invitadas por el equipo.</figcaption></figure>
+  <div class="ojo"><b>Si dice «Todavía no estás habilitado»</b><p>Entraste con otra cuenta de Google (pasa mucho cuando el navegador tiene abierta la cuenta del trabajo o la personal). Tocá <strong>Salir</strong>, volvé a <span class="b">Entrar con Google</span> y elegí la cuenta invitada. Si igual no te deja, avisale a Rober.</p></div>
+  <p>La primera vez que entrás, la app te reconoce por el alias con el que figurás en las planillas (AGUS, INES, CARLI, ROBER…) y te asigna solos los efectos que ya estaban a tu nombre.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">3</span>La pantalla, de un vistazo</h2>
+  <p class="entrada">Todas las pantallas comparten el mismo marco. Una vez que lo conocés, te movés por toda la app sin pensar.</p>
+  <figure><img src="../../public/manual/img/02-inicio.jpg" alt="Marco general de la app"><figcaption><b>El marco de la app.</b> Menú a la izquierda, causa arriba y el contenido de cada sección en el centro.</figcaption></figure>
+  <table class="t">
+    <tr><th>Dónde</th><th>Qué es</th></tr>
+    <tr><td>Arriba a la izquierda</td><td>El selector de <strong>Causa</strong>. La app sirve para cualquier legajo; si trabajás en más de uno, cambiás desde acá.</td></tr>
+    <tr><td>Buscar en la causa</td><td>El buscador general. También se abre con <kbd>Ctrl</kbd> + <kbd>K</kbd> desde cualquier pantalla (capítulo 13).</td></tr>
+    <tr><td>El menú</td><td>Las secciones: Inicio, Índice de prueba, Efectos, Documentos, Contrataciones, Personas y empresas, Mensajes, Cronología, Juicio y Equipo. El número al lado de Documentos son las sugerencias pendientes de validar.</td></tr>
+    <tr><td>En línea ahora</td><td>Quién del equipo tiene la causa abierta en este momento.</td></tr>
+    <tr><td>Todo guardado</td><td>El indicador de guardado. Cada cambio se guarda solo; acá ves «Guardando…», «Guardado» o, si se cortó internet, «Sin conexión».</td></tr>
+    <tr><td>Abajo de todo</td><td>Tu nombre y el botón para <strong>Salir</strong>.</td></tr>
+    <tr><td>La cabecera</td><td>Legajo de Fiscalía, número de OGA, delito y carátula de la causa, siempre a la vista.</td></tr>
+    <tr><td>La barra de abajo</td><td>Cuántas filas estás viendo y el aviso «En vivo»: los cambios del equipo aparecen solos, sin recargar.</td></tr>
+  </table>
+  <div class="consejo"><b>Consejo</b><p>No hay botón de «guardar». Escribís, pasás al campo siguiente y ya quedó guardado para todos. Si dudás, mirá el indicador de abajo a la izquierda.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">4</span>Inicio</h2>
+  <p class="entrada">Es el tablero de mando de la causa: en una sola pantalla ves cómo viene el trabajo, qué está trabado y qué hizo el equipo últimamente. Reemplaza a la planilla «AVANCE DE TAREAS».</p>
+  <ul class="lista">
+    <li><strong>Avance de los efectos:</strong> cuántos están escaneados o terminados sobre el total, con la barra por estado (Sin iniciar, En proceso, Escaneado, Finalizado, Observado).</li>
+    <li><strong>Por responsable:</strong> cuánto lleva cada integrante. «Sin invitar» indica un alias de las planillas que todavía no tiene cuenta. <span class="b">Ver el tablero</span> te lleva a los efectos.</li>
+    <li><strong>Alertas procesales:</strong> las prueba con problema procesal (en rojo lacre) y a cuántas fichas alcanza cada una.</li>
+    <li><strong>Pendientes:</strong> efectos sin responsable, observados o que esperan a alguien que no entró.</li>
+    <li><strong>Lo último que pasó:</strong> la actividad del equipo, con quién y hace cuánto. Tocando una línea vas a esa ficha.</li>
+    <li><strong>Ir a:</strong> accesos directos con los totales de cada sección.</li>
+    <li><strong>Copia de resguardo:</strong> <span class="b">Descargar copia completa</span> baja toda la causa en un .zip (capítulo 16).</li>
+  </ul>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">5</span>Índice de prueba y ficha de cada pieza</h2>
+  <p class="entrada">El corazón del tablero: una fila por pieza, como el cuadro Urribarri, pero con su origen, su estado, quién la trabaja y su situación procesal. Una pieza puede ser un documento secuestrado, un expediente, un informe pericial, una extracción, un mensaje, un correo, un informe de un organismo, una testimonial o un audiovisual.</p>
+  <figure><img src="../../public/manual/img/03-indice.jpg" alt="Índice de prueba"><figcaption><b>El índice.</b> El número de orden va como un sello foliado; la barra roja a la izquierda marca las piezas con problema procesal.</figcaption></figure>
+
+  <h3>Leer y filtrar la tabla</h3>
+  <ul class="lista">
+    <li>La tabla se ordena por número de orden, respetando la jerarquía: 1, 2, 2.1, 2 bis, 3…</li>
+    <li><strong>Buscar en el índice</strong> filtra por cualquier texto de la fila. La tecla <kbd>/</kbd> te lleva directo a ese campo.</li>
+    <li>Los filtros <strong>Tipo</strong>, <strong>Relevancia</strong> y <strong>Responsable</strong> se combinan entre sí. <strong>Con alerta procesal</strong> deja solo las piezas en lacre.</li>
+    <li><strong>Cómoda / Compacta</strong> cambia la densidad: compacta muestra más filas por pantalla.</li>
+    <li><span class="b">Exportar</span> baja a Excel o CSV exactamente lo que estás viendo, con los filtros aplicados.</li>
+  </ul>
+
+  <h3>La ficha de la pieza</h3>
+  <p>Tocá una fila y se abre la ficha a la derecha, sin perder la tabla.</p>
+  <figure><img src="../../public/manual/img/04-ficha-pieza.jpg" alt="Ficha de una pieza"><figcaption><b>La ficha.</b> Arriba, los datos del documento y su origen (dato objetivo); abajo, las observaciones del analista (interpretación).</figcaption></figure>
+  <ul class="lista">
+    <li><span class="b">Abrir en Drive</span> abre el archivo original. Si la pieza todavía no tiene link, dice «Sin link»: agregalo en <strong>Enlaces</strong> con <span class="b">Agregar link</span>, pegando el link del Drive.</li>
+    <li><span class="b">Copiar cita</span> arma la referencia lista para pegar en un escrito, con el formato <em>Efecto Nº … – título (Sobre Nº …), fs. …, informe …, pieza Nº …</em>. Si falta un dato, la cita lo marca como <span class="falta">[completar]</span> en lugar de inventarlo.</li>
+    <li><span class="b">Editar</span> pasa la ficha a modo edición. Cada campo se guarda solo al salir de él.</li>
+    <li><strong>Datos del documento</strong>: fecha (con su precisión: día, mes, año o aproximada), autor, destinatarios, fojas y resumen del contenido.</li>
+    <li><strong>Origen</strong>: efecto, sobre, informe del gabinete y dónde y cuándo se secuestró. El efecto es un enlace: te lleva a su ficha.</li>
+    <li><strong>Observaciones del analista</strong>: por qué importa la pieza y qué prueba. Va separado del dato a propósito.</li>
+    <li><strong>Trabajo</strong>: relevancia (alta, media, baja o descartada), estado de trabajo (pendiente, en proceso, revisada), responsable y etiquetas libres.</li>
+    <li><strong>Estado procesal</strong>: si la pieza tiene una incidencia, y si es propia o heredada de su efecto, su procedimiento o su informe.</li>
+    <li><strong>Historial</strong>: quién cambió qué y cuándo, con el valor anterior tachado.</li>
+  </ul>
+
+  <h3>Cargar una pieza nueva</h3>
+  <ol class="pasos">
+    <li>Tocá <span class="b p">Nueva pieza</span>.</li>
+    <li>Escribí el número de orden (admite 2.1, 2 bis, 2 ter…), elegí el tipo y poné el título tal como figura en el documento o el asunto del mail.</li>
+    <li>Si tenés el link del Drive, pegalo y elegí qué es: original escaneado, transcripción, imagen forense, carpeta u otro.</li>
+    <li>Tocá <span class="b p">Cargar pieza</span>. Se abre la ficha: completá lo que tengas y dejá vacío lo que no sepas.</li>
+  </ol>
+  <div class="consejo"><b>Consejo</b><p>Si la pieza sale de un efecto, cargala desde la ficha del efecto con <span class="b">Nueva pieza de este efecto</span>: queda vinculada sola y hereda su situación procesal.</p></div>
+
+  <h3>Archivar</h3>
+  <p>Al pie de la ficha está <strong>Archivar</strong>. La pieza sale del índice pero no se pierde: durante unos segundos aparece <strong>Deshacer</strong>, y después queda en el historial para recuperarla.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">6</span>Efectos secuestrados</h2>
+  <p class="entrada">Cada cosa secuestrada, de qué allanamiento salió, en qué estado está y quién la trabaja. Reemplaza a «DISTRIBUCIÓN DE TAREAS» y «LISTADO EFECTOS».</p>
+
+  <h3>Tablero</h3>
+  <p>Cada efecto es una tarjeta en la columna de su estado. Para cambiarle el estado, <strong>arrastrá la tarjeta</strong> a otra columna: el cambio le aparece al instante a todo el equipo. Cada tarjeta muestra el número, la descripción, si tiene incidencias procesales, cuántas piezas salieron de él y el responsable.</p>
+  <figure><img src="../../public/manual/img/05-efectos-tablero.jpg" alt="Tablero de efectos"><figcaption><b>El tablero.</b> Sin iniciar, En proceso, Escaneado, Finalizado y Observado.</figcaption></figure>
+
+  <h3>Por allanamiento</h3>
+  <p>La misma información en una tabla agrupada por procedimiento (fecha y domicilio). Con las casillas de la izquierda podés <strong>marcar varios efectos</strong> y cargarles juntos una situación procesal con <span class="b">Marcar situación procesal</span>.</p>
+  <figure><img src="../../public/manual/img/06-efectos-allanamiento.jpg" alt="Efectos por allanamiento"><figcaption><b>Por allanamiento.</b> Los filtros de arriba sirven para las dos vistas: papel o dispositivos, responsable, procedimiento y con alerta procesal.</figcaption></figure>
+
+  <h3>La ficha del efecto</h3>
+  <figure><img src="../../public/manual/img/07-ficha-efecto.jpg" alt="Ficha de un efecto"><figcaption><b>La ficha del efecto.</b> La descripción según el acta queda protegida: no se modifica después de importada.</figcaption></figure>
+  <ul class="lista">
+    <li><strong>Descripción según el acta</strong>: el texto tal cual figura en el acta. No se edita.</li>
+    <li><strong>Procedimiento y secuestro</strong>: de qué allanamiento sale, propietario, tenedor, autorización y patrón o contraseña del dispositivo.</li>
+    <li><strong>Trabajo</strong>: responsable, si está apto para analizar, prioridad, fojas aproximadas, ubicación física y link del escaneo.</li>
+    <li><strong>Gabinete de Informática Forense</strong>: el informe de extracción y sus observaciones.</li>
+    <li><strong>Estado procesal</strong>: las incidencias del efecto. Todo lo que se marque acá lo heredan sus piezas.</li>
+    <li><span class="b">Nueva pieza de este efecto</span> y la lista de piezas que ya salieron de él.</li>
+  </ul>
+  <div class="procesal"><b>Situación procesal</b><p>Con <span class="b">Marcar situación procesal</span> se registra un planteo (exclusión, nulidad, apelación, casación u otro) y su situación: <span class="chip lacre">Admisibilidad cuestionada</span>, <span class="chip lacre">Pendiente de resolución</span> o <span class="chip lacre">Excluida</span>. Desde ese momento, el efecto y todas sus piezas se ven en lacre, y el tablero avisa si alguien quiere usarlas en el juicio.</p></div>
+  <p>Para cargar efectos desde una planilla (LISTADO EFECTOS, DISTRIBUCIÓN DE TAREAS o cualquiera parecida) usá <span class="b">Importar planilla</span>; el paso a paso está en el capítulo 16.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">7</span>Documentos y escaneos</h2>
+  <p class="entrada">Acá se «leen» los escaneos para poder buscar adentro de ellos. Una palabra de una factura, un remito o un expediente te lleva directo a la página donde aparece.</p>
+  <ol class="pasos">
+    <li>Bajá del Drive el PDF o la carpeta entera (en el Drive: clic derecho sobre la carpeta → <strong>Descargar</strong>, y descomprimí el .zip).</li>
+    <li>En <strong>Documentos</strong>, arrastrá los archivos o la carpeta, o usá <span class="b p">Leer escaneos</span> o <span class="b">Elegir carpeta</span>.</li>
+    <li>La app lee cada página: si el PDF ya trae texto, lo toma tal cual; si la página es una imagen, la lee con reconocimiento de texto (OCR) en castellano. Arriba ves el avance.</li>
+    <li>Podés seguir trabajando en otra pantalla mientras lee. Lo único que no hay que hacer es cerrar la pestaña.</li>
+  </ol>
+  <figure><img src="../../public/manual/img/08-documentos.jpg" alt="Documentos"><figcaption><b>Documentos leídos.</b> Cada uno con su cantidad de páginas, cómo se leyó y a qué efecto pertenece.</figcaption></figure>
+  <div class="regla"><p><strong>El archivo no se sube a ningún lado.</strong> Se lee en tu computadora y solo viaja el texto de cada página. Cada archivo se identifica por su huella digital (SHA-256): si lo vuelve a arrastrar otra persona, o si se cortó a la mitad, la app lo reconoce y sigue desde donde quedó, sin duplicar.</p></div>
+  <div class="ojo"><b>Qué esperar del OCR</b><p>Lee bien lo impreso (facturas, remitos, expedientes). Lo escrito a mano, como las agendas, casi no lo lee. El texto leído por máquina sirve para <strong>encontrar</strong> el documento, no para citarlo: citá siempre el original.</p></div>
+
+  <h3>La ficha del documento</h3>
+  <p>Tocando un documento ves el texto de cada página, podés buscar adentro, abrirlo en el Drive y, con <span class="b">Crear pieza con este documento</span>, sumarlo al índice con su huella.</p>
+
+  <h3>Sugerencias para validar</h3>
+  <p>Al leer, la app propone de qué efecto es el documento (si la carpeta se llama, por ejemplo, «EFECTO 10002»), qué contratación menciona (por el identificador o el número de expediente), qué persona (por el CUIT) y si ya es una pieza del índice. <strong>Nada se aplica solo</strong>: en <strong>Sugerencias</strong> alguien del equipo toca <span class="b p">Confirmar</span> (y queda con su nombre) o <span class="b">Descartar</span> (y no vuelve a aparecer).</p>
+  <figure><img src="../../public/manual/img/09-sugerencias.jpg" alt="Sugerencias para validar"><figcaption><b>La bandeja de sugerencias.</b> El número en el menú, al lado de Documentos, dice cuántas quedan pendientes.</figcaption></figure>
+  <p><strong>Traer texto de AppUFIL:</strong> si los escaneos ya se procesaron en AppUFIL, no hace falta volver a leerlos. Desde ese botón se baja un pequeño programa que arma un archivo con el texto, y ese archivo se trae acá. Los documentos se reconocen por su huella.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">8</span>Contrataciones</h2>
+  <p class="entrada">Una ficha por licitación, solicitud de cotización o contratación directa: el trámite paso a paso con fojas y firmantes, el cuadro comparativo de ofertas y la prueba que la respalda. Es la vista que muestra el hecho completo.</p>
+  <figure><img src="../../public/manual/img/10-contratacion.jpg" alt="Ficha de una contratación"><figcaption><b>La ficha de la contratación.</b> A la izquierda la lista, con buscador por identificador, expediente u oferente.</figcaption></figure>
+  <ul class="lista">
+    <li><strong>Cabecera</strong>: tipo de procedimiento, identificador, expediente, fecha de inicio, apertura de sobres y objeto.</li>
+    <li><strong>Montos</strong>: presupuesto oficial, reserva presupuestaria y monto adjudicado, con el adjudicatario (su nombre lleva a su ficha).</li>
+    <li><strong>Observaciones del analista</strong>: el porqué de la contratación en la causa, en tono de interpretación.</li>
+    <li><strong>Cuadro de ofertas</strong>: cada oferente con su monto, las fojas, el link a la oferta y la diferencia contra el presupuesto oficial. La <strong>menor oferta</strong> se marca sola. Debajo de cada oferente se lee su observación (por ejemplo, qué ítems se le adjudicaron).</li>
+  </ul>
+  <figure><img src="../../public/manual/img/11-contratacion-tramite.jpg" alt="Trámite y prueba vinculada"><figcaption><b>Trámite y prueba vinculada.</b> Cada paso con sus fojas, su fecha tal como figura en el expediente y quién lo firmó; a la derecha, los mensajes y piezas que la prueban.</figcaption></figure>
+  <ul class="lista">
+    <li><strong>Trámite</strong>: los pasos a fojas. Si el expediente dice solo «marzo de 2021», se muestra así, sin inventar el día. <span class="b">Agregar paso</span> suma uno; el lápiz de cada paso lo edita.</li>
+    <li><strong>Prueba vinculada</strong>: los mensajes y las piezas que se vincularon a esta contratación. Tocando uno vas a su conversación o a su ficha.</li>
+    <li><strong>Historial</strong>: los cambios de la ficha.</li>
+  </ul>
+  <h3>Cargar y completar</h3>
+  <ol class="pasos">
+    <li><span class="b p">Nueva contratación</span> pide el identificador (por ejemplo, «LP 05/2020»), el expediente, el tipo de procedimiento y el objeto.</li>
+    <li><span class="b">Editar datos</span> abre todos los campos: montos (escritos como en el expediente, 18.415.263,50), fechas, link al expediente y observaciones.</li>
+    <li>En el cuadro, <span class="b">Agregar</span> suma una oferta; tocando una oferta se completa o corrige.</li>
+    <li>Para traer una planilla con una hoja por licitación (como EXPEDIENTES DE CONTRATACIÓN), usá <span class="b">Importar planilla</span> (capítulo 16).</li>
+  </ol>
+  <div class="consejo"><b>Consejo</b><p>Los montos que faltan se ven como <span class="falta">[completar]</span>. La app nunca los deduce de las observaciones: los carga una persona, mirando el expediente.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">9</span>Personas y empresas</h2>
+  <p class="entrada">El directorio de la causa: quién es quién, con su rol, su cargo, sus teléfonos, su CUIT o DNI y cómo figura agendado en los celulares. Y el grafo que muestra cómo se relacionan.</p>
+  <figure><img src="../../public/manual/img/12-personas.jpg" alt="Directorio de personas"><figcaption><b>El directorio.</b> Personas y empresas con sus roles en la causa: imputado, testigo, denunciante, funcionario, proveedor, perito.</figcaption></figure>
+  <h3>La ficha de cada persona</h3>
+  <figure><img src="../../public/manual/img/13-ficha-persona.jpg" alt="Ficha de una persona"><figcaption><b>La ficha.</b> Roles, identificadores, relaciones y todo lo que la menciona en la causa.</figcaption></figure>
+  <ul class="lista">
+    <li><strong>Roles</strong> y <strong>cargo</strong>. Una persona puede tener más de un rol (por ejemplo, imputado y funcionario).</li>
+    <li><strong>Identificadores</strong>: teléfonos, CUIT, DNI, correo y cómo figura agendado. El buscador los encuentra, así que un número de teléfono te lleva a la persona.</li>
+    <li><strong>Relaciones</strong>: con quién se vincula y de dónde surge. <span class="b">Agregar relación</span> suma una.</li>
+    <li><strong>Dónde aparece</strong>: contrataciones en las que ofertó o fue adjudicataria, piezas, efectos, conversaciones y mensajes, y el juicio.</li>
+  </ul>
+  <p><span class="b p">Nueva persona o empresa</span> carga una ficha nueva con su rol y su primer identificador.</p>
+  <h3>Relaciones</h3>
+  <p>Con <strong>Relaciones</strong> ves el grafo: quién es socio, familiar o empleado de quién, qué empresas ofertaron en cada contratación y quiénes aparecen juntos en una conversación.</p>
+  <figure><img src="../../public/manual/img/14-relaciones.jpg" alt="Grafo de relaciones"><figcaption><b>El grafo.</b> Líneas llenas: lo firme. Punteadas: coincidencias por nombre en una conversación, a confirmar.</figcaption></figure>
+  <ul class="lista">
+    <li><strong>Sumar al dibujo</strong> agrega o quita capas: <em>Ofertas y adjudicaciones</em> y <em>Juntos en conversaciones</em>.</li>
+    <li>Los botones <kbd>+</kbd> y <kbd>−</kbd> acercan y alejan, y el tercero vuelve a encuadrar todo el dibujo. Tocando un nodo se abre la ficha.</li>
+    <li>La columna <strong>Quién con quién</strong> lista cada relación con su origen.</li>
+  </ul>
+  <ol class="pasos">
+    <li>Tocá <span class="b">Nueva relación</span> y elegí las dos fichas.</li>
+    <li>Escribí qué relación tienen (socio, familiar, empleado…).</li>
+    <li>Completá <strong>de dónde surge</strong> (contrato social, efecto, fojas): así cualquiera puede ir a verificarla.</li>
+  </ol>
+  <div class="ojo"><b>Ojo con las punteadas</b><p>Salen de nombres que aparecen en la misma conversación. Son una coincidencia a confirmar, no una identificación.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">10</span>Mensajes e informe de relevamiento</h2>
+  <p class="entrada">Las conversaciones extraídas de los teléfonos, como un chat, en orden y con la fecha de cada mensaje. Acá se marcan los relevantes, se escribe por qué importan, se vinculan a su contratación y sale el informe de relevamiento en Word.</p>
+  <figure><img src="../../public/manual/img/15-mensajes.jpg" alt="Lector de mensajes"><figcaption><b>El lector.</b> Cada mensaje con su remitente; los relevantes llevan su observación y la contratación vinculada.</figcaption></figure>
+  <h3>Leer y marcar</h3>
+  <ol class="pasos">
+    <li>Elegí la conversación en la lista de la izquierda (se busca por nombre, número o cómo estaba agendado).</li>
+    <li><strong>Buscar en esta conversación</strong> encuentra y resalta palabras, sin importar tildes. <strong>Relevantes</strong> muestra solo los marcados.</li>
+    <li>Para marcar un mensaje como relevante, tocá el marcador de la esquina, o elegilo y apretá <kbd>R</kbd>. Queda marcado para todo el equipo al instante.</li>
+    <li>Tocá el mensaje para abrir su ficha: escribí la <strong>observación</strong> (por qué es relevante y con qué se vincula) y, en <strong>Vínculos</strong>, elegí la contratación o la pieza que prueba y tocá <span class="b">Vincular</span>.</li>
+  </ol>
+  <figure><img src="../../public/manual/img/16-ficha-mensaje.jpg" alt="Ficha de un mensaje"><figcaption><b>La ficha del mensaje.</b> El texto literal no se puede editar y guarda su huella; la observación va a la columna OBSERVACIONES del informe.</figcaption></figure>
+
+  <h3>Datos de la conversación</h3>
+  <p>El botón <span class="b">Datos de la conversación</span> guarda el dispositivo, el número de efecto, el informe de extracción del Gabinete, el <strong>titular del teléfono</strong>, el número de la conversación, cómo estaba agendado y el período. Son los datos que usa el informe: completalos antes de sacarlo.</p>
+
+  <h3>El informe de relevamiento</h3>
+  <ol class="pasos">
+    <li>Tocá <span class="b p">Informe .docx</span>. Revisá los datos del encabezado: lo que falte va a salir como <span class="falta">[completar: …]</span>.</li>
+    <li>Si el teléfono tiene otras conversaciones, podés sumarlas al mismo informe.</li>
+    <li>Tocá <span class="b p">Descargar .docx</span>. Sale con la plantilla del equipo: Palatino Linotype 11, justificado, interlineado 1,5, con la referencia del legajo, los párrafos de introducción y la transcripción por conversación y en orden.</li>
+    <li>Cada mensaje lleva Fecha, <strong>Emisor</strong> (el titular del teléfono analizado), <strong>Remitente</strong> (quien envía el mensaje), el Mensaje literal y las OBSERVACIONES con la contratación vinculada. Revisalo en Word antes de firmarlo.</li>
+  </ol>
+  <figure><img src="../../public/manual/img/17-informe.jpg" alt="Informe de relevamiento"><figcaption><b>Antes de descargar</b>, el informe muestra los datos que va a usar.</figcaption></figure>
+
+  <h3>Importar una conversación</h3>
+  <ol class="pasos">
+    <li>Bajá la transcripción del Drive como Word (<strong>Archivo → Descargar → Microsoft Word (.docx)</strong>). También sirve el .txt que exporta WhatsApp, o pegar el texto.</li>
+    <li>Tocá <span class="b p">Importar conversación</span> y arrastrá el archivo.</li>
+    <li>La app separa fecha, remitente y mensaje y te muestra todo en una tabla para revisar. Las notas entre paréntesis del analista no se importan como mensajes; las notas al pie pasan a la observación. Destildá lo que no sea un mensaje.</li>
+    <li>Completá título, participantes, efecto, titular, número y cómo estaba agendado, y tocá <span class="b p">Importar</span>. El texto queda literal y ya no se puede editar.</li>
+  </ol>
+  <p><strong>Desde un reporte de UFED:</strong> exportá el reporte a Excel (.xlsx) en UFED Reader y arrastralo en el mismo lugar. La app encuentra la hoja de chats, reconoce las columnas y te deja importar cada chat como una conversación. Si una fecha puede leerse como día/mes o mes/día, te avisa.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">11</span>Cronología</h2>
+  <p class="entrada">Todo lo que tiene fecha, en una sola línea de tiempo: piezas, mensajes relevantes, pasos del trámite de las contrataciones, allanamientos, actos procesales y planteos. Ideal para mostrarle al fiscal la historia completa.</p>
+  <figure><img src="../../public/manual/img/18-cronologia.jpg" alt="Cronología"><figcaption><b>La cronología</b>, agrupada por mes. Cada hito dice de qué tipo es y se abre con un toque.</figcaption></figure>
+  <ul class="lista">
+    <li>Los botones de arriba (Piezas, Mensajes, Trámite, Allanamientos, Actos procesales, Planteos) filtran por tipo: si no tocás ninguno se ve todo; si tocás uno o varios, se ven solo esos. El número dice cuántos hay de cada tipo.</li>
+    <li><strong>Persona</strong> y <strong>Contratación</strong> filtran la línea de tiempo; <strong>Desde</strong> y <strong>Hasta</strong> acotan las fechas. <strong>Limpiar filtros</strong> vuelve a mostrar todo.</li>
+    <li><span class="b">Acto procesal</span> carga una audiencia, una resolución, un planteo o un allanamiento, con su fecha y el link al acta.</li>
+    <li><span class="b p">Exportar PDF</span> imprime la cronología tal como la estás viendo, con los filtros elegidos.</li>
+  </ul>
+  <div class="consejo"><b>Consejo</b><p>Para preparar una audiencia, filtrá por la contratación o por la persona y exportá el PDF: queda la historia de ese hecho en una sola hoja.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">12</span>Preparación del juicio</h2>
+  <p class="entrada">El punteo de la prueba para el debate, heredero de «Prueba a mostrar en debate con testigos»: qué se ofrece, cómo se incorpora, con quién, si se entregó a la defensa, y los avisos de lo que falta resolver.</p>
+  <figure><img src="../../public/manual/img/19-juicio.jpg" alt="Preparación del juicio"><figcaption><b>El ofrecimiento</b>, ordenado por clase de prueba y con los avisos arriba.</figcaption></figure>
+  <ol class="pasos">
+    <li><span class="b p">Sumar piezas</span> agrega piezas del índice, en el orden en que las querés numerar. Si alguna tiene problema procesal, el tablero lo dice <strong>antes</strong> de confirmar y el botón pasa a decir «Sumar igual».</li>
+    <li><span class="b">Testigos o peritos</span> suma personas del directorio (primero aparecen las que ya tienen ese rol). <span class="b">Otra prueba</span> sirve para informativa o instrumental que no está en el índice.</li>
+    <li>Tocá cada fila para completar su ficha: cómo se nombra en el escrito, qué prueba o sobre qué declara, si se exhibe o se incorpora por lectura, con quién se introduce, si se entregó a la defensa, el acuerdo probatorio, los imputados vinculados y, después de la audiencia, qué dijo el auto de apertura.</li>
+    <li>Revisá los avisos: <span class="chip lacre">con problema procesal</span>, rechazadas en el auto, sin quién la introduce, sin entregar a la defensa e impugnadas. Tocando uno ves solo esas filas.</li>
+    <li><span class="b">Exportar</span> → <strong>Listado para la remisión (.docx)</strong> arma el ofrecimiento por clase (A.- TESTIMONIAL, B.- DOCUMENTAL…), numerado y con el formato de la fiscalía. <strong>Planilla del punteo (Excel)</strong> baja la tabla completa. Si quitás una prueba, <strong>Renumerar</strong> corre los números para que no queden salteados.</li>
+  </ol>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">13</span>El buscador (Ctrl + K)</h2>
+  <p class="entrada">Desde cualquier pantalla, <kbd>Ctrl</kbd> + <kbd>K</kbd> (o «Buscar en la causa», arriba a la izquierda) abre el buscador de toda la causa. Es la forma más rápida de encontrar cualquier cosa.</p>
+  <figure><img src="../../public/manual/img/20-busqueda.jpg" alt="Buscador"><figcaption><b>El buscador.</b> Los resultados salen agrupados por tipo y con la palabra resaltada.</figcaption></figure>
+  <ul class="lista">
+    <li>Busca en piezas, efectos, personas (también por teléfono o por cómo estaban agendadas), contrataciones, el texto de todos los mensajes y el texto de los escaneos leídos.</li>
+    <li>No distingue tildes ni mayúsculas: «invitacion» encuentra «Invitación».</li>
+    <li>Moverte con las flechas y abrir con <kbd>Enter</kbd>. Un mensaje abre la conversación justo en ese punto; un escaneo, la página con la palabra resaltada.</li>
+    <li>Un número de efecto (por ejemplo, 10001) te lleva directo a su ficha.</li>
+  </ul>
+  <div class="regla"><p><strong>La prueba de fuego:</strong> si el fiscal pregunta por «el mensaje donde le dice que arregle la cotización», escribí dos o tres palabras que recuerde. En segundos tenés el mensaje, la conversación, el efecto del que sale, el informe que lo respalda y la contratación con la que se vincula.</p></div>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">14</span>Equipo</h2>
+  <p class="entrada">Quién está habilitado para entrar a la causa y con qué alias figura en las planillas. Todos los invitados tienen los mismos permisos: pueden ver, cargar y editar todo.</p>
+  <figure><img src="../../public/manual/img/21-equipo.jpg" alt="Equipo"><figcaption><b>El equipo.</b> Arriba, los alias de las planillas que todavía no tienen a nadie.</figcaption></figure>
+  <ol class="pasos">
+    <li>Cargá el <strong>Correo de Google</strong> de la persona, <strong>Cómo figura en las planillas</strong> (por ejemplo, CARLI) y, si querés, su nombre y apellido.</li>
+    <li>Tocá <span class="b p">Invitar</span>. La app arma un mensaje con las instrucciones para mandárselo por WhatsApp o por correo.</li>
+    <li>Cuando la persona entra por primera vez, se le asignan solos los efectos que figuraban con su alias.</li>
+  </ol>
+  <p>Desde la misma pantalla se puede cambiar el alias de alguien (con el lápiz que aparece al pasar por su nombre) o <strong>Deshabilitar</strong> a quien deja de trabajar en la causa. Si un alias queda en dos cuentas, sus efectos no se asignan a ninguna hasta que quede en una sola: la pantalla lo avisa.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">15</span>Trabajar a la vez sin pisarse</h2>
+  <p class="entrada">El tablero está hecho para que varias personas trabajen al mismo tiempo, cada una desde su computadora, y el fiscal consulte cuando quiera.</p>
+  <h3>Todo en vivo</h3>
+  <p>Lo que carga una persona le aparece al resto en segundos, sin recargar la página. «En línea ahora» muestra quién está conectado.</p>
+  <h3>Si dos personas tocan el mismo campo</h3>
+  <p>El tablero no pisa a nadie. Si alguien cambió un campo mientras vos lo editabas, te avisa: <em>«Inés cambió este campo mientras lo editabas. Ahora dice: … Tu cambio todavía no se guardó.»</em> Elegís entre <span class="b p">Guardar el mío igual</span> o <span class="b">Quedarme con el de Inés</span>. En cualquier caso, los dos valores quedan en el historial.</p>
+  <h3>Si se corta internet</h3>
+  <p>Seguí trabajando. El indicador de abajo a la izquierda pasa a «Sin conexión» y lo que cargues queda en cola; cuando vuelve la conexión, se guarda solo y te avisa.</p>
+  <h3>El historial</h3>
+  <p>Cada ficha tiene su historial: quién cambió qué, cuándo, qué decía antes y qué dice ahora. No es para controlar a nadie: sirve para ver qué hizo el otro y recuperar algo si se pisó por error.</p>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">16</span>Exportar, copias y planillas</h2>
+  <h3>Exportar lo que estás viendo</h3>
+  <p>En Índice, Efectos y Personas, <span class="b">Exportar</span> baja a Excel o CSV exactamente lo que está en pantalla, con los filtros aplicados. En Juicio, el listado para la remisión sale en Word y el punteo en Excel. El informe de relevamiento sale en Word y la cronología en PDF.</p>
+  <h3>Copia completa de la causa</h3>
+  <p>En <strong>Inicio</strong>, <span class="b">Descargar copia completa</span> baja un .zip con toda la causa: un archivo JSON con todas las tablas (sirve para restaurarla) y una planilla CSV por cada tabla, que se abre con Excel. Conviene guardar una cada tanto en el Drive, además de las copias automáticas.</p>
+  <h3>Importar una planilla de efectos</h3>
+  <ol class="pasos">
+    <li>Bajá la planilla como Excel: si es de Google Sheets, <strong>Archivo → Descargar → Microsoft Excel (.xlsx)</strong>.</li>
+    <li>En <strong>Efectos</strong>, tocá <span class="b">Importar planilla</span> y arrastrá el archivo.</li>
+    <li><strong>Planilla:</strong> la app encuentra sola la fila de títulos y si son papeles o dispositivos. Revisá la vista previa.</li>
+    <li><strong>Columnas:</strong> cada columna viene relacionada con su campo; cambiá lo que haga falta. Lo que marques «No importar» queda afuera.</li>
+    <li><strong>Revisión:</strong> antes de guardar te dice cuántas filas entran, cuáles ya estaban, cuáles están repetidas o tienen un valor que no reconoce. Nada se corrige por deducción.</li>
+    <li>Tocá <span class="b p">Importar</span>. Importar dos veces la misma planilla no duplica nada.</li>
+  </ol>
+  <h3>Importar EXPEDIENTES DE CONTRATACIÓN</h3>
+  <ol class="pasos">
+    <li>Bajá la planilla como Excel y, en <strong>Contrataciones</strong>, tocá <span class="b">Importar planilla</span>.</li>
+    <li>Cada hoja con la tabla del trámite (PROCEDIMIENTO, Fs., FECHA, FIRMANTE, OBSERVACIONES) es una contratación. El identificador sale del nombre de la hoja y se puede corregir.</li>
+    <li>Las fechas raras («entre el 11 y 17/3/2020», «febrero 2020») se guardan tal cual, sin inventar el día.</li>
+    <li>Los montos escritos en las observaciones aparecen <strong>sin tildar</strong>: tildá solo los que coinciden con el expediente, y tocá <span class="b p">Importar</span>.</li>
+  </ol>
+</section>
+
+<section class="capitulo">
+  <h2><span class="num">17</span>Desde el celular</h2>
+  <p class="entrada">La app funciona en el celular sin instalar nada: abrí la misma dirección en el navegador y entrá con Google. Sirve sobre todo para consultar: buscar una pieza, leer una conversación o mirar una contratación antes de una audiencia.</p>
+  <figure class="celular"><img src="../../public/manual/img/22-celular-inicio.jpg" alt="Inicio en el celular"><img src="../../public/manual/img/23-celular-contratacion.jpg" alt="Contratación en el celular"></figure>
+  <ul class="lista">
+    <li>El menú pasa arriba, en una fila que se desliza con el dedo.</li>
+    <li>La lupa de arriba a la derecha abre el buscador.</li>
+    <li>Las fichas ocupan toda la pantalla; «Todas las contrataciones» (o la flecha) vuelve a la lista.</li>
+    <li>Para agregarla a la pantalla de inicio del teléfono: en el menú del navegador, <strong>Agregar a la pantalla principal</strong>.</li>
+  </ul>
+</section>
+
+<section class="capitulo faq">
+  <h2><span class="num">18</span>Preguntas frecuentes y ayuda</h2>
+  <div class="contacto" style="margin:0 0 4mm"><b>¿Algo no anda o tenés una idea?</b><p style="margin-top:2mm">Escribile a Rober (Roberto Lacabanne), con una captura de la pantalla si podés. Las ideas para mejorar el tablero también son bienvenidas: está hecho para que le sirva al equipo.</p></div>
+  <h3>¿Tengo que guardar?</h3>
+  <p>No. Cada campo se guarda solo al pasar al siguiente. Mirá el indicador de abajo a la izquierda.</p>
+  <h3>Borré algo por error, ¿se perdió?</h3>
+  <p>No. Nada se borra de verdad: lo archivado se recupera, y en el historial de la ficha está el valor anterior de cada campo.</p>
+  <h3>¿La app modifica los archivos del Drive?</h3>
+  <p>Nunca. Guarda el link y, cuando lee un escaneo, solo el texto de sus páginas. El original queda intacto.</p>
+  <h3>¿Puedo corregir el texto de un mensaje transcripto?</h3>
+  <p>No: las transcripciones son literales y quedan protegidas con su huella. Si hay un error de transcripción, anotalo en la observación del mensaje.</p>
+  <h3>¿Por qué algo dice [completar]?</h3>
+  <p>Porque ese dato no está cargado. La app no lo inventa: completalo cuando lo tengas.</p>
+  <h3>Veo una línea punteada en el grafo, ¿es una relación?</h3>
+  <p>Todavía no. Es una coincidencia de nombres en una conversación, a confirmar. Si la confirmás, cargala como relación con su «de dónde surge».</p>
+  <h3>¿Por qué una pieza está en rojo?</h3>
+  <p>Porque tiene una situación procesal: admisibilidad cuestionada, pendiente de resolución o excluida, propia o heredada de su efecto. Tocala para ver cuál.</p>
+  <h3>No me deja entrar</h3>
+  <p>Fijate que estés usando la cuenta de Gmail invitada. Si el navegador tiene varias cuentas abiertas, tocá <strong>Salir</strong> y volvé a elegir. Si sigue sin andar, avisá.</p>
+  <h3>La pantalla se ve rara o no se actualiza</h3>
+  <p>Recargá la página (<kbd>F5</kbd>). Lo guardado no se pierde.</p>
+</section>
+
+</main>
+</body>
+</html>
