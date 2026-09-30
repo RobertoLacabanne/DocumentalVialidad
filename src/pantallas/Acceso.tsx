@@ -5,6 +5,7 @@ import { Boton } from '../componentes/Boton';
 import { Entrada } from '../componentes/campos';
 import { AvisoError } from '../componentes/estados';
 import { useSesion } from '../datos/sesion';
+import { Ilustracion } from '../ilustraciones/Ilustracion';
 import { accesoConClave } from '../lib/supabase';
 import s from './Acceso.module.css';
 
@@ -40,8 +41,12 @@ function Presentacion() {
             <History aria-hidden /> Nada se borra: queda quién cambió qué y cuándo.
           </li>
         </ul>
+        <p className={s.pie}>Los archivos siguen en el Drive de la UFIL. La app guarda las referencias.</p>
       </div>
-      <p className={s.pie}>Los archivos siguen en el Drive de la UFIL. La app guarda las referencias.</p>
+      <div className={s.panorama} aria-hidden>
+        <Ilustracion id="bajada" className={s.panoramaImg} prioridad />
+        <Ilustracion id="hilo-bajada" className={`${s.panoramaImg} ${s.hilo}`} prioridad />
+      </div>
     </section>
   );
 }

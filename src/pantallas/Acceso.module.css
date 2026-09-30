@@ -4,16 +4,51 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
   background: var(--color-fondo);
 }
+/* Sin los renglones de cuaderno de antes: competían con la pintura de «La Bajada». */
 .presentacion {
+  --sangrado: clamp(var(--esp-6), 6vw, var(--esp-16));
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: var(--esp-10);
-  padding: var(--esp-12) clamp(var(--esp-6), 6vw, var(--esp-16));
+  padding: var(--esp-12) var(--sangrado) 0;
   border-right: 1px solid var(--color-borde);
-  background:
-    repeating-linear-gradient(0deg, transparent 0 31px, var(--color-borde-suave) 31px 32px),
-    var(--color-fondo);
+  background: var(--color-fondo);
+}
+/* La pintura ocupa lo que sobra de la mitad de abajo, a sangre; su borde de arriba se disuelve
+   en el papel porque así está pintada, no por un degradé. El texto nunca va encima. */
+.panorama {
+  position: relative;
+  flex: 1 1 220px;
+  min-height: 200px;
+  margin-inline: calc(-1 * var(--sangrado));
+  overflow: hidden;
+  pointer-events: none;
+}
+.panoramaImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Anclada arriba: si hay que recortar, se pierde agua de abajo y no el lavado que se disuelve. */
+  object-position: center top;
+}
+/* El único movimiento de la serie: el hilo se tiende de una punta a la otra, una sola vez. */
+.hilo {
+  animation: tender 1.4s cubic-bezier(0.45, 0.05, 0.25, 1) 0.25s both;
+}
+@keyframes tender {
+  from {
+    clip-path: polygon(0 0, 0 0, -30% 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 135% 0, 105% 100%, 0 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hilo {
+    animation: none;
+  }
 }
 .marca {
   display: flex;
@@ -39,6 +74,7 @@
   display: grid;
   gap: var(--esp-5);
   max-width: 34rem;
+  margin-top: auto;
 }
 .eyebrow {
   font-size: var(--texto-2xs);
@@ -172,19 +208,37 @@
   padding: 1px 5px;
 }
 
+/* Notebooks bajas: que la pintura no empuje la página a hacer scroll. */
+@media (min-width: 861px) and (max-height: 820px) {
+  .presentacion {
+    gap: var(--esp-6);
+  }
+  .panorama {
+    flex-basis: 140px;
+    min-height: 140px;
+  }
+}
+
 @media (max-width: 860px) {
   .pagina {
     grid-template-columns: minmax(0, 1fr);
   }
   .presentacion {
+    --sangrado: var(--esp-5);
     border-right: 0;
     border-bottom: 1px solid var(--color-borde);
-    padding: var(--esp-8) var(--esp-5);
+    padding: var(--esp-8) var(--sangrado) 0;
     gap: var(--esp-6);
   }
   .rasgos,
   .pie {
     display: none;
+  }
+  /* En el celular la pintura pasa a ser una franja. */
+  .panorama {
+    flex: none;
+    min-height: 0;
+    height: 118px;
   }
   .lado {
     padding: var(--esp-6) var(--esp-4) var(--esp-10);
