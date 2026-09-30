@@ -6,6 +6,7 @@ import { MATERIALES_ETIQUETA, SOPORTE_ETIQUETA, tipoPieza } from '../lib/etiquet
 import { supabase } from '../lib/supabase';
 import type { TipoPieza } from '../lib/tipos';
 import s from './BusquedaGlobal.module.css';
+import { Ilustracion } from '../ilustraciones/Ilustracion';
 
 type Resultado = { tipo: string; id: string; titulo: string; detalle: string; fragmento: string; rango: number };
 
@@ -187,7 +188,10 @@ export function BusquedaGlobal({ causaId, abierta, onCambiar }: { causaId: strin
             ) : error ? (
               <p className={s.nada}>No se pudo buscar: {error}</p>
             ) : ordenados.length === 0 ? (
-              <p className={s.nada}>Nada coincide con «{texto.trim()}». Probá con menos palabras o con otra forma de escribirlo.</p>
+              <div className={s.nadaConDibujo}>
+                <Ilustracion id="vacio-busqueda" className={s.nadaDibujo} />
+                <p className={s.nada}>Nada coincide con «{texto.trim()}». Probá con menos palabras o con otra forma de escribirlo.</p>
+              </div>
             ) : (
               GRUPOS.map((g) => {
                 const del = ordenados.filter((r) => r.tipo === g.tipo);

@@ -23,6 +23,19 @@
   height: 24px;
   stroke-width: 1.4;
 }
+.vacioIlustracion {
+  display: block;
+  width: 160px;
+  height: 120px;
+  margin-bottom: calc(-1 * var(--esp-2));
+  user-select: none;
+}
+@media (max-width: 640px) {
+  .vacioIlustracion {
+    width: 120px;
+    height: 90px;
+  }
+}
 .vacioTitulo {
   font-family: var(--fuente-titulos);
   font-size: var(--texto-xl);

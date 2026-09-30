@@ -22,6 +22,7 @@ import { TarjetaKanban } from '../componentes/TarjetaKanban';
 import { useToast } from '../componentes/Toast';
 import { armarCita } from '../lib/cita';
 import s from './PaginaDiseno.module.css';
+import { SeccionIlustraciones } from './SeccionIlustraciones';
 
 // ---------------------------------------------------------------------
 // Ejemplos: solo nombres y números que figuran en el prompt maestro.
@@ -145,6 +146,7 @@ const SECCIONES = [
   ['ficha', 'Panel lateral y ficha'],
   ['kanban', 'Tarjeta de efecto'],
   ['estados', 'Estados'],
+  ['ilustraciones', 'Ilustraciones'],
 ] as const;
 
 function Bloque({ id, titulo, bajada, children }: { id: string; titulo: string; bajada?: string; children: ReactNode }) {
@@ -492,6 +494,14 @@ export function PaginaDiseno() {
                 </AvisoError>
               </div>
             </div>
+          </Bloque>
+
+          <Bloque
+            id="ilustraciones"
+            titulo="Ilustraciones"
+            bajada="«La Bajada»: una serie en acuarela del Litoral, pintada con código sobre el papel de la app y horneada a imágenes. Es la identidad artística: vive donde no hay datos y nunca compite con la lectura."
+          >
+            <SeccionIlustraciones />
           </Bloque>
         </div>
       </div>

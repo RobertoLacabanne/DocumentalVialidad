@@ -19,7 +19,7 @@ export function Proximamente() {
   if (!datos) return null;
   return (
     <div className={s.proximamente}>
-      <EstadoVacio icono={datos.icono} titulo={`${datos.etiqueta} llega en la Fase ${datos.fase}`}>
+      <EstadoVacio icono={datos.icono} ilustracion="proximamente-orilla" titulo={`${datos.etiqueta} llega en la Fase ${datos.fase}`}>
         Mientras tanto, todo se carga en el Índice de prueba. Esta sección va a traer:
       </EstadoVacio>
       <ul className={s.lista} style={{ maxWidth: 460, marginInline: 'auto' }}>

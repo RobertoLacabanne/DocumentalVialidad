@@ -301,7 +301,7 @@ export function Personas() {
                 </div>
               ) : visibles.length === 0 ? (
                 <div className={si.vacio}>
-                  <EstadoVacio icono={<Search />} titulo="Nadie coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
+                  <EstadoVacio icono={<Search />} ilustracion="vacio-busqueda" titulo="Nadie coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
                     Probá con otra parte del nombre o con los últimos dígitos del teléfono.
                   </EstadoVacio>
                 </div>

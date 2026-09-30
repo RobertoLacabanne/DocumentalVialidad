@@ -103,6 +103,18 @@
   color: var(--color-texto-suave);
   text-align: center;
 }
+.nadaConDibujo {
+  display: grid;
+  justify-items: center;
+  padding-top: var(--esp-2);
+}
+.nadaDibujo {
+  display: block;
+  width: 120px;
+  height: 90px;
+  margin-bottom: calc(-1 * var(--esp-3));
+  user-select: none;
+}
 .grupo {
   display: grid;
   gap: 1px;

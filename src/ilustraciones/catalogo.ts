@@ -26,6 +26,20 @@ export const ILUSTRACIONES = {
     alto: 500,
     uso: 'El hilo de la bandera, en capa aparte con transparencia para tenderlo sobre el panorama.',
   },
+  'entre-dos-rios': {
+    archivo: 'entre-dos-rios-v1',
+    ancho: 560,
+    alto: 96,
+    uso: 'Franja de la cabecera de Inicio: dos cintas de agua y el sol entre ambas.',
+  },
+  'vacio-indice': { archivo: 'vacio-indice-v1', ancho: 160, alto: 120, uso: 'Estado vacío: todavía no hay piezas en el índice.' },
+  'vacio-efectos': { archivo: 'vacio-efectos-v1', ancho: 160, alto: 120, uso: 'Estado vacío: todavía no hay efectos.' },
+  'vacio-documentos': { archivo: 'vacio-documentos-v1', ancho: 160, alto: 120, uso: 'Estado vacío: todavía no hay documentos leídos.' },
+  'vacio-mensajes': { archivo: 'vacio-mensajes-v1', ancho: 160, alto: 120, uso: 'Estado vacío: todavía no hay conversaciones.' },
+  'vacio-sugerencias': { archivo: 'vacio-sugerencias-v1', ancho: 160, alto: 120, uso: 'Estado vacío: todo al día, sin sugerencias pendientes.' },
+  'vacio-busqueda': { archivo: 'vacio-busqueda-v1', ancho: 160, alto: 120, uso: 'Estado vacío: la búsqueda no encontró nada.' },
+  'error-orilla': { archivo: 'error-orilla-v1', ancho: 160, alto: 120, uso: 'Pantalla de error: una orilla serena.' },
+  'proximamente-orilla': { archivo: 'proximamente-orilla-v1', ancho: 160, alto: 120, uso: 'Sección que llega en una fase próxima.' },
 } as const satisfies Record<string, DatosIlustracion>;
 
 export type IdIlustracion = keyof typeof ILUSTRACIONES;

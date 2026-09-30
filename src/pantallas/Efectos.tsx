@@ -347,6 +347,7 @@ export function Efectos() {
             <div className={si.vacio}>
               <EstadoVacio
                 icono={<Package />}
+                ilustracion="vacio-efectos"
                 titulo="Todavía no hay efectos cargados"
                 accion={
                   <Link to="../importar" relative="path" className={clasesBoton('primario')} style={{ textDecoration: 'none' }}>
@@ -360,7 +361,7 @@ export function Efectos() {
             </div>
           ) : visibles.length === 0 ? (
             <div className={si.vacio}>
-              <EstadoVacio icono={<Search />} titulo="Ningún efecto coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
+              <EstadoVacio icono={<Search />} ilustracion="vacio-busqueda" titulo="Ningún efecto coincide" accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}>
                 Probá con otra palabra o sacá algún filtro. La búsqueda no distingue tildes ni mayúsculas.
               </EstadoVacio>
             </div>

@@ -1,24 +1,33 @@
 import { CircleAlert, Check, CloudOff, LoaderCircle } from 'lucide-react';
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { Ilustracion } from '../ilustraciones/Ilustracion';
+import type { IdIlustracion } from '../ilustraciones/catalogo';
 import { haceCuanto } from '../lib/tiempo';
 import s from './estados.module.css';
 
 export function EstadoVacio({
   icono,
+  ilustracion,
   titulo,
   children,
   accion,
 }: {
   icono: ReactNode;
+  /** Viñeta en acuarela que reemplaza al círculo con el ícono. Es decorativa: el texto dice todo. */
+  ilustracion?: IdIlustracion;
   titulo: string;
   children?: ReactNode;
   accion?: ReactNode;
 }) {
   return (
     <div className={s.vacio}>
-      <span className={s.vacioIcono} aria-hidden>
-        {icono}
-      </span>
+      {ilustracion ? (
+        <Ilustracion id={ilustracion} className={s.vacioIlustracion} />
+      ) : (
+        <span className={s.vacioIcono} aria-hidden>
+          {icono}
+        </span>
+      )}
       <h3 className={s.vacioTitulo}>{titulo}</h3>
       {children && <p className={s.vacioTexto}>{children}</p>}
       {accion && <div className={s.vacioAccion}>{accion}</div>}

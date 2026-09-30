@@ -335,3 +335,133 @@
     height: 620px;
   }
 }
+
+/* Ilustraciones */
+.panoramaDemo {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  aspect-ratio: 1200 / 500;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+}
+.panoramaDemoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.franjaDemo {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--esp-2) var(--esp-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-lg);
+}
+.franjaDemo img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.galeriaIlus {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--esp-4);
+}
+.tarjetaIlus {
+  display: grid;
+  justify-items: center;
+  gap: var(--esp-2);
+  margin: 0;
+  padding: var(--esp-3);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-lg);
+}
+.tarjetaIlus figcaption {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  text-align: center;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.tarjetaIlus code {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-2xs);
+  color: var(--color-texto);
+}
+.punzoLacre {
+  display: grid;
+  gap: var(--esp-3);
+}
+.punzoMuestras {
+  display: flex;
+  max-width: 420px;
+  height: 72px;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+}
+.punzoMuestras div {
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  color: var(--color-sobre-tinta);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+}
+.punzoMuestras small {
+  font-weight: var(--peso-normal);
+  font-variant-numeric: tabular-nums;
+}
+.reglasIlus {
+  display: grid;
+  gap: var(--esp-2);
+  margin: 0;
+  padding-left: 1.2em;
+  max-width: 76ch;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+.tablaIlusMarco {
+  overflow-x: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie);
+}
+.tablaIlus {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+.tablaIlus th {
+  padding: var(--esp-2) var(--esp-3);
+  text-align: left;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto-suave);
+  background: var(--color-cabecera);
+}
+.tablaIlus td {
+  padding: var(--esp-2) var(--esp-3);
+  vertical-align: top;
+  border-top: 1px solid var(--color-borde-suave);
+}
+.tablaIlus td a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tablaIlus td a :global(svg) {
+  width: 12px;
+  height: 12px;
+}

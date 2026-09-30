@@ -146,6 +146,7 @@ export function Mensajes() {
           <div className={s.vacio}>
             <EstadoVacio
               icono={<MessagesSquare />}
+              ilustracion="vacio-mensajes"
               titulo="Todavía no hay conversaciones"
               accion={
                 <Link to="../importar-conversacion" relative="path" className={clasesBoton('primario')} style={{ textDecoration: 'none' }}>
@@ -465,7 +466,7 @@ function Lector({
           <FilasEsqueleto filas={6} />
         ) : filas.length === 0 ? (
           <div className={s.chatVacio}>
-            <EstadoVacio icono={soloRelevantes ? <Bookmark /> : <Search />} titulo={soloRelevantes && !texto ? 'Ningún mensaje marcado todavía' : 'No hay mensajes que coincidan'}>
+            <EstadoVacio icono={soloRelevantes ? <Bookmark /> : <Search />} ilustracion={soloRelevantes && !texto ? undefined : 'vacio-busqueda'} titulo={soloRelevantes && !texto ? 'Ningún mensaje marcado todavía' : 'No hay mensajes que coincidan'}>
               {soloRelevantes && !texto ? 'Pasá el mouse por un mensaje y tocá el marcador, o elegilo y apretá R.' : 'Probá con otra palabra. La búsqueda no distingue tildes.'}
             </EstadoVacio>
           </div>

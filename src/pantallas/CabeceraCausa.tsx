@@ -1,11 +1,14 @@
+import { Ilustracion } from '../ilustraciones/Ilustracion';
+import type { IdIlustracion } from '../ilustraciones/catalogo';
 import type { Causa } from '../lib/tipos';
 import s from './Indice.module.css';
 
 /** Carátula de la causa, en serif, con legajo y OGA. */
-export function CabeceraCausa({ causa }: { causa: Causa }) {
+export function CabeceraCausa({ causa, ilustracion }: { causa: Causa; ilustracion?: IdIlustracion }) {
   const partes = /^(.*?)\s*(\(.*\))\s*$/.exec(causa.caratula);
   return (
-    <header className={s.causa}>
+    <header className={ilustracion ? `${s.causa} ${s.conIlustracion}` : s.causa}>
+      {ilustracion && <Ilustracion id={ilustracion} className={s.causaIlustracion} />}
       <div className={s.causaMeta}>
         <span>
           Legajo Fiscalía <b>{causa.legajo_fiscalia}</b>

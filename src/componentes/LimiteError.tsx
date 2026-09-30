@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { Ilustracion } from '../ilustraciones/Ilustracion';
 import { Boton } from './Boton';
 import { AvisoError } from './estados';
 
@@ -14,6 +15,7 @@ export class LimiteError extends Component<{ children: ReactNode }, { error: Err
     if (this.state.error) {
       return (
         <div style={{ padding: 'var(--esp-8)', maxWidth: 640 }}>
+          <Ilustracion id="error-orilla" style={{ display: 'block', marginBottom: 'var(--esp-2)' }} />
           <AvisoError
             titulo="Algo falló al mostrar esta pantalla"
             accion={<Boton onClick={() => window.location.reload()}>Recargar la página</Boton>}

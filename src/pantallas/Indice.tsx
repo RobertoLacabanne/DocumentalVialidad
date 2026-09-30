@@ -246,6 +246,7 @@ export function Indice() {
             <div className={s.vacio}>
               <EstadoVacio
                 icono={<FileSearch />}
+                ilustracion="vacio-indice"
                 titulo="Todavía no hay piezas en esta causa"
                 accion={
                   <Boton variante="primario" icono={<Plus aria-hidden />} onClick={() => setCreando(true)}>
@@ -261,6 +262,7 @@ export function Indice() {
             <div className={s.vacio}>
               <EstadoVacio
                 icono={<Search />}
+                ilustracion="vacio-busqueda"
                 titulo="Ninguna pieza coincide"
                 accion={<Boton onClick={() => setFiltros(SIN_FILTROS)}>Limpiar filtros</Boton>}
               >

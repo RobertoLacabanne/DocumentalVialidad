@@ -189,7 +189,7 @@ export class Lienzo {
    * @param s.duro          0 mayormente bordes suaves, 1 mayormente duros
    * @param s.humedo        0 seco, 1 húmedo sobre húmedo (bordes blandos)
    * @param s.sangrado      px CSS: cuánto se corre la pintura de abajo adentro de esta mancha
-   * @param s.reservas      polígonos que quedan sin pintar (papel)
+   * @param s.reservas      polígonos que quedan sin pintar (papel); `reservaRug` (0.2) cuánto se deforma su borde
    * @param s.grad          {dir:[dx,dy], desde, hasta}: la densidad cambia a lo largo de una dirección
    * @param s.mezcla        {dir:[dx,dy], fuerza, ruido}: paso del pigmento A al B
    * @param s.flujo         variación orgánica de densidad a baja frecuencia (por defecto 0.22)
@@ -316,7 +316,7 @@ export class Lienzo {
           r.map(([x, y]) => [x * E, y * E]),
           14 * E,
         );
-        trazar(cc, deformar(pr, az, 3, 0.2));
+        trazar(cc, deformar(pr, az, 3, s.reservaRug ?? 0.2));
         cc.fill();
       }
       const dr = cc.getImageData(0, 0, bw, bh).data;

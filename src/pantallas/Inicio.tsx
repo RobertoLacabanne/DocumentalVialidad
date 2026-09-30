@@ -97,7 +97,7 @@ export function Inicio() {
 
   return (
     <div className={s.pantalla}>
-      <CabeceraCausa causa={causa} />
+      <CabeceraCausa causa={causa} ilustracion="entre-dos-rios" />
 
       <div className={s.cuerpo}>
         <p className={s.saludo}>{saludo(nombre)}. Así viene la causa hoy.</p>

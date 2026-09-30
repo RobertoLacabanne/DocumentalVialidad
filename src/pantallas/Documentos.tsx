@@ -173,6 +173,7 @@ export function Documentos() {
                   <div className={s.vacio}>
                     <EstadoVacio
                       icono={<FileScan />}
+                      ilustracion="vacio-documentos"
                       titulo="Soltá acá los escaneos"
                       accion={
                         <div className={s.vacioAcciones}>
@@ -192,7 +193,7 @@ export function Documentos() {
                 )
               ) : visibles.length === 0 ? (
                 <div className={si.vacio}>
-                  <EstadoVacio icono={<Search />} titulo="Ningún documento coincide" accion={<Boton onClick={() => setTexto('')}>Limpiar</Boton>}>
+                  <EstadoVacio icono={<Search />} ilustracion="vacio-busqueda" titulo="Ningún documento coincide" accion={<Boton onClick={() => setTexto('')}>Limpiar</Boton>}>
                     Probá con otra parte del nombre o de la carpeta.
                   </EstadoVacio>
                 </div>
@@ -502,7 +503,7 @@ function Bandeja({ sugerencias, documentos, onAbrir }: { sugerencias: Sugerencia
       </p>
       {pendientes.length === 0 ? (
         <div className={si.vacio}>
-          <EstadoVacio icono={<Inbox />} titulo="No hay sugerencias pendientes">
+          <EstadoVacio icono={<Inbox />} ilustracion="vacio-sugerencias" titulo="No hay sugerencias pendientes">
             {resueltas ? `Ya se resolvieron ${resueltas}. ` : ''}Cuando se lea un documento nuevo, lo que encuentre la app aparece acá para que alguien lo confirme.
           </EstadoVacio>
         </div>
