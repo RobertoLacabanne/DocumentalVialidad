@@ -31,17 +31,21 @@
   a { color: var(--acento); text-decoration: none; }
 
   /* Portada */
-  .portada { page: portada; height: 297mm; width: 210mm; background: var(--papel); position: relative; padding: 26mm 22mm; display: flex; flex-direction: column; break-after: page;
+  .portada { page: portada; height: 297mm; width: 210mm; background: var(--papel); position: relative; padding: 26mm 22mm 0; display: flex; flex-direction: column; break-after: page; overflow: hidden;
     box-shadow: inset 14mm 0 0 -13.6mm var(--sello-borde); }
   .marca { display: flex; align-items: center; gap: 14px; }
   .sello-tp { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--tinta); display: grid; place-items: center; box-shadow: 0 0 0 4px var(--papel), 0 0 0 5px var(--sello-borde); font-family: var(--serif); font-weight: 700; font-size: 17pt; background: #FFFEFA; }
   .marca b { display: block; font-family: var(--serif); font-size: 15pt; }
   .marca span { font-size: 9pt; color: var(--tinta-suave); }
-  .portada .rotulo { margin-top: auto; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 650; }
+  .portada .rotulo { margin-top: 14mm; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 650; }
   .portada h1 { font-family: var(--serif); font-size: 44pt; line-height: 1.05; margin: 6mm 0 6mm; letter-spacing: -.01em; }
   .portada .bajada { font-size: 13pt; color: var(--tinta-suave); max-width: 120mm; line-height: 1.5; }
-  .portada .pie { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9pt; color: var(--tinta-suave); border-top: 1px solid var(--borde); padding-top: 5mm; }
+  .portada .pie { margin-top: 9mm; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9pt; color: var(--tinta-suave); border-top: 1px solid var(--borde); padding-top: 5mm; }
   .portada .direccion { font-family: var(--serif); font-size: 12pt; color: var(--tinta); }
+  /* «La Bajada»: el panorama a sangre ocupa el resto de la hoja; su borde de arriba se disuelve en el papel.
+     El texto nunca va encima de la pintura. El hilo punzó es el único rojo del manual. */
+  .portada .panorama { position: relative; flex: 1; min-height: 90mm; margin: 7mm -22mm 0; overflow: hidden; }
+  .portada .panorama img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% top; }
 
   /* Títulos */
   h2 { font-family: var(--serif); font-size: 22pt; line-height: 1.15; margin: 0 0 4mm; break-after: avoid; letter-spacing: -.005em; }
@@ -127,6 +131,10 @@
   <div class="pie">
     <div><span class="direccion">tablero-prueba-ufil.netlify.app</span><br>Se entra con la cuenta de Google invitada.</div>
     <div style="text-align:right">Versión del 27 de septiembre de 2026<br>Las capturas muestran una causa de ejemplo inventada.</div>
+  </div>
+  <div class="panorama" aria-hidden="true">
+    <img src="../../public/ilustraciones/bajada-v1.webp" alt="">
+    <img src="../../public/ilustraciones/hilo-bajada-v1.webp" alt="">
   </div>
 </section>
 
