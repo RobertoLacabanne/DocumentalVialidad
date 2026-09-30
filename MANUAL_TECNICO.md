@@ -1,0 +1,243 @@
+# Manual técnico
+
+Para quien mantiene el Tablero de Prueba. El README es para el equipo; esto es para instalar, publicar, respaldar y restaurar.
+
+## Arquitectura
+
+| Pieza | Qué hace |
+|---|---|
+| **Frontend** | React 19 + TypeScript + Vite. Tabla virtualizada con TanStack Table y TanStack Virtual. Estilos propios con CSS Modules y tokens en `src/styles/tokens.css`. |
+| **Base de datos** | Supabase (Postgres 17). Esquema versionado en `supabase/migrations/`. |
+| **Acceso** | Supabase Auth con Google. Solo leen y escriben los correos de la tabla `miembro` (lista de invitados), vía políticas RLS. |
+| **Tiempo real** | Supabase Realtime: cambios de tablas (`postgres_changes`) y presencia (quién está viendo qué ficha). Cada canal, al conectarse (o reconectarse) y si no puede conectarse, vuelve a traer los datos de su pantalla (`refrescarAlConectar` en `datos/causa.ts`): un aviso perdido no deja una pantalla vieja. |
+| **Publicación** | Netlify, sitio `tablero-prueba-ufil` (https://tablero-prueba-ufil.netlify.app). |
+| **Archivos** | Siguen en el Google Drive de la UFIL. La app guarda links. |
+
+### Reglas que garantiza la base (no la pantalla)
+
+Están en `supabase/migrations/20260926120000_esquema_inicial.sql` y las prueba `supabase/tests/reglas.sql`:
+
+- No hay permiso de `DELETE` para nadie de la app. Archivar = completar `archivado_en`.
+- Cada alta, edición, archivo y restauración queda en `auditoria` (disparadores), con valor anterior y nuevo. La tabla no se puede modificar ni borrar, ni siquiera como administrador.
+- El texto literal de `mensaje` y la `descripcion_acta` de `efecto` no se modifican una vez cargados.
+- `guardar_campo()` guarda un campo solo si nadie lo cambió desde que la persona lo vio; si no, devuelve la ficha actual para mostrar el conflicto.
+- `registrar_ingreso()`: si la lista de invitados está vacía, la primera persona que entra queda habilitada. Después, solo entran los invitados.
+- Lo que sugiera una máquina va a `sugerencia`, nunca al dato.
+
+Desde la Fase 1 (`20260927100000_fase1_efectos_importacion.sql`, probada por `supabase/tests/fase1.sql`):
+
+- `importar_efectos()` carga todas las filas de una planilla en una sola transacción: o entran todas las revisadas o ninguna. Un número de efecto ya cargado no se pisa (vuelve como duplicado). Agrupa los procedimientos por fecha y domicilio, da de alta los informes del gabinete mencionados y guarda en cada efecto el archivo, la hoja y la fila de origen. Cada importación queda en la tabla `importacion` con el conteo de filas.
+- Alias de responsables: un efecto importado con responsable «AGUS» guarda ese alias en `responsable_alias`. Se asigna a la persona (`responsable`) cuando exactamente una cuenta habilitada tiene ese alias, sea al importar o al invitarla después. Si dos cuentas comparten alias, no se asigna a ninguna.
+- `aplicar_incidencia()` marca una situación procesal sobre varias fichas de una vez, sin duplicar. La vista `efecto_estado_procesal` resume la más grave de cada efecto (propia o de su procedimiento) y las piezas la heredan por `pieza_estado_procesal`.
+- `buscar()` busca en piezas, efectos, personas, mensajes y contrataciones, y también por teléfonos (solo dígitos, desde 6) y por cómo figura agendada una persona.
+
+Desde la Fase 2 (`20260928100000_fase2_contrataciones_mensajes.sql` y `20260928110000_fase2_completar_contratacion.sql`, probadas por `supabase/tests/fase2.sql`):
+
+- `importar_contratacion()` carga una hoja de EXPEDIENTES DE CONTRATACIÓN (la contratación, sus pasos y sus ofertas) en una sola transacción. El identificador es único por causa sin distinguir mayúsculas ni espacios (índice `contratacion_identificador_unico`). Si la contratación ya tiene trámite, vuelve como duplicada; si estaba cargada sin trámite, se completa llenando solo los datos vacíos y avisa si el expediente no coincide. Cada paso guarda `fecha_texto` tal cual figura; `fecha` y `fecha_precision` solo se completan cuando la fecha es inequívoca.
+- `importar_conversacion()` carga una transcripción (conversación y mensajes) en una sola transacción. El disparador `t_mensaje_literal` calcula `hash_contenido` (SHA-256) y bloquea cualquier cambio de texto, emisor, receptor, fecha, orden o tipo; solo se pueden cambiar `relevante` y `observacion`. Las notas al pie de la transcripción entran como `observacion`, nunca en el texto.
+- Vista `conversacion_resumen`: mensajes, relevantes y primera y última fecha por conversación.
+- `mensaje` está en la publicación de Realtime: la app escucha solo los `UPDATE` de la conversación abierta (marcar relevante, observación).
+- Un mismo vínculo (origen, destino, tipo) no se carga dos veces (índice `vinculo_unico`). Mensaje → contratación se guarda como `prueba_de`; mensaje → pieza, como `relacionado`.
+
+Desde la Fase 3 (`20260929100000_fase3_juicio.sql`, probada por `supabase/tests/fase3.sql`):
+
+- `ofrecimiento_item` es el punteo de prueba para el debate. Cada ítem es una pieza del índice (clase documental), una persona del directorio (testimonial o pericial) o una prueba descripta a mano (informativa, instrumental, otra); el control `ofrecimiento_algo_ofrecido` exige una de las tres. Una misma pieza no se ofrece dos veces, ni una persona dos veces en la misma clase (índices únicos parciales). `se_exhibe` se reemplazó por `incorporacion` (exhibición, lectura o no se incorpora); se suman `objeto`, `admision` y `numero_auto` (lo que resolvió el auto de apertura), `impugnada` y `motivo_impugnacion`, `imputados` (lista de personas), `tambien_ofrecida_por` y `origen`.
+- `agregar_al_ofrecimiento(causa, clase, piezas[], personas[])` suma varias de una vez, numerando desde el último número de la clase, con un candado por causa y clase para que dos personas sumando a la vez no repitan números. Copia la ubicación física del efecto de la pieza y devuelve cuántas entraron y cuántas ya estaban. `renumerar_ofrecimiento(causa, clase)` corre los números 1..n.
+- Vista `ofrecimiento_estado`: por ítem, la situación procesal que hereda de su pieza (`pieza_estado_procesal`), si se exhibe sin quién la introduce, si falta la entrega a la defensa (solo para lo que no es una persona), si fue impugnada o rechazada. De ahí salen los avisos de la pantalla Juicio.
+- `cronologia(causa)`: una sola línea de tiempo con piezas fechadas, mensajes relevantes, pasos de trámite, allanamientos, actos procesales (`acto_procesal`, que suma `link`) y planteos y resoluciones de las incidencias, cada hito con las fichas vinculadas (`relacionados`).
+- `vinculo` suma `fuente`: de dónde surge una relación entre personas (tipo `relacionado`, la relación va en `nota`). Se edita con `guardar_campo()` y queda en el historial.
+
+Desde la Fase 4 (`20260930100000_fase4_documentos.sql`, probada por `supabase/tests/fase4.sql`):
+
+- `documento`: un archivo leído, identificado por su huella SHA-256 (única por causa: el mismo contenido con otro nombre es el mismo documento). Guarda nombre, ruta dentro de la carpeta arrastrada, tamaño, páginas, origen (`navegador` o `appufil`), estado (`leyendo`/`completo`), `indexado_en`, link del Drive, efecto y pieza. La huella y el tamaño no se pueden modificar (disparador `a_huella`, y `guardar_campo()` los rechaza). Pasa por el historial como cualquier ficha y está en Realtime.
+- `documento_pagina`: el texto de cada página con su método (`capa_texto`, `ocr`, `appufil`), motor y confianza, e índice de texto completo en castellano. Es un derivado del original (se puede volver a leer): no se audita página por página. Vista `documento_resumen`: páginas leídas, con texto, confianza media del OCR y métodos.
+- `registrar_documento()` da de alta un archivo o devuelve el que ya estaba con esa huella (y cuántas páginas tiene leídas, para seguir). `guardar_paginas()` guarda tandas de páginas sin pisar lo ya leído (salvo pedido expreso) y, con todas, deja el documento completo con su fecha de indexado.
+- Sugerencias: `guardar_sugerencias()` las carga como pendientes sin repetirlas (índice `sugerencia_unica`: una descartada no vuelve); `resolver_sugerencia()` la aplica recién cuando una persona la confirma (asocia el efecto o la pieza, o crea el vínculo con de dónde salió) y registra quién y cuándo.
+- `buscar()` suma los documentos por nombre y el texto de sus páginas (primero elige las páginas que más coinciden y recién después arma el fragmento, para que ande con miles de páginas).
+
+Del lado de la app:
+
+- **OCR en el navegador** (`lib/lector.ts`, `datos/lectura.tsx`): pdf.js saca la capa de texto; si la página es una imagen, se dibuja a unos 2.200 px de ancho y se lee con tesseract.js (castellano, motor LSTM), con 1 a 4 trabajadores según los núcleos. Se usa la versión **legacy** de pdf.js, que trae lo que les falta a los navegadores que no son de este año. La cola vive en el marco de la causa (sigue aunque se cambie de pantalla), guarda de a 4 páginas y retoma por huella.
+- **Nada del OCR depende de un CDN:** `scripts/copiar-ocr.mjs` copia a `public/ocr/` el trabajador de tesseract.js, su núcleo en WebAssembly (solo las variantes LSTM) y los datos del castellano (`@tesseract.js-data/spa`, `best_int`). Corre en `postinstall` y en `npm run build`; `public/ocr/` no se versiona. Se baja solo cuando alguien usa el OCR (unos 6 MB, con caché de una semana).
+- `lib/sugerencias.ts`: propone el efecto por la carpeta o el nombre del archivo («EFECTO 48435»), contrataciones por identificador (reconoce «LP 05/2020», «Licitación Pública Nº 5/20», «L.P. 05-2020») o por número de expediente, personas por CUIT, efectos mencionados y piezas por huella o nombre de archivo. Solo compara contra lo que ya existe en la causa: nunca crea fichas.
+- **AppUFIL** (evaluado e integrado sin acoplarlo): es un sistema offline (Python, PyMuPDF y Tesseract, una base SQLite por legajo) que lee mejor los escaneos (endereza las hojas, compara dos lecturas). El único contrato entre las dos aplicaciones es el «paquete de texto» (`tablero-texto/1`, un JSON con la huella y el texto de cada página). Lo arma `public/herramientas/appufil-a-tablero.py` (solo biblioteca estándar, abre la base en solo lectura, toma la mejor lectura de cada página con la misma regla que el buscador de AppUFIL y reconstruye los renglones con las coordenadas; de la ruta original guarda solo carpeta y archivo). Se baja desde el diálogo y lo prueba `herramientas/test_appufil_a_tablero.py`; se verificó también contra el esquema real de AppUFIL.
+- `lib/ufed.ts`: reportes de UFED exportados a Excel. Encuentra la hoja de chats y la fila de encabezados, reconoce columnas en inglés y castellano (se pueden cambiar a mano), arrastra los datos del chat de las celdas combinadas y agrupa por chat. La fecha se guarda tal cual; la fecha interpretada, solo si es clara (si puede ser día/mes o mes/día, se toma día/mes y se avisa). **Pendiente:** probarlo contra un reporte real del Gabinete; los reportes en HTML y PDF no se leen (desde UFED Reader se exportan a Excel).
+
+Lectores y generador del lado de la app (con pruebas en `src/lib/*.test.ts`):
+
+- `lib/contrataciones.ts`: lee una hoja con el formato de la planilla (encabezado PROCEDIMIENTO · Fs. · FECHA · FIRMANTE · OBSERVACIONES), une las filas combinadas al paso de arriba (el link suele venir en la fila siguiente), arma el cuadro de ofertas con los pasos que empiezan con «Oferta» y propone como sugerencia los montos escritos (uno solo por oferta). Repone la «/» que Excel no admite en el nombre de la hoja.
+- `lib/conversaciones.ts`: saca el texto de un .docx (párrafos y notas al pie, sin librerías) y lee las dos formas de transcripción del equipo y el .txt de WhatsApp. Lo que no entiende queda en la lista de líneas omitidas, a la vista.
+- `lib/ofrecimiento.ts`: avisos de cada ítem, orden por clase, cita y el listado para la remisión en .docx (mismo formato que el informe: «Ref.: Legajo N.º …», OFRECIMIENTO DE PRUEBA, «A.- TESTIMONIAL:», ítems numerados, `[completar: …]` para lo que falta).
+- `lib/cronologia.ts`: agrupa por año y mes respetando la precisión de la fecha (nunca inventa el día) y busca a una persona por nombre, apellido o cómo figura agendada. Esa coincidencia es por nombre y la pantalla lo avisa.
+- `lib/relaciones.ts` y `lib/disposicion.ts`: arman el grafo (una línea por par con todos sus motivos; firmes las relaciones cargadas y las ofertas, punteadas las coincidencias por nombre en conversaciones) y lo ubican con `d3-force`, calculado de una vez y sin animación. En grafos chicos se prueban varios arranques con semilla fija y se queda el que menos líneas cruza, así el mismo grafo se dibuja siempre igual. `d3-force` se descarga recién cuando alguien abre Relaciones.
+- La cronología se exporta a PDF con el diálogo de impresión del navegador (`window.print()` y reglas `@media print`: A4, sin menú ni filtros, con encabezado de la causa, filtros aplicados y fecha de emisión).
+- `lib/informe.ts`: arma el .docx con la librería `docx` siguiendo la plantilla PLANTILLA PARA REALIZAR INFORMES CELULARES (Palatino Linotype 11, justificado, interlineado 1,5, A4 con márgenes de 2,54 cm). Lo que falta sale como `[completar: …]` en cursiva. La librería se descarga recién cuando alguien pide un informe.
+
+### Estructura del repositorio
+
+```
+src/
+  styles/        tokens.css (único lugar de colores, tipografía, espaciado) y base.css
+  componentes/   piezas del sistema de diseño: marcas, botones, tabla, panel, ficha, estados,
+                 tarjeta de efecto, búsqueda global (Ctrl+K), menú de exportar
+  pantallas/     acceso, causas, inicio, índice, efectos, documentos, contrataciones, personas
+                 (directorio y grafo de relaciones), mensajes, cronología, juicio, importadores
+                 (efectos, contrataciones, conversaciones y reportes UFED), informe, equipo, fichas,
+                 sistema de diseño (/diseno)
+  datos/         sesión, consultas en tiempo real (consultas.ts, causa.ts, hechos.ts, juicio.ts,
+                 documentos.ts), cola de lectura de documentos (lectura.tsx), guardado con
+                 cola sin conexión, presencia
+  lib/           orden jerárquico, cita, fechas, etiquetas, links de Drive, importación de
+                 planillas, exportación, copia completa, comparación de nombres, lectura de
+                 contrataciones y de transcripciones, informe .docx, resaltado, ofrecimiento y
+                 listado para la remisión, cronología, grafo y su disposición, documentos, lector
+                 (pdf.js + tesseract.js), sugerencias y reportes UFED (con pruebas)
+supabase/
+  migrations/    esquema
+  seed.sql       datos reales del legajo 299113 (solo lo que figura en las fuentes)
+  tests/         pruebas SQL de las reglas
+public/herramientas/appufil-a-tablero.py   script para traer el texto de AppUFIL (se baja desde la app)
+herramientas/    prueba del script de AppUFIL (python3 -m unittest herramientas/test_appufil_a_tablero.py)
+e2e/             pruebas de punta a punta (dos navegadores a la vez, importación, Ctrl+K, Fases 2, 3 y 4);
+                 fixtures/generar-planillas.mjs arma planillas y una transcripción .docx sintéticas
+                 con la forma de las reales
+scripts/         preparar-local, capturas, test-sql, configurar-produccion, copiar-ocr
+```
+
+## Desarrollo local
+
+Requisitos: Node 22 y Docker.
+
+```bash
+npm install
+npm run db:start                        # Supabase local (Postgres, Auth, Realtime)
+node scripts/preparar-local.mjs         # cuentas de prueba rober@ / ines@ejemplo.test
+node scripts/preparar-local.mjs --ejemplos   # además, piezas, personas, una contratación y una
+                                             # conversación inventadas, marcadas «(ejemplo local)»
+cp .env.example .env.local              # y completar con `npx supabase status -o env`
+npm run dev                             # http://localhost:5173
+```
+
+En `.env.local` local conviene `VITE_ACCESO_CON_CLAVE=true` para entrar con correo y contraseña (solo desarrollo). **En producción esa variable no se define.**
+
+### Pruebas
+
+```bash
+npm run typecheck      # tipos
+npm test               # lógica: orden, citas, fechas, links, importación, nombres, contrataciones,
+                       # transcripciones, informe .docx, resaltado, ofrecimiento, cronología, grafo,
+                       # documentos, sugerencias, reportes UFED (85)
+python3 -m unittest herramientas/test_appufil_a_tablero.py   # script de AppUFIL (3)
+npm run db:test        # reglas de la base, Fases 1 a 4 (119 comprobaciones)
+npm run test:e2e       # dos personas a la vez, importaciones, tablero en vivo, Ctrl+K, mensajes
+                       # relevantes en vivo, vínculos e informe descargado y verificado, ofrecimiento
+                       # con aviso procesal, listado .docx verificado, cronología y relaciones,
+                       # carpeta de escaneos leída con capa de texto y OCR, sugerencias validadas,
+                       # texto encontrado con Ctrl+K, paquete de AppUFIL y chats de un reporte UFED,
+                       # y una sesión con el canal en vivo cortado que igual ve lo nuevo (9)
+node e2e/fixtures/generar-planillas.mjs   # planillas y transcripción sintéticas en e2e/fixtures/generadas/
+npm run capturas       # capturas en 1440×900 y 390×844 en ./capturas (importa las planillas sintéticas)
+```
+
+Antes de publicar, probar también el build de producción: `npm run build && npx vite preview` y abrir http://localhost:4173.
+
+## Puesta en marcha de producción
+
+### Estado actual (26/09/2026, Fase 4)
+
+| Pieza | Valor |
+|---|---|
+| Proyecto Supabase | `DocumentalVialidad`, ref `fpihhaaqgsukscnfrbry`, región us-west-2, organización «Rober» (plan gratuito) |
+| URL de la API | `https://fpihhaaqgsukscnfrbry.supabase.co` |
+| Esquema | Migraciones `20260926120000_esquema_inicial`, `20260926170000_ingreso_concurrente`, `20260927100000_fase1_efectos_importacion`, `20260928100000_fase2_contrataciones_mensajes`, `20260928110000_fase2_completar_contratacion`, `20260929100000_fase3_juicio` y `20260930100000_fase4_documentos` aplicadas y registradas en `supabase_migrations.schema_migrations`; semilla del 299113 cargada |
+| Auth | Site URL y redirecciones configuradas; «Entrar con Google» activo (proyecto de Google Cloud «Tablero de Prueba», cliente web `283725982972-….apps.googleusercontent.com`) |
+| Netlify | Variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` cargadas y sitio publicado |
+| Redirección para Google | `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback` |
+
+Las pruebas de `supabase/tests/reglas.sql`, `supabase/tests/fase2.sql`, `supabase/tests/fase3.sql` y `supabase/tests/fase4.sql` también se corrieron contra producción, dentro de una transacción que se deshace (sin dejar rastro). Para correr un archivo de pruebas por la API de administración hay que sacarle las líneas que empiezan con `\` (son comandos de psql).
+
+### Con el script (recomendado)
+
+Usa solo la API de administración de Supabase: no hace falta la contraseña de la base.
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_... SUPABASE_PROJECT_REF=fpihhaaqgsukscnfrbry \
+GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... \
+node scripts/configurar-produccion.mjs
+```
+
+Aplica las migraciones nuevas (cada una una sola vez), vuelve a pasar la semilla (no duplica), configura las direcciones y Google, y muestra las variables para Netlify. Sin `SUPABASE_PROJECT_REF` crea un proyecto nuevo en São Paulo. **Para cada migración nueva de una fase, correr este script es la forma de llevarla a producción.**
+
+### Google Cloud: cliente para «Entrar con Google»
+
+1. Entrar a https://console.cloud.google.com con la cuenta que va a administrar la app y crear un proyecto («Tablero de Prueba»).
+2. **APIs y servicios → Pantalla de consentimiento de OAuth**: tipo **Externo**; nombre «Tablero de Prueba UFIL»; correo de asistencia; permisos básicos (correo, perfil, openid). Publicar la app (**En producción**): con permisos básicos no requiere verificación y evita el tope de usuarios de prueba.
+3. **Credenciales → Crear credenciales → ID de cliente de OAuth → Aplicación web**:
+   - Orígenes autorizados: `https://tablero-prueba-ufil.netlify.app`
+   - URI de redireccionamiento: `https://fpihhaaqgsukscnfrbry.supabase.co/auth/v1/callback`
+4. Copiar el ID de cliente y el secreto.
+
+### Supabase, a mano (si no se usa el script)
+
+1. Crear el proyecto (región South America – São Paulo).
+2. **SQL Editor**: pegar y ejecutar `supabase/migrations/20260926120000_esquema_inicial.sql`, y después `supabase/seed.sql`.
+3. **Authentication → URL Configuration**: Site URL `https://tablero-prueba-ufil.netlify.app`; Redirect URLs `https://tablero-prueba-ufil.netlify.app/**`.
+4. **Authentication → Sign In / Providers → Google**: activar y pegar ID y secreto.
+5. **Project Settings → API**: copiar la URL del proyecto y la clave `anon` (pública).
+
+### Netlify
+
+- Sitio: `tablero-prueba-ufil`, equipo `rlacabanne14`.
+- **Site configuration → Environment variables**: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. No definir `VITE_ACCESO_CON_CLAVE`.
+- Publicar desde esta computadora de trabajo: mover `.env.local` fuera de la carpeta antes de publicar (Vite lo leería y el sitio quedaría apuntando al Supabase local con acceso por contraseña) y volver a ponerlo después. Después de publicar, revisar que el JS del sitio contenga `fpihhaaqgsukscnfrbry` y no `127.0.0.1`.
+- Para publicar en cada cambio: **Site configuration → Build & deploy → Link repository** con `RobertoLacabanne/DocumentalVialidad`, rama de producción `main`. `netlify.toml` ya trae el comando de build y la redirección de rutas.
+- Cuidado con los créditos del plan gratuito: cada publicación a producción consume 15 de 300 por mes (y el equipo los comparte con los demás sitios). Conviene juntar cambios y publicar desde `main`; las vistas previas de las ramas figuran como ilimitadas.
+
+### Primer ingreso
+
+La primera persona que entra con Google queda habilitada automáticamente (la lista de invitados está vacía). Desde **Equipo** invita al resto.
+
+## Manual de uso
+
+El manual para el equipo es `public/manual/Manual-Tablero-de-Prueba.pdf` (la app lo sirve en `/manual/Manual-Tablero-de-Prueba.pdf` y lo enlaza desde el menú). Su fuente es `docs/manual/manual.html`; las capturas salen de una causa de ejemplo **inventada**, porque el PDF es público y no puede mostrar datos reales. Para regenerarlo después de un cambio visual:
+
+```bash
+npx supabase db reset                     # base local limpia
+node scripts/preparar-local.mjs           # cuentas de prueba
+node scripts/preparar-manual.mjs          # causa de ejemplo (Legajo 123456, todo inventado)
+npm run dev                               # en otra terminal
+node scripts/capturas-manual.mjs          # capturas en public/manual/img
+node scripts/manual-pdf.mjs               # arma el PDF
+```
+
+La captura de la pantalla de ingreso (`01-acceso`) se saca de la app publicada, que no muestra datos.
+
+## Ilustraciones («La Bajada»)
+
+La identidad artística es una serie de acuarelas del Litoral pintada con código (no hay modelo generador de imágenes) y horneada a imágenes: la app solo muestra archivos, nunca pinta nada en el navegador de quien la usa.
+
+- **Dónde está:** el motor y las piezas viven en `herramientas/ilustraciones/` (fuera de `public/`; no confundir con `public/herramientas/`). `pigmentos.js` guarda los pigmentos (son del arte, no de `tokens.css`), `acuarela.js` el motor, `piezas/` cada pintura con su semilla fija, y `lab.html` la hoja de pruebas: con `npm run dev` se abre `/herramientas/ilustraciones/lab.html?ver=bajada,hilo-bajada` para ver cada pieza a tamaño real sobre el papel de la app.
+- **Cómo se hornea:** `npm run ilustraciones` (o `-- --solo=bajada,hilo-bajada`) abre el laboratorio con Chromium, pinta cada pieza y escribe `public/ilustraciones/<id>-v<N>.webp` y `@2x`. Agregar `--previas=carpeta --compuesta=bajada+hilo-bajada` deja PNG para revisar. **Los .webp se commitean**: el build de Netlify no genera nada ni depende de Playwright.
+- **Versión en el nombre:** al repintar una pieza hay que subir su `version` en `piezas/*.js` y el `archivo` en `src/ilustraciones/catalogo.ts`; el caché de `/ilustraciones/*` es de un año, así que un nombre nuevo evita que quede una imagen vieja pegada. La prueba `src/ilustraciones/catalogo.test.ts` avisa si el catálogo y los archivos no coinciden o si se pasa el presupuesto de peso (panorama hasta 300 KB, el resto hasta 60 KB, toda la serie bajo 1 MB a 1x).
+- **Reemplazar una pieza por una pintada a mano:** alcanza con pisar los dos archivos (1x y `@2x`) con el mismo nombre y las mismas proporciones; el código no cambia.
+- **Reglas:** se usan solo donde no hay datos (acceso, estados vacíos, error, cabecera de Inicio y manual), nunca en las pantallas de trabajo ni en las exportaciones; sin personas ni texto adentro de la imagen; el único rojo de la serie es el hilo. De dónde sale cada elemento cultural, con su nivel de confianza, está en `docs/ilustraciones/FUENTES.md`, y la sección *Ilustraciones* de `/diseno` muestra todo junto.
+
+## Copias de seguridad y restauración
+
+- **Supabase Pro** hace una copia diaria y la guarda 7 días (**Database → Backups**). El plan gratuito **no hace copias**: por eso conviene Pro desde que entra información real.
+- **Copia propia** (a demanda o semanal, desde cualquier computadora con el repo y la contraseña de la base, que se resetea en Supabase → Project Settings → Database):
+  ```bash
+  npx supabase link --project-ref fpihhaaqgsukscnfrbry
+  npx supabase db dump --linked --data-only -f copia-datos-$(date +%F).sql
+  npx supabase db dump --linked -f copia-esquema-$(date +%F).sql
+  ```
+- **Copia completa de la causa** (botón en **Inicio**): un .zip con `causa.json` (todas las tablas de la causa, incluido lo archivado, el texto de los documentos leídos y la `auditoria` completa) y una planilla CSV por tabla. Es la copia que puede guardar cualquiera del equipo en el Drive de la UFIL, sin credenciales. Sirve como resguardo legible y para auditar; para reconstruir la base entera se usa el volcado de arriba. La exportación semanal automática queda pendiente.
+- **Restaurar en un proyecto nuevo:** crear el proyecto, aplicar `supabase/migrations/` (o `copia-esquema`), después `psql "<cadena de conexión>" -f copia-datos-AAAA-MM-DD.sql`. Revisar que la tabla `auditoria` quede con la misma cantidad de filas que en la copia.
+- **Recuperar algo pisado por error:** está en `auditoria` (columna `cambios` o `antes`). La ficha muestra el historial; restaurar un valor es volver a cargarlo, y queda registrado.
+
+## Límites a tener en cuenta (verificados el 26/09/2026)
+
+- Supabase gratuito: 500 MB de base, 200 conexiones en tiempo real, pausa tras una semana sin uso, sin copias. Pro: desde US$ 25/mes (8 GB de base).
+- Texto de los escaneos: cada página ocupa unos 5 KB con su índice. En el plan gratuito entran unas 60.000 páginas además del resto; con Pro, no es un límite práctico.
+- Netlify gratuito: 300 créditos por mes; si se agotan, el sitio queda pausado hasta el mes siguiente. Personal: US$ 9/mes.
+- Correo de Supabase por defecto: solo a miembros del proyecto y 2 por hora. No afecta al acceso con Google.

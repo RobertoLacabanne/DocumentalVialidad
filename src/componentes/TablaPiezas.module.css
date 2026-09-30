@@ -1,0 +1,199 @@
+.marco {
+  --columnas: 96px 196px minmax(220px, 1fr) 104px 184px 192px 106px 56px;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-superficie);
+  outline: none;
+}
+.cabecera,
+.fila {
+  display: grid;
+  grid-template-columns: var(--columnas);
+  min-width: 1160px;
+}
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-cabecera);
+  border-bottom: 1px solid var(--color-borde);
+}
+.cabecera > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 var(--esp-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto-suave);
+  border-right: 1px solid var(--color-borde);
+  white-space: nowrap;
+}
+.cabecera > div:last-child {
+  border-right: 0;
+}
+.ordenable {
+  cursor: pointer;
+  user-select: none;
+}
+.ordenable:hover {
+  color: var(--color-texto);
+  background: var(--color-borde-suave);
+}
+.ordenActivo {
+  color: var(--color-texto);
+}
+.ordenActivo :global(svg.lucide) {
+  width: 12px;
+  height: 12px;
+}
+
+.cuerpo {
+  position: relative;
+}
+.fila {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-borde-suave);
+  background: var(--color-superficie);
+  transition: background-color var(--duracion-rapida) var(--curva-salida);
+}
+.fila:hover {
+  background: var(--color-hover);
+}
+.fila:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: -2px;
+}
+.seleccionada,
+.seleccionada:hover {
+  background: var(--color-seleccion);
+}
+.alerta > .celda:first-child {
+  box-shadow: inset 3px 0 0 var(--color-peligro);
+}
+.nueva {
+  animation: resaltar 2.4s var(--curva-salida);
+}
+@keyframes resaltar {
+  0%, 30% { background: var(--color-exito-fondo); }
+  100% { background: var(--color-superficie); }
+}
+
+.celda {
+  min-width: 0;
+  padding: 11px var(--esp-3);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+.compacta .celda {
+  padding-block: 6px;
+}
+.compacta .sub,
+.compacta .precision,
+.compacta .detalle,
+.compacta .viendo {
+  display: none;
+}
+.numero {
+  display: flex;
+  align-items: flex-start;
+  white-space: nowrap;
+}
+.rama {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin: 1px 6px 0 0;
+  border-left: 1px solid var(--color-borde-fuerte);
+  border-bottom: 1px solid var(--color-borde-fuerte);
+}
+.titulo {
+  font-weight: var(--peso-medio);
+  color: var(--color-texto);
+}
+.sub {
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.precision {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.origen {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+.detalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.nada {
+  color: var(--color-texto-tenue);
+}
+.viendo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.cifras {
+  font-variant-numeric: tabular-nums;
+}
+
+/* En el celular, cada pieza es una tarjeta */
+@media (max-width: 720px) {
+  .cabecera {
+    display: none;
+  }
+  .fila {
+    min-width: 0;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'num tipo resp'
+      'tit tit tit'
+      'fecha orig rel'
+      'proc proc proc';
+    padding: var(--esp-3) var(--esp-4);
+    gap: 6px var(--esp-3);
+    align-items: center;
+  }
+  .celda {
+    padding: 0;
+  }
+  .celda[data-area='num'] { grid-area: num; }
+  .celda[data-area='tipo'] { grid-area: tipo; }
+  .celda[data-area='tit'] { grid-area: tit; }
+  .celda[data-area='fecha'] { grid-area: fecha; font-size: var(--texto-xs); color: var(--color-texto-suave); }
+  .celda[data-area='orig'] { grid-area: orig; }
+  .celda[data-area='proc'] { grid-area: proc; }
+  .celda[data-area='rel'] { grid-area: rel; }
+  .celda[data-area='resp'] { grid-area: resp; }
+  .celda[data-vacio='true'] {
+    display: none;
+  }
+  .origen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .alerta > .celda:first-child {
+    box-shadow: none;
+  }
+  .alerta {
+    box-shadow: inset 3px 0 0 var(--color-peligro);
+  }
+}

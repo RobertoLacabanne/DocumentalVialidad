@@ -1,6 +1,6 @@
 # Propuesta inicial: Tablero de Prueba
 
-Respuesta al Paso 1 del prompt maestro (sección 11). Fecha: 26/09/2026. Estado: **pendiente de OK**.
+Respuesta al Paso 1 del prompt maestro (sección 11). Fecha: 26/09/2026. Estado: **aprobada** el 26/09/2026, con estos ajustes del usuario: login con Google (todo el equipo usa cuenta de Google); los riesgos de la sección 5 se dejan de lado; el patrón/contraseña va como campo común del efecto; sin roles ni separación por causa (todo invitado ve todo). El resto del modelo se implementó tal como está acá.
 
 Boceto visual: [`docs/diseno/boceto-indice-prueba.html`](diseno/boceto-indice-prueba.html) (se abre con doble clic en cualquier navegador).
 

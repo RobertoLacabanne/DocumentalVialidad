@@ -1,0 +1,138 @@
+.seccion {
+  display: grid;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+.seccionTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-2xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: var(--espaciado-rotulo);
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+.naturaleza {
+  font-size: 0.65625rem;
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  border-radius: var(--radio-xs);
+  padding: 1px 6px;
+}
+.natDato {
+  color: var(--color-texto-suave);
+  background: var(--color-cabecera);
+}
+.natInterpretacion {
+  color: var(--color-falta-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-nota-borde);
+}
+.interpretacion {
+  background: var(--color-nota-fondo);
+  border-top: 1px solid var(--color-nota-borde);
+  border-bottom: 1px solid var(--color-nota-borde);
+}
+.textoInterpretacion {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: var(--texto-lg);
+  line-height: 1.55;
+  color: var(--color-texto-suave);
+  white-space: pre-wrap;
+}
+
+/* Filas dato / valor */
+.datos {
+  display: grid;
+  grid-template-columns: minmax(96px, max-content) minmax(0, 1fr);
+  gap: var(--esp-2) var(--esp-4);
+  align-items: baseline;
+  font-size: var(--texto-sm);
+}
+.datos dt {
+  color: var(--color-texto-tenue);
+}
+.datos dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.nada {
+  color: var(--color-texto-tenue);
+}
+.parrafo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Campo editable */
+.campo {
+  display: grid;
+  gap: 5px;
+}
+.campoCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+.campoEtiqueta {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto-suave);
+}
+.campoEstado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+  transition: opacity var(--duracion-media) var(--curva-salida);
+}
+.campoEstado :global(svg.lucide) {
+  width: 12px;
+  height: 12px;
+}
+.campoGuardado {
+  color: var(--color-exito);
+}
+.interpretacionCampo textarea {
+  font-family: var(--fuente-titulos);
+  font-style: italic;
+  font-size: var(--texto-lg);
+  background: var(--color-superficie);
+  border-color: var(--color-nota-borde);
+}
+
+/* Aviso de conflicto */
+.conflicto {
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-3);
+  border-radius: var(--radio-md);
+  background: var(--color-alerta-fondo);
+  border: 1px solid var(--color-falta-borde);
+  color: var(--color-alerta);
+  font-size: var(--texto-xs);
+}
+.conflicto strong {
+  color: var(--color-texto);
+  font-weight: var(--peso-fuerte);
+}
+.conflictoAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+.girando {
+  animation: girar 0.9s linear infinite;
+}
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}

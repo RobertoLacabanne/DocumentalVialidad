@@ -1,0 +1,135 @@
+/* =====================================================================
+   Tablero de Prueba · Tokens de diseño ("expediente moderno")
+   Único lugar donde se definen colores, tipografía, espaciado, radios,
+   sombras y duraciones. Los componentes usan solo estas variables.
+   Todos los pares de texto/fondo superan AA (4,5:1).
+   ===================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Superficies */
+  --color-fondo: #FAF9F6;          /* papel */
+  --color-superficie: #FFFFFF;
+  --color-riel: #F6F5F1;
+  --color-cabecera: #F2F1EC;       /* encabezados de tabla, al estilo planilla */
+  --color-hover: #F8F7F3;
+  --color-seleccion: #EDF2F9;
+  --color-seleccion-borde: #C4D2E6;
+  --color-borde: #E4E1D8;
+  --color-borde-suave: #EEECE6;
+  --color-borde-fuerte: #B9C2D0;
+
+  /* Tinta */
+  --color-texto: #1E3350;          /* 12,1:1 sobre papel */
+  --color-texto-hover: #2A4468;
+  --color-texto-suave: #4A5B73;    /* 6,9:1 */
+  --color-texto-tenue: #667387;    /* 4,8:1 */
+  --color-sobre-tinta: #FFFFFF;
+  --color-acento: #2F5A93;         /* links, foco, selección */
+  --color-acento-fondo: #EDF2F9;
+
+  /* Semánticos */
+  --color-exito: #2F6B4A;
+  --color-exito-fondo: #E4F1E8;
+  --color-alerta: #7E520A;         /* vencimientos, avisos no procesales */
+  --color-alerta-fondo: #FBF0DA;
+  --color-peligro: #A63D2A;        /* lacre: SOLO alertas procesales */
+  --color-peligro-fondo: #F8E8E4;
+  --color-peligro-texto: #8A3121;
+
+  /* Dato faltante, sugerencia de máquina e interpretación */
+  --color-falta-texto: #7A6436;
+  --color-falta-fondo: #FFFBF0;
+  --color-falta-borde: #D8C9A3;
+  --color-sugerencia-borde: #9DB3D3;
+  --color-nota-fondo: #FBF7EC;
+  --color-nota-borde: #E9DFC6;
+
+  /* Foliado (sellos y etiquetas de secuestro) */
+  --color-sello-fondo: #FFFEFA;
+  --color-sello-borde: #B9C2D0;
+  --color-sello-anillo: #DCE1E9;
+  --color-etiqueta-fondo: #E9EDF3;
+
+  /* Pastel por familia (fondo / texto) */
+  --cat-documental-fondo: #F4EAD5;  --cat-documental-texto: #6A4B12;
+  --cat-pericial-fondo: #E2E9F6;    --cat-pericial-texto: #2C4C80;
+  --cat-mensaje-fondo: #DCF0EE;     --cat-mensaje-texto: #1D5D58;
+  --cat-contratacion-fondo: #E5EEDC; --cat-contratacion-texto: #3B5A28;
+  --cat-persona-fondo: #ECE5F6;     --cat-persona-texto: #56408C;
+  --cat-otros-fondo: #EEEBE5;       --cat-otros-texto: #4D4840;
+
+  /* Avatares del equipo */
+  --avatar-1-fondo: #E3ECF7; --avatar-1-texto: #274B7A;
+  --avatar-2-fondo: #F3E6DA; --avatar-2-texto: #7A4222;
+  --avatar-3-fondo: #E3F0E6; --avatar-3-texto: #2F5E3D;
+  --avatar-4-fondo: #ECE6F5; --avatar-4-texto: #523D86;
+  --avatar-5-fondo: #EEE9E1; --avatar-5-texto: #4D4840;
+  --avatar-6-fondo: #DCF0EE; --avatar-6-texto: #1D5D58;
+
+  /* Tipografía */
+  --fuente-interfaz: 'Inter Variable', 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --fuente-titulos: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --fuente-codigo: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --texto-2xs: 0.6875rem;  /* 11 px: rótulos en mayúsculas */
+  --texto-xs: 0.75rem;     /* 12 px */
+  --texto-sm: 0.8125rem;   /* 13 px: tablas */
+  --texto-md: 0.875rem;    /* 14 px: cuerpo */
+  --texto-lg: 0.9375rem;   /* 15 px */
+  --texto-xl: 1.125rem;    /* 18 px */
+  --texto-2xl: 1.375rem;   /* 22 px */
+  --texto-3xl: 1.75rem;    /* 28 px: título de pantalla */
+  --texto-4xl: 2.25rem;    /* 36 px */
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+  --peso-negrita: 700;
+
+  --interlineado-cuerpo: 1.5;
+  --interlineado-titulo: 1.2;
+  --espaciado-rotulo: 0.08em;
+
+  /* Espaciado (base 4) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-10: 40px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+
+  /* Radios */
+  --radio-xs: 3px;    /* sellos foliados */
+  --radio-sm: 6px;    /* inputs y botones */
+  --radio-md: 8px;
+  --radio-lg: 12px;   /* tarjetas y paneles */
+  --radio-pill: 999px;
+
+  /* Sombras suaves, en capas, teñidas de tinta */
+  --sombra-1: 0 1px 2px rgba(30, 51, 80, 0.05), 0 1px 1px rgba(30, 51, 80, 0.03);
+  --sombra-2: 0 1px 2px rgba(30, 51, 80, 0.06), 0 8px 24px -12px rgba(30, 51, 80, 0.16);
+  --sombra-3: 0 2px 6px rgba(30, 51, 80, 0.06), 0 18px 44px -16px rgba(30, 51, 80, 0.26);
+  --anillo-foco: 0 0 0 3px var(--color-acento-fondo);
+
+  /* Movimiento */
+  --duracion-rapida: 120ms;
+  --duracion-media: 180ms;
+  --duracion-lenta: 260ms;
+  --curva-salida: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Medidas de la interfaz */
+  --ancho-riel: 236px;
+  --ancho-panel: 420px;
+  --alto-fila-comoda: 44px;
+  --alto-fila-compacta: 34px;
+  --alto-control: 34px;
+  --alto-control-sm: 30px;
+  --z-panel: 20;
+  --z-dialogo: 40;
+  --z-toast: 60;
+}

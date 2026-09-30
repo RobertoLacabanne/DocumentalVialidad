@@ -1,0 +1,190 @@
+.tabla {
+  min-width: 860px;
+}
+.nombre {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+}
+.nombre strong {
+  display: block;
+  font-weight: var(--peso-fuerte);
+}
+.cargo {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.icono {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--cat-persona-fondo);
+  color: var(--cat-persona-texto);
+}
+.icono :global(svg.lucide) {
+  width: 16px;
+  height: 16px;
+}
+.iconoJuridica {
+  border-radius: var(--radio-sm);
+  background: var(--cat-contratacion-fondo);
+  color: var(--cat-contratacion-texto);
+}
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.identificadores {
+  display: grid;
+  gap: 2px;
+  font-size: var(--texto-xs);
+}
+.identificadorTipo {
+  color: var(--color-texto-tenue);
+}
+.valor {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto);
+}
+.agregar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  align-items: center;
+}
+.agregar select,
+.agregar input {
+  flex: 1 1 140px;
+  width: auto;
+  height: var(--alto-control-sm);
+  font-size: var(--texto-sm);
+}
+
+/* Sugerencias */
+.sugerencias {
+  display: grid;
+  gap: var(--esp-3);
+  margin: var(--esp-4) var(--esp-6);
+  padding: var(--esp-4) var(--esp-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-left: 3px solid var(--color-sugerencia-borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-1);
+}
+.sugerenciasCabecera {
+  display: flex;
+  gap: var(--esp-3);
+  align-items: flex-start;
+}
+.sugerenciasCabecera > :global(svg.lucide) {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--color-acento);
+}
+.sugerenciasTitulo {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.3;
+}
+.sugerenciasBajada {
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.sugerenciasLista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--esp-2);
+}
+.sugerencia {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-md);
+  background: var(--color-fondo);
+}
+.sugerenciaTexto {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-sm);
+}
+.sugerenciaTexto strong {
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+.sugerenciaDonde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-size: var(--texto-2xs);
+  color: var(--color-texto-tenue);
+}
+
+@media (max-width: 720px) {
+  .sugerencias {
+    margin-inline: var(--esp-4);
+    padding: var(--esp-3) var(--esp-4);
+  }
+  .sugerenciasLista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tabla {
+    min-width: 0;
+  }
+}
+
+/* Relaciones en la ficha */
+.relacion {
+  align-items: flex-start;
+}
+.relacionTexto {
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-sm);
+}
+.relacionEdicion {
+  display: grid;
+  gap: var(--esp-2);
+  flex: 1;
+  min-width: 0;
+}
+.enlace {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+.enlace:hover {
+  color: var(--color-acento);
+  text-decoration: underline;
+}
+.enlace:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

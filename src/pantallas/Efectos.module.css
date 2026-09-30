@@ -1,0 +1,288 @@
+.contenido {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid var(--color-borde);
+  background: var(--color-fondo);
+}
+
+/* Tablero por estado */
+.tablero {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(224px, 1fr);
+  gap: var(--esp-3);
+  flex: 1;
+  min-height: 0;
+  padding: var(--esp-4) var(--esp-6);
+  overflow-x: auto;
+}
+.columna {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--esp-2);
+  background: var(--color-cabecera);
+  border: 2px dashed transparent;
+  border-radius: var(--radio-lg);
+  transition: border-color var(--duracion-rapida) var(--curva-salida), background-color var(--duracion-rapida) var(--curva-salida);
+}
+.columnaActiva {
+  border-color: var(--color-acento);
+  background: var(--color-seleccion);
+}
+.columnaCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  padding: var(--esp-1) var(--esp-2) var(--esp-2);
+}
+.columnaTitulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto);
+}
+.cuenta {
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: var(--radio-pill);
+  background: var(--color-superficie);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  color: var(--color-texto-suave);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.columnaLista {
+  display: grid;
+  align-content: start;
+  gap: var(--esp-2);
+  overflow-y: auto;
+  min-height: 80px;
+  padding: 2px;
+}
+.columnaVacia {
+  padding: var(--esp-6) var(--esp-3);
+  text-align: center;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Tabla agrupada */
+.marcoTabla {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--color-superficie);
+}
+.tabla {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--texto-sm);
+}
+.tabla th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-cabecera);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  text-align: left;
+  padding: 8px var(--esp-3);
+  border-bottom: 1px solid var(--color-borde);
+  border-right: 1px solid var(--color-borde);
+  white-space: nowrap;
+}
+.tabla th:last-child {
+  border-right: 0;
+}
+.tabla td {
+  padding: 10px var(--esp-3);
+  border-bottom: 1px solid var(--color-borde-suave);
+  vertical-align: top;
+}
+.fila {
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) var(--curva-salida);
+}
+.fila:hover td {
+  background: var(--color-hover);
+}
+.fila:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: -2px;
+}
+.filaAbierta td,
+.filaAbierta:hover td {
+  background: var(--color-seleccion);
+}
+.filaAlerta td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-peligro);
+}
+.grupo td {
+  position: sticky;
+  top: 33px;
+  z-index: 1;
+  background: var(--color-fondo);
+  padding: 9px var(--esp-3);
+  border-bottom: 1px solid var(--color-borde);
+}
+.grupoTitulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--esp-3);
+}
+.grupoFecha {
+  font-family: var(--fuente-titulos);
+  font-weight: var(--peso-fuerte);
+  font-size: var(--texto-md);
+  font-variant-numeric: tabular-nums;
+}
+.grupoLugar {
+  font-weight: var(--peso-medio);
+}
+.grupoCuenta {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.descripcion {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 440px;
+}
+.tenue {
+  color: var(--color-texto-tenue);
+  font-size: var(--texto-xs);
+}
+.estadoChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  white-space: nowrap;
+}
+.estadoChip::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-borde-fuerte);
+}
+.estado_en_proceso::before { background: var(--color-acento); }
+.estado_escaneado::before { background: var(--cat-mensaje-texto); }
+.estado_finalizado::before { background: var(--color-exito); }
+.estado_observado::before { background: var(--color-alerta); }
+.casilla {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-texto);
+  cursor: pointer;
+}
+
+/* Selector de vista */
+.vistas button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 12px;
+}
+.vistas :global(svg.lucide) {
+  width: 14px;
+  height: 14px;
+}
+
+/* Barra de selección */
+.seleccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2) var(--esp-3);
+  padding: 8px var(--esp-6);
+  background: var(--color-seleccion);
+  border-bottom: 1px solid var(--color-seleccion-borde);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+@media (max-width: 720px) {
+  /* En el celular se desplaza la página entera, no una caja chiquita adentro. */
+  .desplazable {
+    overflow-y: auto;
+  }
+  .desplazable .contenido,
+  .desplazable .marcoTabla,
+  .desplazable .tablero {
+    flex: none;
+    overflow-y: visible;
+  }
+  .desplazable .columnaLista {
+    overflow: visible;
+  }
+  .tablero {
+    padding-inline: var(--esp-4);
+    grid-auto-columns: minmax(78vw, 1fr);
+    align-items: start;
+  }
+  .tabla {
+    min-width: 0;
+  }
+  .tabla thead {
+    display: none;
+  }
+  .tabla,
+  .tabla tbody,
+  .tabla tr,
+  .tabla td {
+    display: block;
+  }
+  .fila {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 6px var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+    border-bottom: 1px solid var(--color-borde-suave);
+  }
+  .fila td {
+    padding: 0;
+    border: 0;
+  }
+  .fila td[data-movil='oculto'] {
+    display: none;
+  }
+  .fila td[data-movil='ancho'] {
+    grid-column: 1 / -1;
+  }
+  .fila td[data-movil='esquina'] {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .grupo {
+    display: flex !important;
+    align-items: center;
+    gap: var(--esp-3);
+    padding: 10px var(--esp-4);
+    background: var(--color-fondo);
+    border-bottom: 1px solid var(--color-borde);
+  }
+  .grupo td {
+    position: static;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .seleccion {
+    padding-inline: var(--esp-4);
+  }
+}
