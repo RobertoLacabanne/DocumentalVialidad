@@ -375,6 +375,7 @@
 }
 .tarjetaIlus {
   display: grid;
+  align-content: start;
   justify-items: center;
   gap: var(--esp-2);
   margin: 0;
