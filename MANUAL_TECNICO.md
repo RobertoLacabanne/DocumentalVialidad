@@ -212,6 +212,16 @@ node scripts/manual-pdf.mjs               # arma el PDF
 
 La captura de la pantalla de ingreso (`01-acceso`) se saca de la app publicada, que no muestra datos.
 
+## Ilustraciones («La Bajada»)
+
+La identidad artística es una serie de acuarelas del Litoral pintada con código (no hay modelo generador de imágenes) y horneada a imágenes: la app solo muestra archivos, nunca pinta nada en el navegador de quien la usa.
+
+- **Dónde está:** el motor y las piezas viven en `herramientas/ilustraciones/` (fuera de `public/`; no confundir con `public/herramientas/`). `pigmentos.js` guarda los pigmentos (son del arte, no de `tokens.css`), `acuarela.js` el motor, `piezas/` cada pintura con su semilla fija, y `lab.html` la hoja de pruebas: con `npm run dev` se abre `/herramientas/ilustraciones/lab.html?ver=bajada,hilo-bajada` para ver cada pieza a tamaño real sobre el papel de la app.
+- **Cómo se hornea:** `npm run ilustraciones` (o `-- --solo=bajada,hilo-bajada`) abre el laboratorio con Chromium, pinta cada pieza y escribe `public/ilustraciones/<id>-v<N>.webp` y `@2x`. Agregar `--previas=carpeta --compuesta=bajada+hilo-bajada` deja PNG para revisar. **Los .webp se commitean**: el build de Netlify no genera nada ni depende de Playwright.
+- **Versión en el nombre:** al repintar una pieza hay que subir su `version` en `piezas/*.js` y el `archivo` en `src/ilustraciones/catalogo.ts`; el caché de `/ilustraciones/*` es de un año, así que un nombre nuevo evita que quede una imagen vieja pegada. La prueba `src/ilustraciones/catalogo.test.ts` avisa si el catálogo y los archivos no coinciden o si se pasa el presupuesto de peso (panorama hasta 300 KB, el resto hasta 60 KB, toda la serie bajo 1 MB a 1x).
+- **Reemplazar una pieza por una pintada a mano:** alcanza con pisar los dos archivos (1x y `@2x`) con el mismo nombre y las mismas proporciones; el código no cambia.
+- **Reglas:** se usan solo donde no hay datos (acceso, estados vacíos, error, cabecera de Inicio y manual), nunca en las pantallas de trabajo ni en las exportaciones; sin personas ni texto adentro de la imagen; el único rojo de la serie es el hilo. De dónde sale cada elemento cultural, con su nivel de confianza, está en `docs/ilustraciones/FUENTES.md`, y la sección *Ilustraciones* de `/diseno` muestra todo junto.
+
 ## Copias de seguridad y restauración
 
 - **Supabase Pro** hace una copia diaria y la guarda 7 días (**Database → Backups**). El plan gratuito **no hace copias**: por eso conviene Pro desde que entra información real.
